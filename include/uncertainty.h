@@ -2,6 +2,10 @@
 #include <vector>
 #include <iostream>
 #include <memory>
+
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 #include "ceres/ceres.h"
 
 #define SVD_QR_ITERATION 0

@@ -91,7 +91,7 @@ void iZupdate(SDM *iZ, double coeff, SDM *iZadd ) {
 void composeZ(tp *s, cov::Options &options, cov::Statistic &statistic, SSM &J, double **diagRightScaleJ, SSM *Y, SDM *Z) {
 	// Scale Jacobian from left by a vector
 	double csJ = 1;
-	J.scaleMat(R, diagRightScaleJ, &csJ);
+	J.scaleMat(RIGHT, diagRightScaleJ, &csJ);
 	for (int i = 0; i < J.ncols(); ++i)
 		(*diagRightScaleJ)[i] = 1 / (csJ * (*diagRightScaleJ)[i]);
 	*s = t(*s, "Computing sM ... ", &(statistic.timeNormJ));
@@ -345,6 +345,7 @@ void computeCovariances(cov::Options &options, cov::Statistic &statistic, ceres:
 
 	// Create sparse matrix with separated scale coefficient 
 	SSM *J = new SSM( jacobian.num_rows, jacobian.num_cols, jacobian.rows.data(), jacobian.cols.data(), jacobian.values.data());
+	//J->printBlock2Matlab("J",0,0,2000,2000);
 
 	// Main algorithm
 	int Ncams = options._numCams * options._camParams;

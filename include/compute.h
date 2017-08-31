@@ -17,12 +17,16 @@
 #include <Eigen/Eigen>
 #include <ctime>
 
+#include "openMVG/sfm/sfm_data.hpp"
+#include "openMVG/sfm/sfm_data_io.hpp"
+
+
 #ifndef COMPUTE_HEADER_INCLUDED
 	#define COMPUTE_HEADER_INCLUDED
 #endif
 
-#define L 0
-#define R 1
+#define LEFT 0
+#define RIGHT 1
 #define checkCudaErrors(val) check( (val), #val, __FILE__, __LINE__)
 
 template<typename T>

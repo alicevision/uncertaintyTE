@@ -123,7 +123,7 @@ public:
 	void scaleMat(int type, double **sLR, double *cLR) {
 		double asum = 0;
 		switch (type) {
-		case L:
+		case LEFT:
 			// auxiliary vectors
 			*sLR = (double*)malloc(nrows()*sizeof(double));
 			assert((*sLR) != NULL);
@@ -149,7 +149,7 @@ public:
 			*cLR = asum;
 
 			break;
-		case R:
+		case RIGHT:
 			// auxiliary vectors
 			(*sLR) = (double*)malloc(ncols()*sizeof(double));
 			assert((*sLR) != NULL);
@@ -205,8 +205,8 @@ public:
 		// "Z" -> cL * sL * "sZ" * sR * cR
 		double cL = 1, cR = 1;
 		double *sL, *sR;
-		scaleMat(L, &sL, &cL);
-		scaleMat(R, &sR, &cR);
+		scaleMat(LEFT, &sL, &cL);
+		scaleMat(RIGHT, &sR, &cR);
 
 		// LU decomposition
 		magma_int_t     *ipiv, iunused[1], info;
@@ -287,8 +287,8 @@ public:
 		// Scale matrices
 		double cl = 1, cr = 1;
 		double *sL, *sR;
-		scaleMat(L, &sL, &cl);
-		B.scaleMat(R, &sR, &cr);
+		scaleMat(LEFT, &sL, &cl);
+		B.scaleMat(RIGHT, &sR, &cr);
 
 		// Perform multiplication
 		double alpha = 1, beta = 0;

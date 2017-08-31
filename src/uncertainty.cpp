@@ -15,8 +15,9 @@
 Main function called from command line: unc.exe
   In: 
 	- algorithm: 0 = SVD_QR_ITERATION, 1 = SVD_DEVIDE_AND_CONQUER, 2 = TAYLOR_EXPANSION
-    - jacobian: path to the file without spaces
-  Example: unc.exe 2 input/myFile.jacob
+    - jacobian/openMVG_scene: path to the file without spaces
+  Example Jacobain: unc.exe 2 input/myFile.jacob
+  Example OpenMVG:  unc.exe 2 input/myFile.[bin,json,xml]
 */
 int main(int argc, char* argv[]) {
 	ceres::CRSMatrix jacobian = ceres::CRSMatrix();
@@ -28,9 +29,18 @@ int main(int argc, char* argv[]) {
 	std::string current_exec_name = argv[0];
 	std::string process_file_name = argv[2];
 	const std::string current_dir = current_exec_name.substr(0, current_exec_name.find(EXECUTABLE_FILE));
-	std::ifstream file(current_dir + process_file_name, std::ios_base::in);
-	loadJacobian(file, std::stod(argv[1]), jacobian, options);
-
+	const std::string input_file(current_dir + process_file_name);
+	if (input_file.find(std::string(".jacob")) != std::string::npos) { // jacobian file
+		std::cout << "Loading the Jacobian from: " << input_file << '\n';
+		std::ifstream file(input_file, std::ios_base::in);
+		loadJacobian(file, std::stod(argv[1]), jacobian, options);
+	} else {	// OpenMVG file
+		std::cout << "Loading a OpenMVG scene: " << input_file << '\n';
+		openMVG::sfm::SfM_Data sfm_data;
+		loadSceneOpenMVG(input_file, sfm_data);
+		openmvgSfM2Jacobian(sfm_data, jacobian, options);
+	}
+	
 	// alocate output arrays
 	int num_camera_covar_values = 0.5 * options._camParams * (options._camParams + 1);   // save only half of each symmetric matrix
 	int camUnc_size = num_camera_covar_values * options._numCams;
@@ -43,7 +53,7 @@ int main(int argc, char* argv[]) {
 	computeCovariances(options, statistic, jacobian, camUnc, ptsUnc);
 
 	// write results to the outut file 
-	saveResults(process_file_name, current_dir, options, statistic, num_camera_covar_values, camUnc);
+	saveResults(process_file_name, current_dir, options, statistic, num_camera_covar_values, camUnc, ptsUnc);
 	std::cout << "Main function... [done]\n";
 	return 0;
 }

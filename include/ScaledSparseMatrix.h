@@ -295,7 +295,7 @@ public:
 	void scaleMat(int type, double **sLR, double *cLR) {
 		double asum = 0;
 		switch (type) {
-		case L:
+		case LEFT:
 			// auxiliary vectors
 			(*sLR) = (double*)malloc(nrows()*sizeof(double));
 			assert((*sLR) != NULL);
@@ -318,7 +318,7 @@ public:
 			*cLR = asum;
 
 			break;
-		case R:
+		case RIGHT:
 			// auxiliary vectors
 			(*sLR) = (double*)malloc(ncols()*sizeof(double));
 			assert((*sLR) != NULL);
@@ -348,14 +348,14 @@ public:
 	*/
 	void unscaleMat(int type, const double *sLR, const double cLR) {
 		switch (type) {
-		case L:
+		case LEFT:
 			#pragma omp parallel for
 			for (int i = 0; i < nrows(); i++) {
 				for (int j = row(i); j < row(i + 1); j++)
 					_sA->val[j] *= (cLR * sLR[i]);
 			}
 			break;
-		case R:
+		case RIGHT:
 			#pragma omp parallel for
 			for (int i = 0; i < nnz(); ++i){
 				_sA->val[i] *= (cLR * sLR[col(i)]);
@@ -501,8 +501,8 @@ public:
 		double cl = 1, cr = 1;
 		double *sL = NULL;
 		double *sR = NULL;
-		scaleMat(L, &sL, &cl);
-		B.scaleMat(R, &sR, &cr);
+		scaleMat(LEFT, &sL, &cl);
+		B.scaleMat(RIGHT, &sR, &cr);
 
 		// Multiply two scaled matrices
 		sparseMultEigen(B);
@@ -510,11 +510,11 @@ public:
 
 		// Unscale matrices and setup coefficients
 		double c = 1 / (_sA->val[0] * sL[0] * sR[0]);
-		unscaleMat(L, sL, c);
-		unscaleMat(R, sR, 1); 
+		unscaleMat(LEFT, sL, c);
+		unscaleMat(RIGHT, sR, 1); 
 		_cA = (_cA * B._cA * cl * cr) / c;
 		B.set_cA(B.get_cA()*cr);
-		B.unscaleMat(R, sR, 1);
+		B.unscaleMat(RIGHT, sR, 1);
 		free(sL);
 		free(sR);
 		return *this;
