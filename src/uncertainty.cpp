@@ -4,6 +4,10 @@
 #ifndef AUXCMD_HEADER_INCLUDED
 	#include "auxCmd.h"
 #endif
+#ifndef MATLAB_INTERFACE_HEADER_INCLUDED
+	#include "matlabInterface.h"
+#endif
+
 
 #ifdef _WIN32
 	#define EXECUTABLE_FILE "uncertainty.exe"
@@ -35,12 +39,14 @@ int main(int argc, char* argv[]) {
 		std::ifstream file(input_file, std::ios_base::in);
 		loadJacobian(file, std::stod(argv[1]), jacobian, options);
 	} else {	// OpenMVG file
-		std::cout << "Loading a OpenMVG scene: " << input_file << '\n';
-		openMVG::sfm::SfM_Data sfm_data;
-		loadSceneOpenMVG(input_file, sfm_data);
-		openmvgSfM2Jacobian(sfm_data, jacobian, options);
+		#ifdef USE_OPENMVG
+			std::cout << "Loading a OpenMVG scene: " << input_file << '\n';
+			openMVG::sfm::SfM_Data sfm_data;
+			loadSceneOpenMVG(input_file, sfm_data);
+			openmvgSfM2Jacobian(sfm_data, jacobian, options);
+		#endif // USE_OPENMVG
 	}
-	
+
 	// alocate output arrays
 	int num_camera_covar_values = 0.5 * options._camParams * (options._camParams + 1);   // save only half of each symmetric matrix
 	int camUnc_size = num_camera_covar_values * options._numCams;
@@ -93,5 +99,34 @@ In:
 
 /*
 Matlab interface, call in Matlab: unc( .... ) 
-TODO: comming soon ...
 */
+void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+	cov::Statistic statistic = cov::Statistic();
+	cov::Options options = cov::Options();
+	ceres::CRSMatrix jacobian = ceres::CRSMatrix();
+	
+	// Load and create Jacobian using camera model [angle axis, camera center, focal length, radial distortion]
+	ceres::examples::BALProblem bal_problem = loadSceneMatlab( prhs );
+	buildJacobian(&bal_problem, jacobian, options);
+
+	// alocate output arrays
+	int NcamArr = 0.5 * bal_problem.camera_block_size() * (bal_problem.camera_block_size() + 1) * bal_problem.num_cameras();
+	int NptsArr = 6 * bal_problem.num_points();
+	double *ptsUnc = (double*)malloc(NptsArr * sizeof(double));
+	double *camUnc = (double*)malloc(NcamArr * sizeof(double));
+	plhs[0] = mxCreateDoubleMatrix(NptsArr + NcamArr, 1, mxREAL);
+	double *outC = mxGetPr(plhs[0]);
+
+	// COMPUTE COVARIANCES
+	computeCovariances(options, statistic, jacobian, camUnc, ptsUnc);
+
+	// write results to the output
+	for (int i = 0; i < NcamArr; i++)
+		outC[i] = camUnc[i];
+	for (int i = 0; i < NptsArr; i++)
+		outC[NcamArr + i] = ptsUnc[i];
+
+	free(ptsUnc);
+	free(camUnc);
+	mexPrintf("Computation of covariances ... [done]\n");
+}

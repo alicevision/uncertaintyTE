@@ -57,16 +57,6 @@ void loadJacobian(std::ifstream& file, int algorithm, ceres::CRSMatrix& jacobian
 	jacobian.values = values;
 }
 
-int loadSceneOpenMVG(std::string sSfM_Data_Filename_In, openMVG::sfm::SfM_Data &sfm_data) {
-	// Load input SfM_Data scene
-	if (!openMVG::sfm::Load(sfm_data, sSfM_Data_Filename_In, openMVG::sfm::ESfM_Data(openMVG::sfm::ALL)))
-	{
-		std::cerr << std::endl
-			<< "The input SfM_Data file \"" << sSfM_Data_Filename_In << "\" cannot be read." << std::endl;
-		return EXIT_FAILURE;
-	}
-}
-
 void saveResults(std::string& process_file_name, const std::string& current_dir, cov::Options& options, cov::Statistic& statistic,
 	int num_camera_covar_values, double* camUnc, double *ptsUnc) {
 	std::cout << "\nPrinting the results to file... ";
@@ -113,39 +103,6 @@ void saveResults(std::string& process_file_name, const std::string& current_dir,
 	std::cout << "[done]\n";
 }
 
-/// Create the appropriate cost functor according the provided input camera intrinsic model
-ceres::CostFunction * IntrinsicsToCostFunction(openMVG::cameras::IntrinsicBase * intrinsic, const openMVG::Vec2 & observation)
-{
-	switch (intrinsic->getType())
-	{
-	case openMVG::cameras::PINHOLE_CAMERA:
-		return new ceres::AutoDiffCostFunction<openMVG::sfm::ResidualErrorFunctor_Pinhole_Intrinsic, 2, 3, 6, 3>(
-			new openMVG::sfm::ResidualErrorFunctor_Pinhole_Intrinsic(observation.data()));
-		break;
-	case openMVG::cameras::PINHOLE_CAMERA_RADIAL1:
-		return new ceres::AutoDiffCostFunction<openMVG::sfm::ResidualErrorFunctor_Pinhole_Intrinsic_Radial_K1, 2, 4, 6, 3>(
-			new openMVG::sfm::ResidualErrorFunctor_Pinhole_Intrinsic_Radial_K1(observation.data()));
-		break;
-	case openMVG::cameras::PINHOLE_CAMERA_RADIAL3:
-		return new ceres::AutoDiffCostFunction<openMVG::sfm::ResidualErrorFunctor_Pinhole_Intrinsic_Radial_K3, 2, 6, 6, 3>(
-			new openMVG::sfm::ResidualErrorFunctor_Pinhole_Intrinsic_Radial_K3(observation.data()));
-		break;
-	case openMVG::cameras::PINHOLE_CAMERA_BROWN:
-		return new ceres::AutoDiffCostFunction<openMVG::sfm::ResidualErrorFunctor_Pinhole_Intrinsic_Brown_T2, 2, 8, 6, 3>(
-			new openMVG::sfm::ResidualErrorFunctor_Pinhole_Intrinsic_Brown_T2(observation.data()));
-		break;
-	case openMVG::cameras::PINHOLE_CAMERA_FISHEYE:
-		return new ceres::AutoDiffCostFunction<openMVG::sfm::ResidualErrorFunctor_Pinhole_Intrinsic_Fisheye, 2, 7, 6, 3>(
-			new openMVG::sfm::ResidualErrorFunctor_Pinhole_Intrinsic_Fisheye(observation.data()));
-	case openMVG::cameras::PINHOLE_CAMERA_FISHEYE1:
-		return new ceres::AutoDiffCostFunction<openMVG::sfm::ResidualErrorFunctor_Pinhole_Intrinsic_Fisheye1, 2, 4, 6, 3>(
-			new openMVG::sfm::ResidualErrorFunctor_Pinhole_Intrinsic_Fisheye1(observation.data()));
-	default:
-		return nullptr;
-	}
-}
-
-
 inline double dist(double *p1, double *p2) {
 	return sqrt((p1[0] - p2[0])*(p1[0] - p2[0]) + (p1[1] - p2[1])*(p1[1] - p2[1]) + (p1[2] - p2[2])*(p1[2] - p2[2]));
 }
@@ -180,8 +137,71 @@ void setPts2Fix(cov::Options &opt, int N, double *pts) {
 	std::sort(opt._pts2fix, opt._pts2fix + 2);
 }
 
+void printJacobian(ceres::CRSMatrix &J) {
+	std::cout << "\n\nJ = zeros(" << J.num_rows << ", " << J.num_cols << ");\n";
+	for (int i = 0; i < J.num_rows; i++) {
+		for (int j = J.rows[i]; j < J.rows[i + 1]; j++) {
+			std::cout << "J(" << (i + 1) << "," << (J.cols[j] + 1) << ") = " << J.values[j] << ";";
+		}
+	}
+	std::cout << "\n\n\n";
+}
 
-void openmvgSfM2Jacobian(openMVG::sfm::SfM_Data &sfm_data, ceres::CRSMatrix &jacobian, cov::Options &opt) {
+void printJacobianMEX(ceres::CRSMatrix &J) {
+	mexPrintf("\n\nJ = zeros(%d, %d);\n", J.num_rows, J.num_cols);
+	for (int i = 0; i < J.num_rows; i++) {
+		for (int j = J.rows[i]; j < J.rows[i + 1]; j++) {
+			mexPrintf("J(%d,%d) = %f;", (i + 1), (J.cols[j] + 1), J.values[j]);
+		}
+	}
+	mexPrintf("\n\n\n");
+}
+
+#ifdef USE_OPENMVG
+int loadSceneOpenMVG(std::string sSfM_Data_Filename_In, openMVG::sfm::SfM_Data &sfm_data) {
+	// Load input SfM_Data scene
+	if (!openMVG::sfm::Load(sfm_data, sSfM_Data_Filename_In, openMVG::sfm::ESfM_Data(openMVG::sfm::ALL)))
+	{
+		std::cerr << std::endl
+			<< "The input SfM_Data file \"" << sSfM_Data_Filename_In << "\" cannot be read." << std::endl;
+		return EXIT_FAILURE;
+	}
+	return 1;
+}
+
+/// Create the appropriate cost functor according the provided input camera intrinsic model
+ceres::CostFunction * IntrinsicsToCostFunction(openMVG::cameras::IntrinsicBase * intrinsic, const openMVG::Vec2 & observation)
+{
+	switch (intrinsic->getType())
+	{
+	case openMVG::cameras::PINHOLE_CAMERA:
+		return new ceres::AutoDiffCostFunction<openMVG::sfm::ResidualErrorFunctor_Pinhole_Intrinsic, 2, 3, 6, 3>(
+			new openMVG::sfm::ResidualErrorFunctor_Pinhole_Intrinsic(observation.data()));
+		break;
+	case openMVG::cameras::PINHOLE_CAMERA_RADIAL1:
+		return new ceres::AutoDiffCostFunction<openMVG::sfm::ResidualErrorFunctor_Pinhole_Intrinsic_Radial_K1, 2, 4, 6, 3>(
+			new openMVG::sfm::ResidualErrorFunctor_Pinhole_Intrinsic_Radial_K1(observation.data()));
+		break;
+	case openMVG::cameras::PINHOLE_CAMERA_RADIAL3:
+		return new ceres::AutoDiffCostFunction<openMVG::sfm::ResidualErrorFunctor_Pinhole_Intrinsic_Radial_K3, 2, 6, 6, 3>(
+			new openMVG::sfm::ResidualErrorFunctor_Pinhole_Intrinsic_Radial_K3(observation.data()));
+		break;
+	case openMVG::cameras::PINHOLE_CAMERA_BROWN:
+		return new ceres::AutoDiffCostFunction<openMVG::sfm::ResidualErrorFunctor_Pinhole_Intrinsic_Brown_T2, 2, 8, 6, 3>(
+			new openMVG::sfm::ResidualErrorFunctor_Pinhole_Intrinsic_Brown_T2(observation.data()));
+		break;
+	case openMVG::cameras::PINHOLE_CAMERA_FISHEYE:
+		return new ceres::AutoDiffCostFunction<openMVG::sfm::ResidualErrorFunctor_Pinhole_Intrinsic_Fisheye, 2, 7, 6, 3>(
+			new openMVG::sfm::ResidualErrorFunctor_Pinhole_Intrinsic_Fisheye(observation.data()));
+	case openMVG::cameras::PINHOLE_CAMERA_FISHEYE1:
+		return new ceres::AutoDiffCostFunction<openMVG::sfm::ResidualErrorFunctor_Pinhole_Intrinsic_Fisheye1, 2, 4, 6, 3>(
+			new openMVG::sfm::ResidualErrorFunctor_Pinhole_Intrinsic_Fisheye1(observation.data()));
+	default:
+		return nullptr;
+	}
+}
+
+void openmvgSfM2Jacobian(openMVG::sfm::SfM_Data &sfm_data, ceres::CRSMatrix &jacobian, cov::Options &opt){
 	ceres::Problem problem;
 
 	// blocks filled in Jacobian ( cameras R,t and 3D points )
@@ -308,3 +328,4 @@ void openmvgSfM2Jacobian(openMVG::sfm::SfM_Data &sfm_data, ceres::CRSMatrix &jac
 	opt._svdRemoveN = -1;
 	opt._maxIterTE = -1;
 }
+#endif

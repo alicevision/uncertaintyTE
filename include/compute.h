@@ -17,6 +17,8 @@
 #include <Eigen/Eigen>
 #include <ctime>
 
+#include <mex.h>
+
 #include "openMVG/sfm/sfm_data.hpp"
 #include "openMVG/sfm/sfm_data_io.hpp"
 

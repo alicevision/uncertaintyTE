@@ -6,6 +6,9 @@
 #endif
 #include "ScaledDenseMatrix.h" 
 
+#ifndef AUXCMD_HEADER_INCLUDED
+	#include "auxCmd.h"
+#endif
 
 using namespace std;
 
@@ -329,6 +332,10 @@ void fixPts(tp *s, int *pts, cov::Options &opt, cov::Statistic &statistic, SSM *
 }
 
 void computeCovariances(cov::Options &options, cov::Statistic &statistic, ceres::CRSMatrix &jacobian, double *camUnc, double *ptsUnc) {
+
+	//printJacobian(jacobian);
+	//printJacobianMEX(jacobian);
+
 	if (camUnc == NULL || ptsUnc == NULL) return;
 	#if defined(_OPENMP)
 		omp_set_num_threads(8);
@@ -345,7 +352,6 @@ void computeCovariances(cov::Options &options, cov::Statistic &statistic, ceres:
 
 	// Create sparse matrix with separated scale coefficient 
 	SSM *J = new SSM( jacobian.num_rows, jacobian.num_cols, jacobian.rows.data(), jacobian.cols.data(), jacobian.values.data());
-	//J->printBlock2Matlab("J",0,0,2000,2000);
 
 	// Main algorithm
 	int Ncams = options._numCams * options._camParams;

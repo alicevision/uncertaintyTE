@@ -29,10 +29,19 @@ ENDIF()
 # Set sources and create executable target
 file(GLOB HEADERS "${PROJECT_SOURCE_DIR}/include/*.h")
 file(GLOB SOURCES "${PROJECT_SOURCE_DIR}/src/*.cpp")
+file(GLOB MODUL_DEFINITION_FILES "${PROJECT_SOURCE_DIR}/src/*.def")
+
+# Executable - binary file with txt input
 add_executable(uncertainty ${HEADERS} ${SOURCES})
 
 # Create also the static library
 ADD_LIBRARY(uncertainty_lib STATIC ${HEADERS} ${SOURCES})
+
+# Compile a MEX lib
+#add_library(uncertainty_mex SHARED ${HEADERS} ${SOURCES} ${MODUL_DEFINITION_FILES})
+#add_definitions(-DMATLAB_MEX_FILE)
+#SET_TARGET_PROPERTIES(uncertainty_mex PROPERTIES LINK_FLAGS "/export:mexFunction /dll")
+#SET_TARGET_PROPERTIES(uncertainty_mex PROPERTIES SUFFIX ".mexw64")
 
 # Include headers for both (executable and library)
 SET(INCLUDE_DIRS ${INCLUDE_DIRS} "${PROJECT_SOURCE_DIR}/include")
@@ -196,7 +205,7 @@ ENDIF( CERES_FOUND )
 # -----------------------------------------------------------------------------
 # MATLAB interface - MEX libs ( C:/Program Files/MATLAB/R2017a/extern/include; C:/Program Files/MATLAB/R2017a/extern/lib/win64/microsoft )
 # -----------------------------------------------------------------------------
-# For MATLAB interface do not exist the configuration file
+# MANUALLY REWRITTE THE CERES -> CERES DEBUG FOR DEBUG MODE  ..\libs\compiled_libraries\windows\Debug\ceres-debug.lib
 
 SET(MEX_INCLUDE_DIR CACHE PATH FORCE)
 IF(NOT MEX_INCLUDE_DIR STREQUAL "")
@@ -289,6 +298,104 @@ ENDIF()
 
 
 # -----------------------------------------------------------------------------
+# OpenMVG
+# -----------------------------------------------------------------------------
+option(OPENMVG_SUPPORT "Include OpenMVG libraries (enable input from OpenMVG)" OFF)
+IF (OPENMVG_SUPPORT)
+	add_definitions(-DUSE_OPENMVG)
+	
+	SET(OPENMVG_SRC_DIR CACHE PATH FORCE)
+	IF(NOT OPENMVG_SRC_DIR STREQUAL "")
+		MESSAGE(STATUS "OPENMVG_SRC_DIR: ${OPENMVG_SRC_DIR}")
+		SET(INCLUDE_DIRS ${INCLUDE_DIRS} 
+			"${OPENMVG_SRC_DIR}"
+			"${OPENMVG_SRC_DIR}/third_party/jpeg"
+			"${OPENMVG_SRC_DIR}/third_party/png"
+			"${OPENMVG_SRC_DIR}/third_party/zlib"
+			"${OPENMVG_SRC_DIR}/third_party/tiff"
+			"${OPENMVG_SRC_DIR}/third_party"
+			"${OPENMVG_SRC_DIR}/dependencies"
+			"${OPENMVG_SRC_DIR}/dependencies/cereal/include"
+			"${OPENMVG_SRC_DIR}/third_party/lemon"
+			"${OPENMVG_SRC_DIR}/third_party/flann/src/cpp"
+			"${OPENMVG_SRC_DIR}/dependencies/osi_clp/CoinUtils/src"
+			"${OPENMVG_SRC_DIR}/dependencies/osi_clp/Clp/src"
+			"${OPENMVG_SRC_DIR}/dependencies/osi_clp/Clp/src/OsiClp"
+			"${OPENMVG_SRC_DIR}/dependencies/osi_clp/Osi/src/Osi")     
+	ELSE()
+		MESSAGE(WARNING "Setup the OpenMVG root directory (contatins ./dependencies, ./third_party).")
+	ENDIF()
+	
+	SET(OPENMVG_BUILD_DIR CACHE PATH FORCE)
+	IF(NOT OPENMVG_BUILD_DIR STREQUAL "")
+		MESSAGE(STATUS "OPENMVG_BUILD_DIR: ${OPENMVG_BUILD_DIR}")
+		SET(INCLUDE_DIRS ${INCLUDE_DIRS} 
+			"${OPENMVG_BUILD_DIR}/generated"
+			"${OPENMVG_BUILD_DIR}/third_party/jpeg/config"
+			"${OPENMVG_BUILD_DIR}/third_party/png/config"
+			"${OPENMVG_BUILD_DIR}/third_party/tiff"
+			"${OPENMVG_BUILD_DIR}/third_party/lemon")    
+		SET(LIBS_FILES ${LIBS_FILES} 
+			optimized "${OPENMVG_BUILD_DIR}/third_party/flann/lib/Release/flann_cpp_s.lib"
+			debug "${OPENMVG_BUILD_DIR}/third_party/flann/lib/Debug/flann_cpp_s.lib")    
+	ELSE()
+		MESSAGE(WARNING "Setup the OpenMVG root directory (contatins ./src).")
+	ENDIF()
+	
+	SET(OPENMVG_LIBRARIES_DIR CACHE PATH FORCE)
+	IF(NOT OPENMVG_LIBRARIES_DIR STREQUAL "")
+		MESSAGE(STATUS "OPENMVG_LIBRARIES_DIR: ${OPENMVG_LIBRARIES_DIR}")
+		SET(LIBS_FILES ${LIBS_FILES} 
+			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_system.lib"
+			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_features.lib"
+			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_sfm.lib"
+			optimized "${OPENMVG_LIBRARIES_DIR}/Release/stlplus.lib"
+			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_lInftyComputerVision.lib"
+			optimized "${OPENMVG_LIBRARIES_DIR}/Release/lib_clp.lib"
+			optimized "${OPENMVG_LIBRARIES_DIR}/Release/lib_OsiClpSolver.lib"
+			optimized "${OPENMVG_LIBRARIES_DIR}/Release/lib_CoinUtils.lib"
+			optimized "${OPENMVG_LIBRARIES_DIR}/Release/lib_Osi.lib"
+			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_matching.lib"
+			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_image.lib"
+			optimized "${OPENMVG_LIBRARIES_DIR}/Release/png.lib"
+			optimized "${OPENMVG_LIBRARIES_DIR}/Release/jpeg.lib"
+			optimized "${OPENMVG_LIBRARIES_DIR}/Release/tiff.lib"
+			optimized "${OPENMVG_LIBRARIES_DIR}/Release/zlib.lib"
+			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_multiview.lib"
+			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_numeric.lib"
+			optimized "${OPENMVG_LIBRARIES_DIR}/Release/lemon.lib"
+			optimized "${OPENMVG_LIBRARIES_DIR}/Release/vlsift.lib"
+			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_exif.lib"
+			optimized "${OPENMVG_LIBRARIES_DIR}/Release/easyexif.lib"
+			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_system.lib"
+			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_features.lib"
+			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_sfm.lib"
+			debug "${OPENMVG_LIBRARIES_DIR}/Debug/stlplus.lib"
+			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_lInftyComputerVision.lib"
+			debug "${OPENMVG_LIBRARIES_DIR}/Debug/lib_clp.lib"
+			debug "${OPENMVG_LIBRARIES_DIR}/Debug/lib_OsiClpSolver.lib"
+			debug "${OPENMVG_LIBRARIES_DIR}/Debug/lib_CoinUtils.lib"
+			debug "${OPENMVG_LIBRARIES_DIR}/Debug/lib_Osi.lib"
+			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_matching.lib"
+			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_image.lib"
+			debug "${OPENMVG_LIBRARIES_DIR}/Debug/png.lib"
+			debug "${OPENMVG_LIBRARIES_DIR}/Debug/jpeg.lib"
+			debug "${OPENMVG_LIBRARIES_DIR}/Debug/tiff.lib"
+			debug "${OPENMVG_LIBRARIES_DIR}/Debug/zlib.lib"
+			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_multiview.lib"
+			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_numeric.lib"
+			debug "${OPENMVG_LIBRARIES_DIR}/Debug/lemon.lib"
+			debug "${OPENMVG_LIBRARIES_DIR}/Debug/vlsift.lib"
+			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_exif.lib"
+			debug "${OPENMVG_LIBRARIES_DIR}/Debug/easyexif.lib")     
+	ELSE()
+		MESSAGE(WARNING "Setup the library directories for OpenMVG (contians the subdirecries ./Release, ./Debug.")
+	ENDIF()
+ENDIF()
+
+
+
+# -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
 # LINUX - INCLUDE ALL LIBRARIES IN DIRECTORY
 # -----------------------------------------------------------------------------
@@ -308,16 +415,16 @@ ENDIF()
 # -----------------------------------------------------------------------------
 # INCLUDE ALL DIRECTORIES
 # -----------------------------------------------------------------------------
-
 target_include_directories(uncertainty PUBLIC ${INCLUDE_DIRS})
 target_include_directories(uncertainty_lib PUBLIC ${INCLUDE_DIRS})
+#target_include_directories(uncertainty_mex PUBLIC ${INCLUDE_DIRS})
 
 # -----------------------------------------------------------------------------
 # ADD ALL LIBRARIES
 # -----------------------------------------------------------------------------
 target_link_libraries (uncertainty ${LIBS_FILES})
 target_link_libraries (uncertainty_lib ${LIBS_FILES})
-
+#target_link_libraries (uncertainty_mex ${LIBS_FILES})
 
 # -----------------------------------------------------------------------------
 # Copy the examples and dll files if not exist
