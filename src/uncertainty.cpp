@@ -1,12 +1,6 @@
-#ifndef COMPUTE_HEADER_INCLUDED
-	#include "compute.h"
-#endif
-#ifndef AUXCMD_HEADER_INCLUDED
-	#include "auxCmd.h"
-#endif
-#ifndef MATLAB_INTERFACE_HEADER_INCLUDED
-	#include "matlabInterface.h"
-#endif
+#include "compute.h"
+#include "auxCmd.h"
+#include "matlabInterface.h"
 
 
 #ifdef _WIN32
@@ -128,5 +122,5 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 
 	free(ptsUnc);
 	free(camUnc);
-	mexPrintf("Computation of covariances ... [done]\n");
+	mexPrintf("Computation of covariances ... [done]\n\n");
 }

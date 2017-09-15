@@ -5,6 +5,8 @@ bin*/
 ceres-bin*/
 ceres-debug*/
 BUILD_*/
+vs2015*/
+*.props
 
 
 #Ignore thumbnails created by Windows

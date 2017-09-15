@@ -1,15 +1,8 @@
-#ifndef COMPUTE_HEADER_INCLUDED
-	#include "compute.h"
-#endif
-#ifndef MATLAB_INTERFACE_HEADER_INCLUDED
-	#include "matlabInterface.h"
-#endif
-#ifndef CERES_EXAMPLES_SNAVELY_REPROJECTION_ERROR_H_
-	#include "snavely_reprojection_error.h"
-#endif
-#ifndef AUXCMD_HEADER_INCLUDED
-	#include "auxCmd.h"
-#endif
+#include "compute.h"
+#include "matlabInterface.h"
+#include "snavely_reprojection_error.h"
+#include "auxCmd.h"
+
 
 void BuildProblem(ceres::examples::BALProblem *bal_problem, ceres::Problem* problem) {
 	const int point_block_size = bal_problem->point_block_size();

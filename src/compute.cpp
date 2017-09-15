@@ -1,16 +1,10 @@
-#ifndef COMPUTE_HEADER_INCLUDED
-	#include "compute.h"
-#endif
-#ifndef SSM_HEADER_INCLUDED
-	#include "ScaledSparseMatrix.h" 
-#endif
+#include "compute.h"
+#include "auxCmd.h"
+#include "ScaledSparseMatrix.h" 
 #include "ScaledDenseMatrix.h" 
 
-#ifndef AUXCMD_HEADER_INCLUDED
-	#include "auxCmd.h"
-#endif
-
 using namespace std;
+using namespace Eigen;
 
 typedef ScaledSparseMatrix SSM;
 typedef ScaledDenseMatrix SDM;
@@ -19,30 +13,12 @@ typedef std::unique_ptr<SDM> uDM;
 typedef SparseMatrix<float, RowMajor> SM;
 typedef MatrixXf DM;
 
-//////////////////////////////////////////////////////////////////////////////////////
-// TIME MEASURING
-#ifdef _WIN32		// ORIGINAL TIME MEASURING
-	#include <chrono>
-	typedef chrono::high_resolution_clock Clock;
-	typedef chrono::time_point<chrono::system_clock> s_clock;
-	typedef chrono::steady_clock::time_point tp;
 
-	double timeDuration(tp from, tp to) {
-		return chrono::duration_cast<chrono::nanoseconds>(to - from).count() * 1e-9;
-	}
-#elif __linux__    // DISABLE <chrono> for measuring the time - time is alwas 0
-	typedef double tp;
-	struct Clock {
-		static double now() {
-			return 0;
-		}
-	};
-	double timeDuration(tp from, tp to) {
-		return 0;
-	}
+#ifdef _WIN32
+double timeDuration(tp from, tp to) {
+	return std::chrono::duration_cast<std::chrono::nanoseconds>(to - from).count() * 1e-9;
+}
 #endif
-//////////////////////////////////////////////////////////////////////////////////////
-
 
 
 tp t(tp s, char* txt) {
@@ -102,7 +78,6 @@ void composeZ(tp *s, cov::Options &options, cov::Statistic &statistic, SSM &J, d
 	// Compute cJJ * sJJ = sJ'sJ
 	SSM Jt( J.trn() );		// create transpose matix and save reference to it
 	SSM M(Jt * J);
-	//sJJ.printAll(); cout << "\n\n\n\n\n";
 	*s = t(*s, "Split sM -> sU, sW, sV ... ", &(statistic.timeMultiplyJJ));
 
 	// Split cJJ -> U, W, V
@@ -139,11 +114,13 @@ void teInverse(tp *s, int N, cov::Options &options, cov::Statistic &statistic, S
 		iZ->set(i, i, (iZ->sval(i, i) + (lambda / iZ->c())));
 	statistic.lambda = lambda;
 	cout << "using lambda: " << lambda << " ... ";
-	
+	mexPrintf("using lambda: %e\n\n", lambda);
+
 	// Z -> iZ
 	iZ->inv();
 	*s = t(*s, "Taylor expansion ... ", &(statistic.timeInvZ));
-	
+	mexPrintf("Taylor expansion ... ");
+
 	// TE
 	double old_change = DBL_MAX, k, change;
 	SDM *iZorig = new SDM(*iZ);
@@ -151,6 +128,7 @@ void teInverse(tp *s, int N, cov::Options &options, cov::Statistic &statistic, S
 	for (int i = 1; i < 20; ++i) {
 		k = pow(lambda,i) / factorial(i - 1);
 		change = abs(k) * iZadd.absMax();
+		mexPrintf("\n cykle %d, coeff: %e, change: %e ",i,k,change);
 		cout << "\n>>> cykle " << i << ", coeff: " << k << ", change: " << change;
 		if (change < 1e-5 || change > old_change)
 			break;
@@ -160,6 +138,7 @@ void teInverse(tp *s, int N, cov::Options &options, cov::Statistic &statistic, S
 		iZupdate(iZ, k, &iZadd);
 		iZadd *= (*iZorig);
 	}
+	mexPrintf("\n Taylor expansion finished.\n");
 	cout << "\nTaylor expansion have been done in ";
 	*s = t(*s, "Refactor solution to the output ... ", &(statistic.timeTE));
 }
@@ -282,6 +261,7 @@ void fixPts(tp *s, int *pts, cov::Options &opt, cov::Statistic &statistic, SSM *
 	if (pts == NULL) return;
 	sort(pts, pts + 2);
 	cout << "id: " << pts[0] << ", " << pts[1] << ", " << pts[2] << " ... ";
+	mexPrintf("fixed points: %d, %d, %d\n", pts[0], pts[1], pts[2]);
 	statistic.fixedPts = new int[3]{ pts[0], pts[1], pts[2] };
 
 	// column ids to remove
@@ -332,10 +312,6 @@ void fixPts(tp *s, int *pts, cov::Options &opt, cov::Statistic &statistic, SSM *
 }
 
 void computeCovariances(cov::Options &options, cov::Statistic &statistic, ceres::CRSMatrix &jacobian, double *camUnc, double *ptsUnc) {
-
-	//printJacobian(jacobian);
-	//printJacobianMEX(jacobian);
-
 	if (camUnc == NULL || ptsUnc == NULL) return;
 	#if defined(_OPENMP)
 		omp_set_num_threads(8);

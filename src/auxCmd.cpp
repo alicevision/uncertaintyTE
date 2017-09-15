@@ -1,7 +1,4 @@
-#ifndef AUXCMD_HEADER_INCLUDED
-	#include "auxCmd.h"
-#endif
-
+#include "auxCmd.h"
 #include "ceres/rotation.h"
 #include "openMVG/sfm/sfm_data_BA_ceres_camera_functor.hpp"
 #include <random>

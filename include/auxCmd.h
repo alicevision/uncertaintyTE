@@ -1,10 +1,5 @@
-#ifndef COMPUTE_HEADER_INCLUDED
-	#include "compute.h"
-#endif
-#ifndef AUXCMD_HEADER_INCLUDED
-	#define AUXCMD_HEADER_INCLUDED
-#endif
-
+#pragma once	
+#include "compute.h"
 
 std::string algorihm2str(int alg);
 

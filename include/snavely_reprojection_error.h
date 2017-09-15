@@ -37,9 +37,7 @@
 //
 // For details see: http://phototour.cs.washington.edu/bundler/
 // and http://grail.cs.washington.edu/projects/bal/
-
-#ifndef CERES_EXAMPLES_SNAVELY_REPROJECTION_ERROR_H_
-#define CERES_EXAMPLES_SNAVELY_REPROJECTION_ERROR_H_
+#pragma once
 
 #include "ceres/rotation.h"
 
@@ -551,4 +549,3 @@ struct SnavelyReprojectionErrorWithQuaternions {
 }  // namespace examples
 }  // namespace ceres
 
-#endif  // CERES_EXAMPLES_SNAVELY_REPROJECTION_ERROR_H_

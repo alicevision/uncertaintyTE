@@ -33,9 +33,7 @@
 // University of Washington.
 //
 // For more details see http://grail.cs.washington.edu/projects/bal/
-
-#ifndef CERES_EXAMPLES_BAL_PROBLEM_H_
-#define CERES_EXAMPLES_BAL_PROBLEM_H_
+#pragma once
 
 #include <string>
 
@@ -124,4 +122,3 @@ namespace examples {
 }  // namespace examples
 }  // namespace ceres
 
-#endif  // CERES_EXAMPLES_BAL_PROBLEM_H_
