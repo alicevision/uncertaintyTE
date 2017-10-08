@@ -39,7 +39,10 @@
 #include "ceres/rotation.h"
 #include "glog/logging.h"
 #include <random>
-#include <mex.h>
+
+#ifdef USE_MATLAB
+  #include <mex.h>
+#endif
 
 namespace ceres {
 namespace examples {
@@ -69,7 +72,9 @@ BALProblem::BALProblem(int ncams, int npts, double* parameters, bool use_quatern
 	num_points_ = npts;
 	num_observations_ = nobs;
 	use_quaternions_ = use_quaternions;
+ #ifdef USE_MATLAB
 	mexPrintf("BALProblem: num_cameras_ %d, num_points_ %d, num_observations_ %d, block_size %d \n", num_cameras_, num_points_, num_observations_, camera_block_size());
+#endif
 
 	num_parameters_ = camera_block_size() * ncams + 3 * npts;
 	parameters_ = new double[num_parameters_];

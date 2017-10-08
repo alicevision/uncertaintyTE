@@ -23,6 +23,7 @@ IF( NOT WIN32 )
 	SET( GCC_COVERAGE_COMPILE_FLAGS "-lpthread")
 	SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++11 ${GCC_COVERAGE_LINK_FLAGS}" )
 	SET( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${GCC_COVERAGE_LINK_FLAGS}" )
+	SET( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "~/documents/libs/ceres-solver-install/lib/cmake/Ceres")
 ENDIF()
 
 # -----------------------------------------------------------------------------
@@ -31,11 +32,14 @@ file(GLOB HEADERS "${PROJECT_SOURCE_DIR}/include/*.h")
 file(GLOB SOURCES "${PROJECT_SOURCE_DIR}/src/*.cpp")
 file(GLOB MODUL_DEFINITION_FILES "${PROJECT_SOURCE_DIR}/src/*.def")
 
+message("HEADERS: ${HEADERS}")
+
+
 # Executable - binary file with txt input
 add_executable(uncertainty ${HEADERS} ${SOURCES})
 
 # Create also the static library
-ADD_LIBRARY(uncertainty_lib STATIC ${HEADERS} ${SOURCES})
+#ADD_LIBRARY(uncertainty_lib STATIC ${HEADERS} ${SOURCES})
 
 # Compile a MEX lib
 #add_library(uncertainty_mex SHARED ${HEADERS} ${SOURCES} ${MODUL_DEFINITION_FILES})
@@ -75,6 +79,18 @@ IF( NOT WIN32 )
 	endif()
 ENDIF()
 
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# LINUX - INCLUDE ALL LIBRARIES IN DIRECTORY
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
+# TODO: REPLACE THIS WITH APROPRIATE LINKING OF LIBRARIES
+IF(NOT WIN32)
+	FILE(GLOB LINUX_LIB_SEARCH "${INTERNAL_LIBRARIES}/*")
+	SET(LIBS_FILES ${LIBS_FILES} ${LINUX_LIB_SEARCH} "-lpthread -lm")
+ENDIF()
+
 
 
 # -----------------------------------------------------------------------------
@@ -86,7 +102,8 @@ IF (EIGEN3_FOUND)
 	message( STATUS "Found Eigen${EIGEN3_VERSION_STRING}" )
 	message( STATUS "> EIGEN3_INCLUDE_DIRS:   ${EIGEN3_INCLUDE_DIRS}"   )
 	SET(INCLUDE_DIRS ${INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS})
-	SET(LIBS_FILES ${LIBS_FILES} "Eigen3::Eigen")
+
+	#SET(LIBS_FILES ${LIBS_FILES} "Eigen3::Eigen")
 	
 ELSE(EIGEN3_FOUND)
 	message( STATUS "Eigen wasn't found.../n" )
@@ -144,35 +161,40 @@ SET(INCLUDE_DIRS ${INCLUDE_DIRS}
 	"${SUITESPARSE_ROOT_DIR}/install/include/suitesparse"        
 	"${SUITESPARSE_ROOT_DIR}/install/include"
 	"${SUITESPARSE_ROOT_DIR}/SuiteSparse/CXSparse/Include" )      
-SET(LIBS_FILES ${LIBS_FILES} 
-	optimized "${INTERNAL_LIBRARIES}/Release/suitesparseconfig.lib"
-	optimized "${INTERNAL_LIBRARIES}/Release/libcholmod.lib"
-	optimized "${INTERNAL_LIBRARIES}/Release/libccolamd.lib"
-	optimized "${INTERNAL_LIBRARIES}/Release/libcamd.lib"
-	optimized "${INTERNAL_LIBRARIES}/Release/libcolamd.lib"
-	optimized "${INTERNAL_LIBRARIES}/Release/libamd.lib"
-	optimized "${INTERNAL_LIBRARIES}/Release/liblapack.lib"
-	optimized "${INTERNAL_LIBRARIES}/Release/libblas.lib"
-	optimized "${INTERNAL_LIBRARIES}/Release/metis.lib"
-	optimized "${INTERNAL_LIBRARIES}/Release/libcxsparse.lib"
-	optimized "${INTERNAL_LIBRARIES}/Release/libspqr.lib"
-	debug "${INTERNAL_LIBRARIES}/Debug/suitesparseconfigd.lib"
-	debug "${INTERNAL_LIBRARIES}/Debug/libcholmodd.lib"
-	debug "${INTERNAL_LIBRARIES}/Debug/libccolamdd.lib"
-	debug "${INTERNAL_LIBRARIES}/Debug/libcamdd.lib"
-	debug "${INTERNAL_LIBRARIES}/Debug/libcolamdd.lib"
-	debug "${INTERNAL_LIBRARIES}/Debug/libamdd.lib"
-	debug "${INTERNAL_LIBRARIES}/Debug/lapack.lib"
-	debug "${INTERNAL_LIBRARIES}/Debug/blas.lib"
-	debug "${INTERNAL_LIBRARIES}/Debug/metisd.lib"
-	debug "${INTERNAL_LIBRARIES}/Debug/libcxsparsed.lib"
-	debug "${INTERNAL_LIBRARIES}/Debug/libspqrd.lib" )
+
+IF(WIN32)
+  SET(LIBS_FILES ${LIBS_FILES} 
+  	optimized "${INTERNAL_LIBRARIES}/Release/suitesparseconfig.lib"
+  	optimized "${INTERNAL_LIBRARIES}/Release/libcholmod.lib"
+  	optimized "${INTERNAL_LIBRARIES}/Release/libccolamd.lib"
+  	optimized "${INTERNAL_LIBRARIES}/Release/libcamd.lib"
+  	optimized "${INTERNAL_LIBRARIES}/Release/libcolamd.lib"
+  	optimized "${INTERNAL_LIBRARIES}/Release/libamd.lib"
+  	optimized "${INTERNAL_LIBRARIES}/Release/liblapack.lib"
+  	optimized "${INTERNAL_LIBRARIES}/Release/libblas.lib"
+  	optimized "${INTERNAL_LIBRARIES}/Release/metis.lib"
+  	optimized "${INTERNAL_LIBRARIES}/Release/libcxsparse.lib"
+  	optimized "${INTERNAL_LIBRARIES}/Release/libspqr.lib"
+  	debug "${INTERNAL_LIBRARIES}/Debug/suitesparseconfigd.lib"
+  	debug "${INTERNAL_LIBRARIES}/Debug/libcholmodd.lib"
+  	debug "${INTERNAL_LIBRARIES}/Debug/libccolamdd.lib"
+  	debug "${INTERNAL_LIBRARIES}/Debug/libcamdd.lib"
+  	debug "${INTERNAL_LIBRARIES}/Debug/libcolamdd.lib"
+  	debug "${INTERNAL_LIBRARIES}/Debug/libamdd.lib"
+  	debug "${INTERNAL_LIBRARIES}/Debug/lapack.lib"
+  	debug "${INTERNAL_LIBRARIES}/Debug/blas.lib"
+  	debug "${INTERNAL_LIBRARIES}/Debug/metisd.lib"
+  	debug "${INTERNAL_LIBRARIES}/Debug/libcxsparsed.lib"
+  	debug "${INTERNAL_LIBRARIES}/Debug/libspqrd.lib" )
+ELSE()
+  
+ENDIF()
 
 
 # -----------------------------------------------------------------------------
 # CERES
 # -----------------------------------------------------------------------------
-find_package( CERES )
+find_package( Ceres )
 IF ( CERES_FOUND )
 	message( STATUS "Found CERES ${CERES_VERSION}" )
 	message( STATUS "> CERES_INCLUDE_DIRS:   ${CERES_INCLUDE_DIRS}"   )
@@ -207,57 +229,38 @@ ENDIF( CERES_FOUND )
 # -----------------------------------------------------------------------------
 # MANUALLY REWRITTE THE CERES -> CERES DEBUG FOR DEBUG MODE  ..\libs\compiled_libraries\windows\Debug\ceres-debug.lib
 
-SET(MEX_INCLUDE_DIR CACHE PATH FORCE)
-IF(NOT MEX_INCLUDE_DIR STREQUAL "")
-	MESSAGE(STATUS "MEX_INCLUDE_DIR: ${MEX_INCLUDE_DIR}")
-	SET(INCLUDE_DIRS ${INCLUDE_DIRS} ${MEX_INCLUDE_DIR})     
-ELSE()
-	MESSAGE(WARNING "Setup the include directory for MATLAB MEX interface (contatins mex.h).")
+option(MATLAB_SUPPORT "Include MATLAB libraries (enable input from MATLAB)" OFF)
+IF (MATLAB_SUPPORT)
+	add_definitions(-DUSE_MATLAB)
+
+  SET(MEX_INCLUDE_DIR CACHE PATH FORCE)
+  IF(NOT MEX_INCLUDE_DIR STREQUAL "")
+  	MESSAGE(STATUS "MEX_INCLUDE_DIR: ${MEX_INCLUDE_DIR}")
+  	SET(INCLUDE_DIRS ${INCLUDE_DIRS} ${MEX_INCLUDE_DIR})     
+  ELSE()
+  	MESSAGE(WARNING "Setup the include directory for MATLAB MEX interface (contatins mex.h).")
+  ENDIF()
+  SET(MEX_LIBRARIES_DIR CACHE PATH FORCE)
+  IF(NOT MEX_LIBRARIES_DIR STREQUAL "")
+  	MESSAGE(STATUS "MEX_LIBRARIES_DIR: ${MEX_LIBRARIES_DIR}")
+  	IF(WIN32)
+  		SET(LIBS_FILES ${LIBS_FILES} 
+  		"${MEX_LIBRARIES_DIR}/libmx.lib"
+  		"${MEX_LIBRARIES_DIR}/libmat.lib"
+  		"${MEX_LIBRARIES_DIR}/libeng.lib"
+  		"${MEX_LIBRARIES_DIR}/libmex.lib")     
+  	ELSE()
+  		SET(LIBS_FILES ${LIBS_FILES} 
+  		"${MEX_LIBRARIES_DIR}/libmx.so"
+  		"${MEX_LIBRARIES_DIR}/libmat.so"
+  		"${MEX_LIBRARIES_DIR}/libeng.so"
+  		"${MEX_LIBRARIES_DIR}/libmex.so")
+  	ENDIF()
+  ELSE()
+  	MESSAGE(WARNING "Setup the library directory for MATLAB MEX interface (contatins libmx.lib, libmat.lib, libeng.lib, libmex.lib).")
+  ENDIF() 
+  
 ENDIF()
-SET(MEX_LIBRARIES_DIR CACHE PATH FORCE)
-IF(NOT MEX_LIBRARIES_DIR STREQUAL "")
-	MESSAGE(STATUS "MEX_LIBRARIES_DIR: ${MEX_LIBRARIES_DIR}")
-	SET(LIBS_FILES ${LIBS_FILES} 
-		"${MEX_LIBRARIES_DIR}/libmx.lib"
-		"${MEX_LIBRARIES_DIR}/libmat.lib"
-		"${MEX_LIBRARIES_DIR}/libeng.lib"
-		"${MEX_LIBRARIES_DIR}/libmex.lib")     
-ELSE()
-	MESSAGE(WARNING "Setup the library directory for MATLAB MEX interface (contatins libmx.lib, libmat.lib, libeng.lib, libmex.lib).")
-ENDIF()
-
-
-# -----------------------------------------------------------------------------
-# CUDA
-# -----------------------------------------------------------------------------
-find_package( CUDA )
-IF ( CUDA_FOUND )
-	message( STATUS "Found CUDA ${CUDA_VERSION}" )
-	message( STATUS "> CUDA_INCLUDE_DIRS:   ${CUDA_INCLUDE_DIRS}"   )
-	message( STATUS "> CUDA_LIBRARIES: ${CUDA_LIBRARIES}" )
-	message( STATUS "> CUDA_CUBLAS_LIBRARIES: ${CUDA_CUBLAS_LIBRARIES}" )
-	message( STATUS "> CUDA_CUDART_LIBRARY: ${CUDA_cusparse_LIBRARY}" )
-	SET(INCLUDE_DIRS ${INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS})
-	SET(LIBS_FILES ${LIBS_FILES} ${CUDA_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES} ${CUDA_cusparse_LIBRARY})
-
-ELSE( CUDA_FOUND )
-	IF(WIN32)
-		message( STATUS "CUDA 8.0 will be included manualy...")
-		MESSAGE( STATUS "> include path: ${CUDA8_ROOT_DIR}/include" )
-		MESSAGE( STATUS "> libraries directory: ${INTERNAL_LIBRARIES}/Release" )
-		MESSAGE( STATUS "> added libraries: cublas.lib, cusparse.lib, cublas_device.lib, cudadevrt.lib, cudart_static.lib" )
-		SET(INCLUDE_DIRS ${INCLUDE_DIRS} "${CUDA8_ROOT_DIR}/include") 
-		SET(LIBS_FILES ${LIBS_FILES}
-			"${INTERNAL_LIBRARIES}/Release/cublas.lib"
-			"${INTERNAL_LIBRARIES}/Release/cusparse.lib"
-			"${INTERNAL_LIBRARIES}/Release/cublas_device.lib"
-			"${INTERNAL_LIBRARIES}/Release/cudadevrt.lib"
-			"${INTERNAL_LIBRARIES}/Release/cudart_static.lib" )
-	ELSEIF( UNIX )
-		MESSAGE( WARNING "Install Cuda libraries first. Follow this guideline: https://askubuntu.com/questions/799184/how-can-i-install-cuda-on-ubuntu-16-04")
-	ENDIF()
-ENDIF( CUDA_FOUND )
-
 
 
 # -----------------------------------------------------------------------------
@@ -280,6 +283,40 @@ IF(WIN32)
 	debug "${INTERNAL_LIBRARIES}/Debug/magma.lib"
 	debug "${INTERNAL_LIBRARIES}/Debug/magma_sparse.lib")
 ENDIF()
+
+
+# -----------------------------------------------------------------------------
+# CUDA
+# -----------------------------------------------------------------------------
+find_package( CUDA )
+IF ( CUDA_FOUND )
+	message( STATUS "Found CUDA ${CUDA_VERSION}" )
+	message( STATUS "> CUDA_INCLUDE_DIRS:   ${CUDA_INCLUDE_DIRS}"   )
+	message( STATUS "> CUDA_LIBRARIES: ${CUDA_LIBRARIES}" )
+	message( STATUS "> CUDA_CUBLAS_LIBRARIES: ${CUDA_CUBLAS_LIBRARIES}" )
+	message( STATUS "> CUDA_CUDART_LIBRARY: ${CUDA_cusparse_LIBRARY}" )
+	SET(INCLUDE_DIRS ${INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS})
+	SET(LIBS_FILES ${LIBS_FILES} ${CUDA_LIBRARIES};${CUDA_CUBLAS_LIBRARIES};${CUDA_cusparse_LIBRARY})
+
+  message("LIBS_FILES: ${LIBS_FILES}")
+
+ELSE( CUDA_FOUND )
+	IF(WIN32)
+		message( STATUS "CUDA 8.0 will be included manualy...")
+		MESSAGE( STATUS "> include path: ${CUDA8_ROOT_DIR}/include" )
+		MESSAGE( STATUS "> libraries directory: ${INTERNAL_LIBRARIES}/Release" )
+		MESSAGE( STATUS "> added libraries: cublas.lib, cusparse.lib, cublas_device.lib, cudadevrt.lib, cudart_static.lib" )
+		SET(INCLUDE_DIRS ${INCLUDE_DIRS} "${CUDA8_ROOT_DIR}/include") 
+		SET(LIBS_FILES ${LIBS_FILES}
+			"${INTERNAL_LIBRARIES}/Release/cublas.lib"
+			"${INTERNAL_LIBRARIES}/Release/cusparse.lib"
+			"${INTERNAL_LIBRARIES}/Release/cublas_device.lib"
+			"${INTERNAL_LIBRARIES}/Release/cudadevrt.lib"
+			"${INTERNAL_LIBRARIES}/Release/cudart_static.lib" )
+	ELSEIF( UNIX )
+		MESSAGE( WARNING "Install Cuda libraries first. Follow this guideline: https://askubuntu.com/questions/799184/how-can-i-install-cuda-on-ubuntu-16-04")
+	ENDIF()
+ENDIF( CUDA_FOUND )
 
 
 # -----------------------------------------------------------------------------
@@ -334,10 +371,17 @@ IF (OPENMVG_SUPPORT)
 			"${OPENMVG_BUILD_DIR}/third_party/jpeg/config"
 			"${OPENMVG_BUILD_DIR}/third_party/png/config"
 			"${OPENMVG_BUILD_DIR}/third_party/tiff"
-			"${OPENMVG_BUILD_DIR}/third_party/lemon")    
-		SET(LIBS_FILES ${LIBS_FILES} 
-			optimized "${OPENMVG_BUILD_DIR}/third_party/flann/lib/Release/flann_cpp_s.lib"
-			debug "${OPENMVG_BUILD_DIR}/third_party/flann/lib/Debug/flann_cpp_s.lib")    
+			"${OPENMVG_BUILD_DIR}/third_party/lemon") 
+
+    IF(WIN32)  
+  		SET(LIBS_FILES ${LIBS_FILES} 
+  			optimized "${OPENMVG_BUILD_DIR}/third_party/flann/lib/Release/flann_cpp_s.lib"
+  			debug "${OPENMVG_BUILD_DIR}/third_party/flann/lib/Debug/flann_cpp_s.lib")   
+    ELSE()
+      #SET(LIBS_FILES ${LIBS_FILES} 
+      #  "${OPENMVG_BUILD_DIR}/third_party/flann/lib/flann_cpp_s.a")  
+    ENDIF()
+       
 	ELSE()
 		MESSAGE(WARNING "Setup the OpenMVG root directory (contatins ./src).")
 	ENDIF()
@@ -345,67 +389,79 @@ IF (OPENMVG_SUPPORT)
 	SET(OPENMVG_LIBRARIES_DIR CACHE PATH FORCE)
 	IF(NOT OPENMVG_LIBRARIES_DIR STREQUAL "")
 		MESSAGE(STATUS "OPENMVG_LIBRARIES_DIR: ${OPENMVG_LIBRARIES_DIR}")
-		SET(LIBS_FILES ${LIBS_FILES} 
-			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_system.lib"
-			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_features.lib"
-			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_sfm.lib"
-			optimized "${OPENMVG_LIBRARIES_DIR}/Release/stlplus.lib"
-			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_lInftyComputerVision.lib"
-			optimized "${OPENMVG_LIBRARIES_DIR}/Release/lib_clp.lib"
-			optimized "${OPENMVG_LIBRARIES_DIR}/Release/lib_OsiClpSolver.lib"
-			optimized "${OPENMVG_LIBRARIES_DIR}/Release/lib_CoinUtils.lib"
-			optimized "${OPENMVG_LIBRARIES_DIR}/Release/lib_Osi.lib"
-			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_matching.lib"
-			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_image.lib"
-			optimized "${OPENMVG_LIBRARIES_DIR}/Release/png.lib"
-			optimized "${OPENMVG_LIBRARIES_DIR}/Release/jpeg.lib"
-			optimized "${OPENMVG_LIBRARIES_DIR}/Release/tiff.lib"
-			optimized "${OPENMVG_LIBRARIES_DIR}/Release/zlib.lib"
-			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_multiview.lib"
-			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_numeric.lib"
-			optimized "${OPENMVG_LIBRARIES_DIR}/Release/lemon.lib"
-			optimized "${OPENMVG_LIBRARIES_DIR}/Release/vlsift.lib"
-			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_exif.lib"
-			optimized "${OPENMVG_LIBRARIES_DIR}/Release/easyexif.lib"
-			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_system.lib"
-			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_features.lib"
-			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_sfm.lib"
-			debug "${OPENMVG_LIBRARIES_DIR}/Debug/stlplus.lib"
-			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_lInftyComputerVision.lib"
-			debug "${OPENMVG_LIBRARIES_DIR}/Debug/lib_clp.lib"
-			debug "${OPENMVG_LIBRARIES_DIR}/Debug/lib_OsiClpSolver.lib"
-			debug "${OPENMVG_LIBRARIES_DIR}/Debug/lib_CoinUtils.lib"
-			debug "${OPENMVG_LIBRARIES_DIR}/Debug/lib_Osi.lib"
-			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_matching.lib"
-			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_image.lib"
-			debug "${OPENMVG_LIBRARIES_DIR}/Debug/png.lib"
-			debug "${OPENMVG_LIBRARIES_DIR}/Debug/jpeg.lib"
-			debug "${OPENMVG_LIBRARIES_DIR}/Debug/tiff.lib"
-			debug "${OPENMVG_LIBRARIES_DIR}/Debug/zlib.lib"
-			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_multiview.lib"
-			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_numeric.lib"
-			debug "${OPENMVG_LIBRARIES_DIR}/Debug/lemon.lib"
-			debug "${OPENMVG_LIBRARIES_DIR}/Debug/vlsift.lib"
-			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_exif.lib"
-			debug "${OPENMVG_LIBRARIES_DIR}/Debug/easyexif.lib")     
+    IF(WIN32)
+      SET(LIBS_FILES ${LIBS_FILES} 
+  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_system.lib"
+  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_features.lib"
+  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_sfm.lib"
+  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/stlplus.lib"
+  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_lInftyComputerVision.lib"
+  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/lib_clp.lib"
+  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/lib_OsiClpSolver.lib"
+  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/lib_CoinUtils.lib"
+  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/lib_Osi.lib"
+  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_matching.lib"
+  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_image.lib"
+  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/png.lib"
+  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/jpeg.lib"
+  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/tiff.lib"
+  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/zlib.lib"
+  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_multiview.lib"
+  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_numeric.lib"
+  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/lemon.lib"
+  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/vlsift.lib"
+  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_exif.lib"
+  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/easyexif.lib"
+  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_system.lib"
+  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_features.lib"
+  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_sfm.lib"
+  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/stlplus.lib"
+  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_lInftyComputerVision.lib"
+  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/lib_clp.lib"
+  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/lib_OsiClpSolver.lib"
+  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/lib_CoinUtils.lib"
+  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/lib_Osi.lib"
+  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_matching.lib"
+  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_image.lib"
+  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/png.lib"
+  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/jpeg.lib"
+  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/tiff.lib"
+  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/zlib.lib"
+  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_multiview.lib"
+  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_numeric.lib"
+  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/lemon.lib"
+  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/vlsift.lib"
+  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_exif.lib"
+  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/easyexif.lib")   
+      ELSE()
+        SET(LIBS_FILES ${LIBS_FILES} 
+        "${OPENMVG_LIBRARIES_DIR}/libopenMVG_system.a"
+  			"${OPENMVG_LIBRARIES_DIR}/libopenMVG_features.a"
+  			"${OPENMVG_LIBRARIES_DIR}/libopenMVG_sfm.a"
+  			"${OPENMVG_LIBRARIES_DIR}/libstlplus.a"
+  			"${OPENMVG_LIBRARIES_DIR}/libopenMVG_lInftyComputerVision.a"
+  			"${OPENMVG_LIBRARIES_DIR}/liblib_clp.a"
+  			"${OPENMVG_LIBRARIES_DIR}/liblib_OsiClpSolver.a"
+  			"${OPENMVG_LIBRARIES_DIR}/liblib_CoinUtils.a"
+  			"${OPENMVG_LIBRARIES_DIR}/liblib_Osi.a"
+  			"${OPENMVG_LIBRARIES_DIR}/libopenMVG_matching.a"
+  			"${OPENMVG_LIBRARIES_DIR}/libopenMVG_image.a"
+  			#"${OPENMVG_LIBRARIES_DIR}/libpng.a"
+  			#"${OPENMVG_LIBRARIES_DIR}/libjpeg.a"
+  			#"${OPENMVG_LIBRARIES_DIR}/libtiff.a"
+  			#"${OPENMVG_LIBRARIES_DIR}/libzlib.a"
+  			"${OPENMVG_LIBRARIES_DIR}/libopenMVG_multiview.a"
+  			"${OPENMVG_LIBRARIES_DIR}/libopenMVG_numeric.a"
+  			"${OPENMVG_LIBRARIES_DIR}/liblemon.a"
+  			"${OPENMVG_LIBRARIES_DIR}/libvlsift.a"
+  			"${OPENMVG_LIBRARIES_DIR}/libopenMVG_exif.a"
+  			"${OPENMVG_LIBRARIES_DIR}/libeasyexif.a")
+      ENDIF()   
 	ELSE()
 		MESSAGE(WARNING "Setup the library directories for OpenMVG (contians the subdirecries ./Release, ./Debug.")
 	ENDIF()
 ENDIF()
 
-
-
-# -----------------------------------------------------------------------------
-# -----------------------------------------------------------------------------
-# LINUX - INCLUDE ALL LIBRARIES IN DIRECTORY
-# -----------------------------------------------------------------------------
-# -----------------------------------------------------------------------------
-
-# TODO: REPLACE THIS WITH APROPRIATE LINKING OF LIBRARIES
-IF(NOT WIN32)
-	FILE(GLOB LINUX_LIB_SEARCH "${INTERNAL_LIBRARIES}/*")
-	SET(LIBS_FILES ${LIBS_FILES} ${LINUX_LIB_SEARCH} "-lpthread -lm")
-ENDIF()
 
 
 
@@ -416,14 +472,14 @@ ENDIF()
 # INCLUDE ALL DIRECTORIES
 # -----------------------------------------------------------------------------
 target_include_directories(uncertainty PUBLIC ${INCLUDE_DIRS})
-target_include_directories(uncertainty_lib PUBLIC ${INCLUDE_DIRS})
+#target_include_directories(uncertainty_lib PUBLIC ${INCLUDE_DIRS})
 #target_include_directories(uncertainty_mex PUBLIC ${INCLUDE_DIRS})
 
 # -----------------------------------------------------------------------------
 # ADD ALL LIBRARIES
 # -----------------------------------------------------------------------------
 target_link_libraries (uncertainty ${LIBS_FILES})
-target_link_libraries (uncertainty_lib ${LIBS_FILES})
+#target_link_libraries (uncertainty_lib ${LIBS_FILES})
 #target_link_libraries (uncertainty_mex ${LIBS_FILES})
 
 # -----------------------------------------------------------------------------

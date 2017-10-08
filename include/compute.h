@@ -18,11 +18,14 @@
 #include <Eigen/Eigen>
 #include <ctime>
 
-#include <mex.h>
+#ifdef USE_MATLAB
+  #include <mex.h>
+#endif
 
-#include "openMVG/sfm/sfm_data.hpp"
-#include "openMVG/sfm/sfm_data_io.hpp"
-
+#ifdef USE_OPENMVG
+  #include "openMVG/sfm/sfm_data.hpp"
+  #include "openMVG/sfm/sfm_data_io.hpp"
+#endif
 
 
 class ScaledSparseMatrix;

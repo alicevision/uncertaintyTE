@@ -1,7 +1,9 @@
 #include "compute.h"
 #include "auxCmd.h"
-#include "matlabInterface.h"
 
+#ifdef USE_MATLAB
+  #include "matlabInterface.h"
+#endif
 
 #ifdef _WIN32
 	#define EXECUTABLE_FILE "uncertainty.exe"
@@ -94,6 +96,7 @@ In:
 /*
 Matlab interface, call in Matlab: unc( .... ) 
 */
+#ifdef USE_MATLAB
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	cov::Statistic statistic = cov::Statistic();
 	cov::Options options = cov::Options();
@@ -124,3 +127,4 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	free(camUnc);
 	mexPrintf("Computation of covariances ... [done]\n\n");
 }
+#endif

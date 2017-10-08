@@ -166,13 +166,13 @@ magma_queue_t magmablasGetQueue();
 // These generally require that magma_internal.h be the last header,
 // as max() and min() often conflict with system and library headers.
 
-#ifndef max
-#define max(a, b) ((a) > (b) ? (a) : (b))
-#endif
+//#ifndef max
+//#define max(a, b) ((a) > (b) ? (a) : (b))
+//#endif
 
-#ifndef min
-#define min(a, b) ((a) < (b) ? (a) : (b))
-#endif
+//#ifndef min
+//#define min(a, b) ((a) < (b) ? (a) : (b))
+//#endif
 
 /***************************************************************************//**
     Suppress "warning: unused variable" in a portable fashion.

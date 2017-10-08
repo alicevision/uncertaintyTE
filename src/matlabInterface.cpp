@@ -1,3 +1,4 @@
+#ifdef USE_MATLAB
 #include "compute.h"
 #include "matlabInterface.h"
 #include "snavely_reprojection_error.h"
@@ -199,3 +200,5 @@ void buildJacobian(ceres::examples::BALProblem *bal_problem, ceres::CRSMatrix &j
 	opt._svdRemoveN = -1;
 	opt._maxIterTE = -1;
 }
+
+#endif

@@ -1,8 +1,15 @@
 #include "auxCmd.h"
 #include "ceres/rotation.h"
-#include "openMVG/sfm/sfm_data_BA_ceres_camera_functor.hpp"
+
+#ifdef USE_OPENMVG
+  #include "openMVG/sfm/sfm_data_BA_ceres_camera_functor.hpp"
+#endif
+
 #include <random>
 
+#ifndef DBL_MIN
+#define DBL_MIN -1e999
+#endif
 
 std::string algorihm2str(int alg) {
 	switch (alg) {
@@ -144,6 +151,7 @@ void printJacobian(ceres::CRSMatrix &J) {
 	std::cout << "\n\n\n";
 }
 
+#ifdef USE_MATLAB
 void printJacobianMEX(ceres::CRSMatrix &J) {
 	mexPrintf("\n\nJ = zeros(%d, %d);\n", J.num_rows, J.num_cols);
 	for (int i = 0; i < J.num_rows; i++) {
@@ -153,6 +161,7 @@ void printJacobianMEX(ceres::CRSMatrix &J) {
 	}
 	mexPrintf("\n\n\n");
 }
+#endif
 
 #ifdef USE_OPENMVG
 int loadSceneOpenMVG(std::string sSfM_Data_Filename_In, openMVG::sfm::SfM_Data &sfm_data) {
@@ -208,8 +217,8 @@ void openmvgSfM2Jacobian(openMVG::sfm::SfM_Data &sfm_data, ceres::CRSMatrix &jac
 	// Data wrapper for refinement:
 	openMVG::Hash_Map<openMVG::IndexT, std::vector<double> > map_poses;
 
-	// Setup Poses data & subparametrization
-	for (openMVG::sfm::Poses::const_iterator itPose = sfm_data.poses.begin(); itPose != sfm_data.poses.end(); ++itPose){
+	// Setup Poses data & subparametrization  -- UNCOMMENT FOR RUN OPENMVG
+	/*for (openMVG::sfm::Poses::const_iterator itPose = sfm_data.poses.begin(); itPose != sfm_data.poses.end(); ++itPose){
 		const openMVG::IndexT indexPose = itPose->first;
 
 		const openMVG::geometry::Pose3 & pose = itPose->second;
@@ -229,7 +238,7 @@ void openmvgSfM2Jacobian(openMVG::sfm::SfM_Data &sfm_data, ceres::CRSMatrix &jac
 		double * parameter_block = &map_poses[indexPose][0];
 		problem.AddParameterBlock(parameter_block, 6);
 		parameter_blocks.push_back(parameter_block);
-	}
+	}*/
 
 	// ----------------------------------------------------------------------------------------------------
 	// TODO: covarince propagation for diferent camera types ( usually not used in practise )
@@ -287,15 +296,15 @@ void openmvgSfM2Jacobian(openMVG::sfm::SfM_Data &sfm_data, ceres::CRSMatrix &jac
 			// Each Residual block takes a point and a camera as input and outputs a 2
 			// dimensional residual. Internally, the cost function stores the observed
 			// image location and compares the reprojection against the observation.
-			ceres::CostFunction* cost_function =
-				IntrinsicsToCostFunction(sfm_data.intrinsics[view->id_intrinsic].get(), observationIt.second.x);
+			ceres::CostFunction* cost_function = NULL;
+				//IntrinsicsToCostFunction(sfm_data.intrinsics[view->id_intrinsic].get(), observationIt.second.x);
 
-			if (cost_function)
+			/*if (cost_function)
 				problem.AddResidualBlock(cost_function,
 					p_LossFunction,
 					&map_intrinsics[view->id_intrinsic][0],
 					&map_poses[view->id_pose][0],
-					landmarkIt.second.X.data()); //Do we need to copy 3D point to avoid false motion, if failure ?
+					landmarkIt.second.X.data()); */  //Do we need to copy 3D point to avoid false motion, if failure ?
 		}
 		parameter_blocks.push_back(landmarkIt.second.X.data());
 		mutable_points.push_back(landmarkIt.second.X(0));

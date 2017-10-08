@@ -135,8 +135,8 @@ double ScaledSparseMatrix::val(int i, int j) const {
 // Print submatrix up to then rows / cols 
 void ScaledSparseMatrix::print() const {
 	std::cout << "\n X = [\n";
-	for (int i = 0; i < min(10, nrows()); ++i) {
-		for (int j = 0; j < min(10, ncols()); ++j) {
+	for (int i = 0; i < std::min(10, nrows()); ++i) {
+		for (int j = 0; j < std::min(10, ncols()); ++j) {
 			std::cout << val(i, j) << " ";
 		}
 		std::cout << "\n";
@@ -154,6 +154,7 @@ void ScaledSparseMatrix::printAll() const {
 	std::cout << "]";
 }
 
+#ifdef USE_MATLAB
 void ScaledSparseMatrix::printBlock2Matlab(char* name, int row_from, int col_from, int row_to, int col_to) {
 	std::cout << "\n\n" << name << " = zeros(" << (row_to - row_from) << ", " << (col_to - col_from) << ");\n";
 	for (int i = row_from; i < row_to; i++) {
@@ -188,6 +189,7 @@ void ScaledSparseMatrix::printBlock2Matlab3(char* name, int row_from, int col_fr
 	}
 	file.close();
 }
+#endif
 
 void ScaledSparseMatrix::inv3x3blockSymmDiag(ScaledSparseMatrix *ssm) {
 	// define output arrays

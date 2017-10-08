@@ -75,13 +75,13 @@ static inline double magma_max_nan( double x, double y )
  *  Global utilities
  *  in both magma_internal.h and testings.h
  **/
-#ifndef max
-#define max(a, b) ((a) > (b) ? (a) : (b))
-#endif
+//#ifndef max
+//#define max(a, b) ((a) > (b) ? (a) : (b))
+//#endif
 
-#ifndef min
-#define min(a, b) ((a) < (b) ? (a) : (b))
-#endif
+//#ifndef min
+//#define min(a, b) ((a) < (b) ? (a) : (b))
+//#endif
 
 // suppress "warning: unused variable" in a portable fashion
 #define MAGMA_UNUSED(var)  ((void)var)

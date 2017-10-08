@@ -14,7 +14,7 @@ typedef SparseMatrix<float, RowMajor> SM;
 typedef MatrixXf DM;
 
 
-#ifdef _WIN32
+#ifdef __MINGW32__
 double timeDuration(tp from, tp to) {
 	return std::chrono::duration_cast<std::chrono::nanoseconds>(to - from).count() * 1e-9;
 }
@@ -114,12 +114,16 @@ void teInverse(tp *s, int N, cov::Options &options, cov::Statistic &statistic, S
 		iZ->set(i, i, (iZ->sval(i, i) + (lambda / iZ->c())));
 	statistic.lambda = lambda;
 	cout << "using lambda: " << lambda << " ... ";
+ #ifdef USE_MATLAB
 	mexPrintf("using lambda: %e\n\n", lambda);
+ #endif
 
 	// Z -> iZ
 	iZ->inv();
 	*s = t(*s, "Taylor expansion ... ", &(statistic.timeInvZ));
+ #ifdef USE_MATLAB
 	mexPrintf("Taylor expansion ... ");
+#endif
 
 	// TE
 	double old_change = DBL_MAX, k, change;
@@ -128,7 +132,9 @@ void teInverse(tp *s, int N, cov::Options &options, cov::Statistic &statistic, S
 	for (int i = 1; i < 20; ++i) {
 		k = pow(lambda,i) / factorial(i - 1);
 		change = abs(k) * iZadd.absMax();
+   #ifdef USE_MATLAB
 		mexPrintf("\n cykle %d, coeff: %e, change: %e ",i,k,change);
+   #endif
 		cout << "\n>>> cykle " << i << ", coeff: " << k << ", change: " << change;
 		if (change < 1e-5 || change > old_change)
 			break;
@@ -138,7 +144,9 @@ void teInverse(tp *s, int N, cov::Options &options, cov::Statistic &statistic, S
 		iZupdate(iZ, k, &iZadd);
 		iZadd *= (*iZorig);
 	}
+ #ifdef USE_MATLAB
 	mexPrintf("\n Taylor expansion finished.\n");
+ #endif
 	cout << "\nTaylor expansion have been done in ";
 	*s = t(*s, "Refactor solution to the output ... ", &(statistic.timeTE));
 }
@@ -261,7 +269,9 @@ void fixPts(tp *s, int *pts, cov::Options &opt, cov::Statistic &statistic, SSM *
 	if (pts == NULL) return;
 	sort(pts, pts + 2);
 	cout << "id: " << pts[0] << ", " << pts[1] << ", " << pts[2] << " ... ";
+ #ifdef USE_MATLAB
 	mexPrintf("fixed points: %d, %d, %d\n", pts[0], pts[1], pts[2]);
+ #endif
 	statistic.fixedPts = new int[3]{ pts[0], pts[1], pts[2] };
 
 	// column ids to remove
