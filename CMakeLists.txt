@@ -64,7 +64,9 @@ SET(CUDA8_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/cuda-8.0")
 SET(EIGEN3_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/eigen-3.3.4")
 SET(GFLAGS_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/gflags")
 SET(MKL_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/IntelMKL")
-SET(MAGMA_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/magma-2.2.0")
+IF(WIN32)
+  SET(MAGMA_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/magma-2.2.0")
+ENDIF()
 SET(SUITESPARSE_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/suitesparse-metis-for-windows")
 # -----------------------------------------------------------------------------
 
@@ -86,11 +88,10 @@ ENDIF()
 # -----------------------------------------------------------------------------
 
 # TODO: REPLACE THIS WITH APROPRIATE LINKING OF LIBRARIES
-IF(NOT WIN32)
-	FILE(GLOB LINUX_LIB_SEARCH "${INTERNAL_LIBRARIES}/*")
-	SET(LIBS_FILES ${LIBS_FILES} ${LINUX_LIB_SEARCH} "-lpthread -lm")
-ENDIF()
-
+#IF(NOT WIN32)
+#	FILE(GLOB LINUX_LIB_SEARCH "${INTERNAL_LIBRARIES}/*")
+#	SET(LIBS_FILES ${LIBS_FILES} ${LINUX_LIB_SEARCH} "-lpthread -lm")
+#ENDIF()
 
 
 # -----------------------------------------------------------------------------
@@ -267,21 +268,48 @@ ENDIF()
 # MAGMA
 # -----------------------------------------------------------------------------
 # For MAGMA do not exist the configuration file
-SET(INCLUDE_DIRS ${INCLUDE_DIRS}
-	"${MAGMA_ROOT_DIR}/include"
-	"${MAGMA_ROOT_DIR}/control"
-	"${MAGMA_ROOT_DIR}/sparse/include"
-	"${MAGMA_ROOT_DIR}/testing")
 IF(WIN32)
+  SET(INCLUDE_DIRS ${INCLUDE_DIRS}
+  	"${MAGMA_ROOT_DIR}/include"
+  	"${MAGMA_ROOT_DIR}/control"
+  	"${MAGMA_ROOT_DIR}/sparse/include"
+  	"${MAGMA_ROOT_DIR}/testing")
+ 
 	SET(LIBS_FILES ${LIBS_FILES}
-	optimized "${INTERNAL_LIBRARIES}/Release/tester.lib"
-	optimized "${INTERNAL_LIBRARIES}/Release/lapacktest.lib"
-	optimized "${INTERNAL_LIBRARIES}/Release/magma.lib"
-	optimized "${INTERNAL_LIBRARIES}/Release/magma_sparse.lib"
-	debug "${INTERNAL_LIBRARIES}/Debug/tester.lib"
-	debug "${INTERNAL_LIBRARIES}/Debug/lapacktest.lib"
-	debug "${INTERNAL_LIBRARIES}/Debug/magma.lib"
-	debug "${INTERNAL_LIBRARIES}/Debug/magma_sparse.lib")
+  	optimized "${INTERNAL_LIBRARIES}/Release/tester.lib"
+  	optimized "${INTERNAL_LIBRARIES}/Release/lapacktest.lib"
+  	optimized "${INTERNAL_LIBRARIES}/Release/magma.lib"
+  	optimized "${INTERNAL_LIBRARIES}/Release/magma_sparse.lib"
+  	debug "${INTERNAL_LIBRARIES}/Debug/tester.lib"
+  	debug "${INTERNAL_LIBRARIES}/Debug/lapacktest.lib"
+  	debug "${INTERNAL_LIBRARIES}/Debug/magma.lib"
+  	debug "${INTERNAL_LIBRARIES}/Debug/magma_sparse.lib")
+   
+ELSE() 
+  SET(MAGMA_ROOT_DIR CACHE PATH FORCE)
+	IF(NOT MAGMA_ROOT_DIR STREQUAL "")
+		MESSAGE(STATUS "MAGMA_ROOT_DIR: ${MAGMA_ROOT_DIR}")
+		SET(INCLUDE_DIRS ${INCLUDE_DIRS}
+    	"${MAGMA_ROOT_DIR}/include"
+    	"${MAGMA_ROOT_DIR}/control"
+    	"${MAGMA_ROOT_DIR}/sparse/include"
+      "${MAGMA_ROOT_DIR}/sparse/control"
+    	"${MAGMA_ROOT_DIR}/testing")   
+	ELSE()
+		MESSAGE(WARNING "Setup the MAGMA_ROOT_DIR")
+	ENDIF()  
+ 
+  SET(MAGMA_INCLUDE_DIR CACHE PATH FORCE)
+	IF(NOT MAGMA_INCLUDE_DIR STREQUAL "")
+		MESSAGE(STATUS "MAGMA_INCLUDE_DIR: ${MAGMA_INCLUDE_DIR}")
+		SET(LIBS_FILES ${LIBS_FILES}
+    	"${MAGMA_INCLUDE_DIR}/libtester.a"
+    	"${MAGMA_INCLUDE_DIR}/liblapacktest.a"
+    	"${MAGMA_INCLUDE_DIR}/libmagma.a"
+    	"${MAGMA_INCLUDE_DIR}/libmagma_sparse.a") 
+	ELSE()
+		MESSAGE(WARNING "Setup the MAGMA_INCLUDE_DIR")
+	ENDIF()  
 ENDIF()
 
 

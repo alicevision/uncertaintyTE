@@ -3,6 +3,7 @@
 #include "ScaledSparseMatrix.h" 
 #include <float.h>
 
+
 class ScaledDenseMatrix {
 private:
 	int _nr = 0;

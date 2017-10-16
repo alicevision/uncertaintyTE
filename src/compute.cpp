@@ -3,6 +3,7 @@
 #include "ScaledSparseMatrix.h" 
 #include "ScaledDenseMatrix.h" 
 
+
 using namespace std;
 using namespace Eigen;
 
@@ -13,14 +14,16 @@ typedef std::unique_ptr<SDM> uDM;
 typedef SparseMatrix<float, RowMajor> SM;
 typedef MatrixXf DM;
 
-
-#ifdef __MINGW32__
+#ifdef _WIN32	
 double timeDuration(tp from, tp to) {
 	return std::chrono::duration_cast<std::chrono::nanoseconds>(to - from).count() * 1e-9;
 }
+#else
+double timeDuration(tp from, tp to) {
+	return 0;
+}
 #endif
-
-
+ 
 tp t(tp s, char* txt) {
 	cout << " " << timeDuration(s, Clock::now()) << "s\n";
 	cout << txt;
