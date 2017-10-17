@@ -24,7 +24,7 @@
 #include "magma_v2.h"
 #include "magma_lapack.h"
 #include "magma_operators.h"
-#include "magmasparse.h"
+//#include "magmasparse.h"
 
 #define min
 #define max

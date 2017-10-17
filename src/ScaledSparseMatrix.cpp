@@ -444,6 +444,7 @@ void ScaledSparseMatrix::sparseMultEigen(ScaledSparseMatrix& B) {
 	set_sA(std::make_shared<CRS>(nrows(), B.ncols(), eC.outerIndexPtr(), eC.innerIndexPtr(), eC.valuePtr()));
 }
 
+/*
 void ScaledSparseMatrix::sparseMultMagma(ScaledSparseMatrix& B) {
 	// init magma queue
 	magma_queue_t queue;
@@ -478,6 +479,7 @@ void ScaledSparseMatrix::sparseMultMagma(ScaledSparseMatrix& B) {
 	magma_queue_destroy(queue);
 	magma_finalize();
 }
+*/
 
 ScaledSparseMatrix& ScaledSparseMatrix::operator=(ScaledSparseMatrix& B) {
 	_cA = B.c();
