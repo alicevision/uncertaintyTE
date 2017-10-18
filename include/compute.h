@@ -26,12 +26,24 @@
 #include "magma_operators.h"
 //#include "magmasparse.h"
 
-#define min
-#define max
-#include "magma_internal.h"
-#include "testings.h"
-#undef min
-#undef max
+#ifdef _WIN32
+	#include "magma_internal.h"
+	#include "testings.h"
+	#define MINIMUM min
+	#define MAXIMUM max
+#else
+	#define min
+	#define max
+	#include "magma_internal.h"
+	#include "testings.h"
+	#undef min
+	#undef max
+	#define MINIMUM std::min
+	#define MAXIMUM std::max
+#endif
+
+
+
 
 
 class ScaledSparseMatrix;

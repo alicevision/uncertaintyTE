@@ -54,3 +54,12 @@ Adjust the paths and according your system.
 6) Create project using Cmake.
   Run 'cmake ..' in subdirectory build (you should create it) in this project
 7) Try the framework by calling 'uncertatinty 2 Release/in/01_Cube.jacob'
+
+
+-----------------------------------------------------------------------
+Notes to LINUX branch:
+
+For compilation of debug version on Windows:
+- add library directories in VS -> properties e.g.:
+  c:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\compiler\lib\intel64\
+and adjust the path to Ceres-debug library -> take care because the installation dir may cotains release only 

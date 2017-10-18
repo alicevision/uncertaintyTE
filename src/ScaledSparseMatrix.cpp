@@ -135,8 +135,8 @@ double ScaledSparseMatrix::val(int i, int j) const {
 // Print submatrix up to then rows / cols 
 void ScaledSparseMatrix::print() const {
 	std::cout << "\n X = [\n";
-	for (int i = 0; i < std::min(10, nrows()); ++i) {
-		for (int j = 0; j < std::min(10, ncols()); ++j) {
+	for (int i = 0; i < MINIMUM(10, nrows()); ++i) {
+		for (int j = 0; j < MINIMUM(10, ncols()); ++j) {
 			std::cout << val(i, j) << " ";
 		}
 		std::cout << "\n";

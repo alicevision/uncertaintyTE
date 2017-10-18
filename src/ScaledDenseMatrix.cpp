@@ -224,7 +224,7 @@ void ScaledDenseMatrix::inv() {
 
 	// LU decomposition
 	magma_int_t     *ipiv, iunused[1], info;
-	TESTING_CHECK(magma_imalloc_cpu(&ipiv, std::min(_nr, _nc)));
+	TESTING_CHECK(magma_imalloc_cpu(&ipiv, MINIMUM(_nr, _nc)));
 	lapackf77_dgetrf(&(_nr), &(_nc), _sA, &(_nr), ipiv, &info);
 	if (info != 0)
 		std::cerr << "Lapack LU decomposition error.";

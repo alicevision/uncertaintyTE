@@ -259,7 +259,7 @@ void openmvgSfM2Jacobian(openMVG::sfm::SfM_Data &sfm_data, ceres::CRSMatrix &jac
 		if (itIntrinsic.second->initialFocalLengthPix() > 0) {
 			// If we have an initial guess, we only authorize a margin around this value.
 			assert(map_intrinsics[idIntrinsics].size() >= 1);
-			const unsigned int maxFocalErr = 0.2 * (std::max)(itIntrinsic.second->w(), itIntrinsic.second->h());
+			const unsigned int maxFocalErr = 0.2 * (MAXIMUM)(itIntrinsic.second->w(), itIntrinsic.second->h());
 			problem.SetParameterLowerBound(parameter_block, 0, (double)itIntrinsic.second->initialFocalLengthPix() - maxFocalErr);
 			problem.SetParameterUpperBound(parameter_block, 0, (double)itIntrinsic.second->initialFocalLengthPix() + maxFocalErr);
 		}
