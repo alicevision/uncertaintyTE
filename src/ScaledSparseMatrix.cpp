@@ -3,11 +3,11 @@
 using namespace Eigen;
 
 // Magma sparse matrix multiplied by scalar
-magma_d_matrix operator*(double lhs, magma_d_matrix rhs) {
+/*magma_d_matrix operator*(double lhs, magma_d_matrix rhs) {
 	for (int i = 0; i < rhs.nnz; i++)
 		rhs.val[i] *= lhs;
 	return rhs;
-}
+}*/
 
 
 CRS::CRS() {};

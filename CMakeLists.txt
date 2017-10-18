@@ -1,4 +1,5 @@
 CMAKE_MINIMUM_REQUIRED (VERSION 3.5)
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 # About the project
 PROJECT (Uncertatinty)
@@ -225,6 +226,33 @@ ENDIF( CERES_FOUND )
 
 
 
+
+# -----------------------------------------------------------------------------
+# IntelMKL -> BLAS & LAPACK ( MAGMA was tested with this implementation of BLAS and LAPACK )
+# -----------------------------------------------------------------------------
+# For IntelMKL do not exist the configuration file
+option(MKL_SUPPORT "Include Intel MKL libraries" OFF)
+IF (MKL_SUPPORT)
+  SET(INCLUDE_DIRS ${INCLUDE_DIRS} "${MKL_ROOT_DIR}/include")
+  IF(WIN32)
+  	SET(LIBS_FILES ${LIBS_FILES}
+  		"${INTERNAL_LIBRARIES}/Release/mkl_intel_lp64_dll.lib"
+  		"${INTERNAL_LIBRARIES}/Release/mkl_intel_thread_dll.lib"
+  		"${INTERNAL_LIBRARIES}/Release/mkl_core_dll.lib"
+  		"${INTERNAL_LIBRARIES}/Release/libiomp5md.lib")
+  ENDIF()
+ENDIF()
+
+
+# -----------------------------------------------------------------------------
+# LAPACK AND BLAS LIBS
+# -----------------------------------------------------------------------------
+IF (NOT MKL_SUPPORT)
+  find_package( LAPACK )
+  SET(LIBS_FILES ${LIBS_FILES} ${LAPACK_LIBRARIES})
+ENDIF()
+
+
 # -----------------------------------------------------------------------------
 # MATLAB interface - MEX libs ( C:/Program Files/MATLAB/R2017a/extern/include; C:/Program Files/MATLAB/R2017a/extern/lib/win64/microsoft )
 # -----------------------------------------------------------------------------
@@ -303,10 +331,10 @@ ELSE()
 	IF(NOT MAGMA_INCLUDE_DIR STREQUAL "")
 		MESSAGE(STATUS "MAGMA_INCLUDE_DIR: ${MAGMA_INCLUDE_DIR}")
 		SET(LIBS_FILES ${LIBS_FILES}
-    	"${MAGMA_INCLUDE_DIR}/libtester.a"
-    	"${MAGMA_INCLUDE_DIR}/liblapacktest.a"
     	"${MAGMA_INCLUDE_DIR}/libmagma.a"
-    	"${MAGMA_INCLUDE_DIR}/libmagma_sparse.a") 
+     # "${MAGMA_INCLUDE_DIR}/libmagma_sparse.a"
+      "${MAGMA_INCLUDE_DIR}/libtester.a"
+    	"${MAGMA_INCLUDE_DIR}/liblapacktest.a") 
 	ELSE()
 		MESSAGE(WARNING "Setup the MAGMA_INCLUDE_DIR")
 	ENDIF()  
@@ -326,8 +354,6 @@ IF ( CUDA_FOUND )
 	SET(INCLUDE_DIRS ${INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS})
 	SET(LIBS_FILES ${LIBS_FILES} ${CUDA_LIBRARIES};${CUDA_CUBLAS_LIBRARIES};${CUDA_cusparse_LIBRARY})
 
-  message("LIBS_FILES: ${LIBS_FILES}")
-
 ELSE( CUDA_FOUND )
 	IF(WIN32)
 		message( STATUS "CUDA 8.0 will be included manualy...")
@@ -346,19 +372,6 @@ ELSE( CUDA_FOUND )
 	ENDIF()
 ENDIF( CUDA_FOUND )
 
-
-# -----------------------------------------------------------------------------
-# IntelMKL -> BLAS & LAPACK ( MAGMA was tested with this implementation of BLAS and LAPACK )
-# -----------------------------------------------------------------------------
-# For IntelMKL do not exist the configuration file
-SET(INCLUDE_DIRS ${INCLUDE_DIRS} "${MKL_ROOT_DIR}/include")
-IF(WIN32)
-	SET(LIBS_FILES ${LIBS_FILES}
-		"${INTERNAL_LIBRARIES}/Release/mkl_intel_lp64_dll.lib"
-		"${INTERNAL_LIBRARIES}/Release/mkl_intel_thread_dll.lib"
-		"${INTERNAL_LIBRARIES}/Release/mkl_core_dll.lib"
-		"${INTERNAL_LIBRARIES}/Release/libiomp5md.lib")
-ENDIF()
 
 
 
@@ -499,6 +512,7 @@ ENDIF()
 # -----------------------------------------------------------------------------
 # INCLUDE ALL DIRECTORIES
 # -----------------------------------------------------------------------------
+message("INCLUDE_DIRS: ${INCLUDE_DIRS}")
 target_include_directories(uncertainty PUBLIC ${INCLUDE_DIRS})
 #target_include_directories(uncertainty_lib PUBLIC ${INCLUDE_DIRS})
 #target_include_directories(uncertainty_mex PUBLIC ${INCLUDE_DIRS})
@@ -506,6 +520,7 @@ target_include_directories(uncertainty PUBLIC ${INCLUDE_DIRS})
 # -----------------------------------------------------------------------------
 # ADD ALL LIBRARIES
 # -----------------------------------------------------------------------------
+message("LIBS_FILES: ${LIBS_FILES}")
 target_link_libraries (uncertainty ${LIBS_FILES})
 #target_link_libraries (uncertainty_lib ${LIBS_FILES})
 #target_link_libraries (uncertainty_mex ${LIBS_FILES})
