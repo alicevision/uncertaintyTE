@@ -135,7 +135,7 @@ void teInverse(tp *s, int N, cov::Options &options, cov::Statistic &statistic, S
 	SDM iZadd = std::move((*iZ) * (*iZ));
 	for (int i = 1; i < 20; ++i) {
 		k = pow(lambda, i) / factorial(i - 1);
-		change = abs(k) * iZadd.absMax();
+		change = abs(k * iZadd.absMax());
 #ifdef USE_MATLAB
 		mexPrintf("\n cykle %d, coeff: %e, change: %e ", i, k, change);
 #endif
