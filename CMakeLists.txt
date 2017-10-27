@@ -202,8 +202,14 @@ IF ( CERES_FOUND )
 	message( STATUS "> CERES_INCLUDE_DIRS:   ${CERES_INCLUDE_DIRS}"   )
 	message( STATUS "> CERES_LIBRARIES: ${CERES_LIBRARIES}" )
 	SET(INCLUDE_DIRS ${INCLUDE_DIRS} ${CERES_INCLUDE_DIRS})
-	SET(LIBS_FILES ${LIBS_FILES} ${CERES_LIBRARIES})
-
+	IF(WIN32)
+		SET(LIBS_FILES ${LIBS_FILES} 
+			optimized ${CERES_LIBRARIES}
+			debug "${INTERNAL_LIBRARIES}/Debug/ceres-debug.lib")
+	ELSE(WIN32)
+		SET(LIBS_FILES ${LIBS_FILES} ${CERES_LIBRARIES})
+	ENDIF(WIN32)
+	
 ELSE( CERES_FOUND )
 	IF(WIN32)
 		MESSAGE( STATUS "Ceres will be included manualy...")
@@ -524,6 +530,15 @@ message("LIBS_FILES: ${LIBS_FILES}")
 target_link_libraries (uncertainty ${LIBS_FILES})
 #target_link_libraries (uncertainty_lib ${LIBS_FILES})
 #target_link_libraries (uncertainty_mex ${LIBS_FILES})
+
+
+# SEARCHED LIBS DIRS
+IF (WIN32)
+	# required for debug - TODO...
+	link_directories("c:/Program Files (x86)/IntelSWTools/compilers_and_libraries_2017.4.210/windows/compiler/lib/intel64_win")
+	
+ENDIF(WIN32)
+
 
 # -----------------------------------------------------------------------------
 # Copy the examples and dll files if not exist
