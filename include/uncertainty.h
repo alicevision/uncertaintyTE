@@ -33,7 +33,7 @@ namespace cov{
 	};
 
 	struct Statistic {
-		double timeCreateJ, timeFixJ, timeNormJ, timeMultiplyJJ, timeSplitJJ, timeInvV, timeComposeZ, timeInvZ, timeTE, timeAll;
+		double timeCreateJ, timeFixJ, timeNormJ, timeMultiplyJJ, timeSplitJJ, timeInvV, timeComposeZ, timeInvZ, timeTE, timePtsUnc, timeAll;
 		double lambda;
 		int *fixedPts;
 		std::vector<double> cycle_change;

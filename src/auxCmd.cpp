@@ -85,6 +85,7 @@ void saveResults(std::string& process_file_name, const std::string& current_dir,
 		outfile << "# Compose Z time: " << statistic.timeComposeZ << "s\n";
 		outfile << "# Inverse Z time: " << statistic.timeInvZ << "s\n";
 		outfile << "# Taylor expansion time: " << statistic.timeTE << "s\n";
+		outfile << "# Point uncertainty time: " << statistic.timePtsUnc << "s\n";
 		outfile << "# TE number of iterations: " << statistic.cycle_change.size() << "s\n";
 		outfile << "# TE cycle change: ";
 		for (int i = 0; i < statistic.cycle_change.size(); ++i)
