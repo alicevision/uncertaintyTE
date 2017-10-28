@@ -95,6 +95,7 @@ void ScaledDenseMatrix::print() {
 	magma_dprint(_nr, _nc, _sA, _nr);
 }
 
+#ifdef USE_MATLAB
 void ScaledDenseMatrix::printBlock2Matlab(char* name, int row_from, int col_from, int row_to, int col_to) {
 	std::cout << "\n\n" << name << " = [";
 	for (int i = row_from; i < row_to; i++) {
@@ -126,6 +127,7 @@ void ScaledDenseMatrix::printBlock2Matlab3(char* name, int row_from, int col_fro
 	file << "];";
 	file.close();
 }
+#endif
 
 /*
 Scale the matrix by diagonal matrix represented by A = cLR * sLR * sA
@@ -222,7 +224,7 @@ void ScaledDenseMatrix::inv() {
 
 	// LU decomposition
 	magma_int_t     *ipiv, iunused[1], info;
-	TESTING_CHECK(magma_imalloc_cpu(&ipiv, min(_nr, _nc)));
+	TESTING_CHECK(magma_imalloc_cpu(&ipiv, MINIMUM(_nr, _nc)));
 	lapackf77_dgetrf(&(_nr), &(_nc), _sA, &(_nr), ipiv, &info);
 	if (info != 0)
 		std::cerr << "Lapack LU decomposition error.";

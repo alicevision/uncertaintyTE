@@ -3,11 +3,11 @@
 using namespace Eigen;
 
 // Magma sparse matrix multiplied by scalar
-magma_d_matrix operator*(double lhs, magma_d_matrix rhs) {
+/*magma_d_matrix operator*(double lhs, magma_d_matrix rhs) {
 	for (int i = 0; i < rhs.nnz; i++)
 		rhs.val[i] *= lhs;
 	return rhs;
-}
+}*/
 
 
 CRS::CRS() {};
@@ -135,8 +135,8 @@ double ScaledSparseMatrix::val(int i, int j) const {
 // Print submatrix up to then rows / cols 
 void ScaledSparseMatrix::print() const {
 	std::cout << "\n X = [\n";
-	for (int i = 0; i < min(10, nrows()); ++i) {
-		for (int j = 0; j < min(10, ncols()); ++j) {
+	for (int i = 0; i < MINIMUM(10, nrows()); ++i) {
+		for (int j = 0; j < MINIMUM(10, ncols()); ++j) {
 			std::cout << val(i, j) << " ";
 		}
 		std::cout << "\n";
@@ -154,6 +154,7 @@ void ScaledSparseMatrix::printAll() const {
 	std::cout << "]";
 }
 
+#ifdef USE_MATLAB
 void ScaledSparseMatrix::printBlock2Matlab(char* name, int row_from, int col_from, int row_to, int col_to) {
 	std::cout << "\n\n" << name << " = zeros(" << (row_to - row_from) << ", " << (col_to - col_from) << ");\n";
 	for (int i = row_from; i < row_to; i++) {
@@ -188,6 +189,7 @@ void ScaledSparseMatrix::printBlock2Matlab3(char* name, int row_from, int col_fr
 	}
 	file.close();
 }
+#endif
 
 void ScaledSparseMatrix::inv3x3blockSymmDiag(ScaledSparseMatrix *ssm) {
 	// define output arrays
@@ -442,6 +444,7 @@ void ScaledSparseMatrix::sparseMultEigen(ScaledSparseMatrix& B) {
 	set_sA(std::make_shared<CRS>(nrows(), B.ncols(), eC.outerIndexPtr(), eC.innerIndexPtr(), eC.valuePtr()));
 }
 
+/*
 void ScaledSparseMatrix::sparseMultMagma(ScaledSparseMatrix& B) {
 	// init magma queue
 	magma_queue_t queue;
@@ -476,6 +479,7 @@ void ScaledSparseMatrix::sparseMultMagma(ScaledSparseMatrix& B) {
 	magma_queue_destroy(queue);
 	magma_finalize();
 }
+*/
 
 ScaledSparseMatrix& ScaledSparseMatrix::operator=(ScaledSparseMatrix& B) {
 	_cA = B.c();

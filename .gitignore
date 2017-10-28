@@ -41,3 +41,4 @@ _ReSharper*/
 packages/
 
 libs/magma-2\.2\.0/sparse/control/
+/src/compute.cpp.orig

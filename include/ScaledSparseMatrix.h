@@ -3,7 +3,7 @@
 
 
 // Magma sparse matrix multiplied by scalar
-magma_d_matrix operator*(double lhs, magma_d_matrix rhs);
+// magma_d_matrix operator*(double lhs, magma_d_matrix rhs);
 
 struct CRS {
 	int nrows = 0;
@@ -97,7 +97,7 @@ public:
 
 	void sparseMultEigen(ScaledSparseMatrix& B);
 
-	void sparseMultMagma(ScaledSparseMatrix& B);
+	//void sparseMultMagma(ScaledSparseMatrix& B);
 
 	ScaledSparseMatrix& operator=(ScaledSparseMatrix& B);
 
