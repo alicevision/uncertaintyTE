@@ -3,15 +3,19 @@ CMAKE_MINIMUM_REQUIRED (VERSION 3.5)
 # About the project
 PROJECT (Uncertatinty)
 SET (VERSION_MAJOR 1)
-SET (VERSION_MINOR 1)
+SET (VERSION_MINOR 2)
 SET (VERSION_PATCH 0)
 SET (VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
-SET(CMAKE_CONFIGURATION_TYPES "Debug;Release")
-MESSAGE(STATUS "CMAKE_CONFIGURATION_TYPES: ${CMAKE_CONFIGURATION_TYPES}")
 SET(CMAKE_BUILD_TYPE "Release")
-MESSAGE(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+SET(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 
-# guard against in-source builds
+MESSAGE(STATUS "---------------------------------------------------------")
+MESSAGE(STATUS "TE-inverse uncertainty framework v.${VERSION}")
+MESSAGE(STATUS "CMAKE_CONFIGURATION_TYPES: ${CMAKE_CONFIGURATION_TYPES}")
+MESSAGE(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+MESSAGE(STATUS "---------------------------------------------------------")
+
+# Guard against in-source builds
 if (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
   message(FATAL_ERROR "In-source builds not allowed.")
 endif()
