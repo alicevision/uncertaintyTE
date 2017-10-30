@@ -1,5 +1,5 @@
 CMAKE_MINIMUM_REQUIRED (VERSION 3.5)
-set(CMAKE_VERBOSE_MAKEFILE ON)
+SET(CMAKE_VERBOSE_MAKEFILE ON)
 
 # About the project
 PROJECT (Uncertatinty)
@@ -17,115 +17,115 @@ MESSAGE(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 MESSAGE(STATUS "---------------------------------------------------------")
 
 # Guard against in-source builds
-if (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
-  message(FATAL_ERROR "In-source builds not allowed.")
-endif()
+IF (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+  MESSAGE(FATAL_ERROR "In-source builds not allowed.")
+ENDIF()
 
+# Add path to find_package modules
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake")
 
 # -----------------------------------------------------------------------------
-# Linux compilation require c++11 flag
-IF( NOT WIN32 )
+# COMPILER FLAGS
+# -----------------------------------------------------------------------------
+IF( UNIX )
 	SET( GCC_COVERAGE_COMPILE_FLAGS "-lpthread")
 	SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++11 ${GCC_COVERAGE_LINK_FLAGS}" )
 	SET( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${GCC_COVERAGE_LINK_FLAGS}" )
 	SET( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "~/documents/libs/ceres-solver-install/lib/cmake/Ceres")
 ENDIF()
 
-# -----------------------------------------------------------------------------
-# Set sources and create executable target
-file(GLOB HEADERS "${PROJECT_SOURCE_DIR}/include/*.h")
-file(GLOB SOURCES "${PROJECT_SOURCE_DIR}/src/*.cpp")
-file(GLOB MODUL_DEFINITION_FILES "${PROJECT_SOURCE_DIR}/src/*.def")
-
-message("HEADERS: ${HEADERS}")
 
 
-# Executable - binary file with txt input
-add_executable(uncertainty ${HEADERS} ${SOURCES})
-
-# Create also the static library
-#ADD_LIBRARY(uncertainty_lib STATIC ${HEADERS} ${SOURCES})
-
-# Compile a MEX lib
-#add_library(uncertainty_mex SHARED ${HEADERS} ${SOURCES} ${MODUL_DEFINITION_FILES})
-#add_definitions(-DMATLAB_MEX_FILE)
-#SET_TARGET_PROPERTIES(uncertainty_mex PROPERTIES LINK_FLAGS "/export:mexFunction /dll")
-#SET_TARGET_PROPERTIES(uncertainty_mex PROPERTIES SUFFIX ".mexw64")
-
-# Include headers for both (executable and library)
-SET(INCLUDE_DIRS ${INCLUDE_DIRS} "${PROJECT_SOURCE_DIR}/include")
 
 # -----------------------------------------------------------------------------
-# Internal prebuilded libraries path
-IF(WIN32)	# Windows
-	SET(INTERNAL_LIBRARIES "${PROJECT_SOURCE_DIR}/libs/compiled_libraries/windows")
-ELSE()		# Linux
-	SET(INTERNAL_LIBRARIES "${PROJECT_SOURCE_DIR}/libs/compiled_libraries/linux")
-ENDIF()
-
-# Third party paths
-SET(CERES_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/ceres-solver")
-SET(CUDA8_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/cuda-8.0")
-SET(EIGEN3_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/eigen-3.3.4")
-SET(GFLAGS_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/gflags")
-SET(MKL_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/IntelMKL")
-IF(WIN32)
-  SET(MAGMA_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/magma-2.2.0")
-ENDIF()
-SET(SUITESPARSE_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/suitesparse-metis-for-windows")
+# -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
 
+
+
+# -----------------------------------------------------------------------------
+# REQUIRED AND OPTIONAL LIBRARIES
+# -----------------------------------------------------------------------------
+MESSAGE(STATUS "REQUIRED LIBRARIES")
+MESSAGE(STATUS " Gflags")
+MESSAGE(STATUS " Eigen")
+MESSAGE(STATUS " Blas and Lapack")
+MESSAGE(STATUS " SuiteSparse")
+MESSAGE(STATUS " Ceres")
+MESSAGE(STATUS " Magma dense")
+MESSAGE(STATUS "")
+MESSAGE(STATUS "OPTIONAL LIBRARIES")
+MESSAGE(STATUS " Matlab mex")
+#MESSAGE(STATUS " Colmap")
+MESSAGE(STATUS " OpenMVG (AliceVision)")
+MESSAGE(STATUS "---------------------------------------------------------")
+
+# -----------------------------------------------------------------------------
 # SYSTEM LIBRARY - FOR LINUX
-IF( NOT WIN32 )
-	find_package (Threads)
-	target_link_libraries (uncertainty ${CMAKE_THREAD_LIBS_INIT})
-	find_package(OpenMP)
-	if (OPENMP_FOUND)
-		set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-		set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-	endif()
-ENDIF()
-
 # -----------------------------------------------------------------------------
-# -----------------------------------------------------------------------------
-# LINUX - INCLUDE ALL LIBRARIES IN DIRECTORY
-# -----------------------------------------------------------------------------
-# -----------------------------------------------------------------------------
-
-# TODO: REPLACE THIS WITH APROPRIATE LINKING OF LIBRARIES
-#IF(NOT WIN32)
-#	FILE(GLOB LINUX_LIB_SEARCH "${INTERNAL_LIBRARIES}/*")
-#	SET(LIBS_FILES ${LIBS_FILES} ${LINUX_LIB_SEARCH} "-lpthread -lm")
-#ENDIF()
-
-
-# -----------------------------------------------------------------------------
-# EIGEN
-# -----------------------------------------------------------------------------
-find_package (Eigen3 NO_MODULE)
-
-IF (EIGEN3_FOUND)
-	message( STATUS "Found Eigen${EIGEN3_VERSION_STRING}" )
-	message( STATUS "> EIGEN3_INCLUDE_DIRS:   ${EIGEN3_INCLUDE_DIRS}"   )
-	SET(INCLUDE_DIRS ${INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS})
-
-	#SET(LIBS_FILES ${LIBS_FILES} "Eigen3::Eigen")
+IF(UNIX)
+	FIND_PACKAGE (Threads)
+	SET(LIBS_FILES ${LIBS_FILES} ${CMAKE_THREAD_LIBS_INIT})
 	
-ELSE(EIGEN3_FOUND)
-	message( STATUS "Eigen wasn't found.../n" )
-	IF (UNIX)
-		IF(NOT EXISTS "/usr/local/include/eigen3")
-			MESSAGE( WARNING "First, you should install Eigen! You can use Cmake at directory 'libs/third_party/eigen3.3.4'. /n
-							 It will add necessary paths and disable functions which are not compatible with system libraries.")
-		ELSE()
-			message( STATUS "Eigen was included manualy, used path: /usr/local/include/eigen3" )
-			SET(INCLUDE_DIRS ${INCLUDE_DIRS} "/usr/local/include/eigen3")			# internal headers do not work, it must be instaled
-		ENDIF()
-	ELSEIF(WIN32)
-		message( STATUS "Eigen will be included manualy, used path: ${EIGEN3_ROOT_DIR}" )
-		SET(INCLUDE_DIRS ${INCLUDE_DIRS} "${EIGEN3_ROOT_DIR}")	# use the internal headers
-	ENDIF()
-ENDIF(EIGEN3_FOUND)
+	FIND_PACKAGE(OpenMP)
+	IF (OPENMP_FOUND)
+		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+	ENDIF(OPENMP_FOUND)
+ENDIF(UNIX)
+
+# -----------------------------------------------------------------------------
+# PACKAGES FOR LINUX
+# -----------------------------------------------------------------------------
+IF(UNIX)
+	MESSAGE(STATUS "You can download the prebuild most of the repositories by calling: ")
+	MESSAGE(STATUS " sudo apt-get install \
+    cmake \
+    build-essential \
+    libboost-all-dev \
+    libeigen3-dev \
+    libsuitesparse-dev \
+    libfreeimage-dev \
+    libgoogle-glog-dev \
+    libgflags-dev \
+    libglew-dev \
+    qtbase5-dev \
+    libqt5opengl5-dev \
+	libatlas-base-dev \
+    libsuitesparse-dev")
+	MESSAGE(STATUS " git clone https://ceres-solver.googlesource.com/ceres-solver")
+    MESSAGE(STATUS " cd ceres-solver")
+	MESSAGE(STATUS " mkdir build")
+	MESSAGE(STATUS " cd build")
+	MESSAGE(STATUS " cmake ..")
+	MESSAGE(STATUS " sudo make install")
+	MESSAGE(STATUS "---------------------------------------------------------")
+ENDIF(UNIX)
+
+
+# -----------------------------------------------------------------------------
+# PREBUILDED LIBRARIES FOR WINDOWS - SETUP PATHS
+# -----------------------------------------------------------------------------
+IF (NOT EXISTS "${PROJECT_SOURCE_DIR}/libs")
+	MESSAGE(STATUS "You can download the prebuild libraries for win64 at: 'cmp.felk.cvut.cz/~policmic/files/uncer_libs_win64.zip'")
+	MESSAGE(STATUS "Please unpack it into the root project directory.")
+	MESSAGE(STATUS "---------------------------------------------------------")
+ELSE (NOT EXIST "${PROJECT_SOURCE_DIR}/libs")
+	SET(USE_PREBUILD_WIN64_LIBS "ON")
+	MESSAGE(STATUS "There were foud precompiled libraries. They will be used in case of not detected the instaled ones.")
+	MESSAGE(STATUS "---------------------------------------------------------")
+	
+	# Third party paths
+	SET(INTERNAL_LIBRARIES "${PROJECT_SOURCE_DIR}/libs/compiled_libraries/windows")
+	SET(CERES_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/ceres-solver")
+	SET(CUDA8_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/cuda-8.0")
+	SET(EIGEN3_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/eigen-3.3.4")
+	SET(GFLAGS_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/gflags")
+	SET(MKL_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/IntelMKL")
+	SET(MAGMA_ROOT_DIR_PRE "${PROJECT_SOURCE_DIR}/libs/third_party/magma-2.2.0")
+	SET(SUITESPARSE_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/suitesparse-metis-for-windows")
+ENDIF(NOT EXISTS "${PROJECT_SOURCE_DIR}/libs")
+
 
 
 # -----------------------------------------------------------------------------
@@ -134,239 +134,421 @@ ENDIF(EIGEN3_FOUND)
 find_package ( gflags )
 
 IF(NOT GFLAGS_VERSION_STRING STREQUAL "")
-	message( STATUS "Found Gflags ${GFLAGS_VERSION_STRING}" )
-	message( STATUS "> GFLAGS_INCLUDE_DIR:   ${GFLAGS_INCLUDE_DIR}" )
-	message( STATUS "> GFLAGS_LIBRARIES:   ${GFLAGS_LIBRARIES}" )
+	MESSAGE( STATUS "Found Gflags ${GFLAGS_VERSION_STRING}" )
+	MESSAGE( STATUS "> GFLAGS_INCLUDE_DIR:   ${GFLAGS_INCLUDE_DIR}" )
+	MESSAGE( STATUS "> GFLAGS_LIBRARIES:   ${GFLAGS_LIBRARIES}" )
 	SET(INCLUDE_DIRS ${INCLUDE_DIRS} ${GFLAGS_INCLUDE_DIR})
 	SET(LIBS_FILES ${LIBS_FILES} ${GFLAGS_LIBRARIES}) 
 	
 ELSE()
-	SET(GFLAGS_DIR CACHE PATH FORCE)
-	IF(NOT GFLAGS_DIR STREQUAL "")
-		MESSAGE(STATUS "GFLAGS_DIR: ${GFLAGS_DIR}")
-		IF(EXISTS "${GFLAGS_DIR}/include/gflags/gflags.h" AND EXISTS "${GFLAGS_DIR}/include/gflags/gflags.h")
-			SET(INCLUDE_DIRS ${INCLUDE_DIRS} "${GFLAGS_DIR}/include")			# "C:/Program Files/gflags/include"
+	IF(UNIX)
+		MESSAGE(WARNING "Gflags was not found...")
+	ELSE(UNIX)
+		# Precompiled win64
+		IF(${USE_PREBUILD_WIN64_LIBS})
+			SET(INCLUDE_DIRS ${INCLUDE_DIRS} "${GFLAGS_ROOT_DIR}/src")
 			SET(LIBS_FILES ${LIBS_FILES} 
-				optimized "${INTERNAL_LIBRARIES}/Release/gflags_static.lib"			# install generate only Release or Debug, not both libs
-				debug "${INTERNAL_LIBRARIES}/Debug/gflags_static.lib" )				# so, it is generated in advance
-		ELSE()
-			MESSAGE(WARNING "Setup the directory where is installed GFLAGS. It is usually \"C:/Program Files/gflags\" and contains \"./include/gflags/gflags.h\" etc.")
-		ENDIF()
-	ELSE()
-		MESSAGE(WARNING "Setup the directory where is installed GFLAGS. It is usually \"C:/Program Files/gflags\" and contains \"./include/gflags/gflags.h\" etc.")
-	ENDIF()
+				optimized "${INTERNAL_LIBRARIES}/Release/gflags_static.lib"			
+				debug "${INTERNAL_LIBRARIES}/Debug/gflags_static.lib" )	
+		ELSE(${USE_PREBUILD_WIN64_LIBS})
+		
+			# Set up gflags install directory
+			SET(GFLAGS_DIR CACHE PATH FORCE)
+			IF(NOT GFLAGS_DIR STREQUAL "")
+				MESSAGE(STATUS "GFLAGS_DIR: ${GFLAGS_DIR}")
+				IF(EXISTS "${GFLAGS_DIR}/include/gflags/gflags.h" AND EXISTS "${GFLAGS_DIR}/include/gflags/gflags.h")
+					SET(INCLUDE_DIRS ${INCLUDE_DIRS} "${GFLAGS_DIR}/include")			# "C:/Program Files/gflags/include"
+					SET(LIBS_FILES ${LIBS_FILES} 
+						optimized "${INTERNAL_LIBRARIES}/Release/gflags_static.lib"			# install generate only Release or Debug, not both libs
+						debug "${INTERNAL_LIBRARIES}/Debug/gflags_static.lib" )				# so, it is generated in advance
+				ELSE()
+					MESSAGE(WARNING "Setup the directory where is installed gflags to variable GFLAGS_DIR. It is usually \"C:/Program Files/gflags\" and contains \"./include/gflags/gflags.h\" etc.")
+				ENDIF()
+			ELSE()
+				MESSAGE(WARNING "Setup the directory where is installed gflags to variable GFLAGS_DIR. It is usually \"C:/Program Files/gflags\" and contains \"./include/gflags/gflags.h\" etc.")
+			ENDIF()
+		ENDIF(${USE_PREBUILD_WIN64_LIBS})
+	ENDIF(UNIX)
 ENDIF()
+
+
+
+# -----------------------------------------------------------------------------
+# EIGEN
+# -----------------------------------------------------------------------------
+FIND_PACKAGE (Eigen3 NO_MODULE)
+
+IF (EIGEN3_FOUND)
+	MESSAGE( STATUS "Found Eigen${EIGEN3_VERSION_STRING}" )
+	MESSAGE( STATUS "> EIGEN3_INCLUDE_DIRS:   ${EIGEN3_INCLUDE_DIRS}"   )
+	SET(INCLUDE_DIRS ${INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS})
+
+ELSE(EIGEN3_FOUND)
+	IF(UNIX)
+		IF(NOT EXISTS "/usr/local/include/eigen3")
+			SET(INCLUDE_DIRS ${INCLUDE_DIRS} "/usr/local/include/eigen3")
+			MESSAGE( STATUS "Eigen was included manualy, used path: /usr/local/include/eigen3" )
+		ELSE(NOT EXISTS "/usr/local/include/eigen3")
+			MESSAGE(WARNING "Eigen was not found...")
+		ENDIF(NOT EXISTS "/usr/local/include/eigen3")	
+	ELSE(UNIX)
+		IF(${USE_PREBUILD_WIN64_LIBS})
+			SET(INCLUDE_DIRS ${INCLUDE_DIRS} "${EIGEN3_ROOT_DIR}")	# use the internal headers
+			MESSAGE( STATUS "Eigen is included manualy, used path: ${EIGEN3_ROOT_DIR}" )
+		ELSE(${USE_PREBUILD_WIN64_LIBS})
+			SET(EIGEN3_DIR CACHE PATH FORCE)
+			IF(NOT EIGEN3_DIR STREQUAL "")
+				MESSAGE(STATUS "EIGEN3_DIR: ${EIGEN3_DIR}")
+				IF(EXISTS "${EIGEN3_DIR}")
+					SET(INCLUDE_DIRS ${INCLUDE_DIRS} "${EIGEN3_DIR}")			
+				ELSE()
+					MESSAGE(WARNING "Setup the directory where is installed eigen to variable EIGEN3_DIR. It is usually 'C:/Program Files/eigen'")
+				ENDIF()
+			ELSE()
+				MESSAGE(WARNING "Setup the directory where is installed eigen to variable EIGEN3_DIR. It is usually 'C:/Program Files/eigen'")
+			ENDIF()
+		ENDIF(${USE_PREBUILD_WIN64_LIBS})	
+	ENDIF(UNIX)
+ENDIF(EIGEN3_FOUND)
+
 
 
 # -----------------------------------------------------------------------------
 # SuiteSparse 
 # -----------------------------------------------------------------------------
-# For this version of Suitesparse do not exist the configuration file
+FIND_PACKAGE(SuiteSparse QUIET NO_MODULE)
 
-SET(INCLUDE_DIRS ${INCLUDE_DIRS} 
-	"${SUITESPARSE_ROOT_DIR}/install/include/suitesparse"        
-	"${SUITESPARSE_ROOT_DIR}/install/include"
-	"${SUITESPARSE_ROOT_DIR}/SuiteSparse/CXSparse/Include" )      
-
-IF(WIN32)
-  SET(LIBS_FILES ${LIBS_FILES} 
-  	optimized "${INTERNAL_LIBRARIES}/Release/suitesparseconfig.lib"
-  	optimized "${INTERNAL_LIBRARIES}/Release/libcholmod.lib"
-  	optimized "${INTERNAL_LIBRARIES}/Release/libccolamd.lib"
-  	optimized "${INTERNAL_LIBRARIES}/Release/libcamd.lib"
-  	optimized "${INTERNAL_LIBRARIES}/Release/libcolamd.lib"
-  	optimized "${INTERNAL_LIBRARIES}/Release/libamd.lib"
-  	optimized "${INTERNAL_LIBRARIES}/Release/liblapack.lib"
-  	optimized "${INTERNAL_LIBRARIES}/Release/libblas.lib"
-  	optimized "${INTERNAL_LIBRARIES}/Release/metis.lib"
-  	optimized "${INTERNAL_LIBRARIES}/Release/libcxsparse.lib"
-  	optimized "${INTERNAL_LIBRARIES}/Release/libspqr.lib"
-  	debug "${INTERNAL_LIBRARIES}/Debug/suitesparseconfigd.lib"
-  	debug "${INTERNAL_LIBRARIES}/Debug/libcholmodd.lib"
-  	debug "${INTERNAL_LIBRARIES}/Debug/libccolamdd.lib"
-  	debug "${INTERNAL_LIBRARIES}/Debug/libcamdd.lib"
-  	debug "${INTERNAL_LIBRARIES}/Debug/libcolamdd.lib"
-  	debug "${INTERNAL_LIBRARIES}/Debug/libamdd.lib"
-  	debug "${INTERNAL_LIBRARIES}/Debug/lapack.lib"
-  	debug "${INTERNAL_LIBRARIES}/Debug/blas.lib"
-  	debug "${INTERNAL_LIBRARIES}/Debug/metisd.lib"
-  	debug "${INTERNAL_LIBRARIES}/Debug/libcxsparsed.lib"
-  	debug "${INTERNAL_LIBRARIES}/Debug/libspqrd.lib" )
-ELSE()
-  
-ENDIF()
+IF( SuiteSparse_FOUND )
+	MESSAGE( STATUS "Found SuiteSparse" )
+	MESSAGE( STATUS "> SUITESPARSE_INCLUDE_DIRS:   ${SuiteSparse_INCLUDE_DIRS}" )
+	MESSAGE( STATUS "> SUITESPARSE_LIBRARIES:   ${SuiteSparse_LIBRARIES}" )
+	SET(INCLUDE_DIRS ${INCLUDE_DIRS} ${SuiteSparse_INCLUDE_DIRS})
+	SET(LIBS_FILES ${LIBS_FILES} ${SuiteSparse_LIBRARIES}) 
+	
+ELSE (SuiteSparse_FOUND)
+	IF(UNIX)
+		MESSAGE(WARNING "SuiteSparse was not found...")
+	ELSE(UNIX)
+		IF(${USE_PREBUILD_WIN64_LIBS})
+			SET(INCLUDE_DIRS ${INCLUDE_DIRS} 
+				"${SUITESPARSE_ROOT_DIR}/install/include/suitesparse"        
+				"${SUITESPARSE_ROOT_DIR}/install/include"
+				"${SUITESPARSE_ROOT_DIR}/SuiteSparse/CXSparse/Include" )      
+			SET(LIBS_FILES ${LIBS_FILES} 
+  			optimized "${INTERNAL_LIBRARIES}/Release/suitesparseconfig.lib"
+  			optimized "${INTERNAL_LIBRARIES}/Release/libcholmod.lib"
+  			optimized "${INTERNAL_LIBRARIES}/Release/libccolamd.lib"
+  			optimized "${INTERNAL_LIBRARIES}/Release/libcamd.lib"
+  			optimized "${INTERNAL_LIBRARIES}/Release/libcolamd.lib"
+  			optimized "${INTERNAL_LIBRARIES}/Release/libamd.lib"
+  			optimized "${INTERNAL_LIBRARIES}/Release/liblapack.lib"
+  			optimized "${INTERNAL_LIBRARIES}/Release/libblas.lib"
+  			optimized "${INTERNAL_LIBRARIES}/Release/metis.lib"
+  			optimized "${INTERNAL_LIBRARIES}/Release/libcxsparse.lib"
+  			optimized "${INTERNAL_LIBRARIES}/Release/libspqr.lib"
+  			debug "${INTERNAL_LIBRARIES}/Debug/suitesparseconfigd.lib"
+  			debug "${INTERNAL_LIBRARIES}/Debug/libcholmodd.lib"
+  			debug "${INTERNAL_LIBRARIES}/Debug/libccolamdd.lib"
+  			debug "${INTERNAL_LIBRARIES}/Debug/libcamdd.lib"
+  			debug "${INTERNAL_LIBRARIES}/Debug/libcolamdd.lib"
+  			debug "${INTERNAL_LIBRARIES}/Debug/libamdd.lib"
+  			debug "${INTERNAL_LIBRARIES}/Debug/lapack.lib"
+  			debug "${INTERNAL_LIBRARIES}/Debug/blas.lib"
+  			debug "${INTERNAL_LIBRARIES}/Debug/metisd.lib"
+  			debug "${INTERNAL_LIBRARIES}/Debug/libcxsparsed.lib"
+  			debug "${INTERNAL_LIBRARIES}/Debug/libspqrd.lib" )
+		ELSE(${USE_PREBUILD_WIN64_LIBS})
+			MESSAGE( STATUS "SuiteSparse was not found... please install it first or download the precompiled libs." )
+		ENDIF(${USE_PREBUILD_WIN64_LIBS}) 
+	ENDIF(UNIX) 
+ENDIF(SuiteSparse_FOUND)
 
 
 # -----------------------------------------------------------------------------
 # CERES
 # -----------------------------------------------------------------------------
-find_package( Ceres )
+FIND_PACKAGE( Ceres )
 IF ( CERES_FOUND )
-	message( STATUS "Found CERES ${CERES_VERSION}" )
-	message( STATUS "> CERES_INCLUDE_DIRS:   ${CERES_INCLUDE_DIRS}"   )
-	message( STATUS "> CERES_LIBRARIES: ${CERES_LIBRARIES}" )
+	MESSAGE( STATUS "Found CERES ${CERES_VERSION}" )
+	MESSAGE( STATUS "> CERES_INCLUDE_DIRS:   ${CERES_INCLUDE_DIRS}"   )
+	MESSAGE( STATUS "> CERES_LIBRARIES: ${CERES_LIBRARIES}" )
 	SET(INCLUDE_DIRS ${INCLUDE_DIRS} ${CERES_INCLUDE_DIRS})
 	IF(WIN32)
-		SET(LIBS_FILES ${LIBS_FILES} 
-			optimized ${CERES_LIBRARIES}
-			debug "${INTERNAL_LIBRARIES}/Debug/ceres-debug.lib")
+		SET(LIBS_FILES ${LIBS_FILES} optimized ${CERES_LIBRARIES})
+		IF(${USE_PREBUILD_WIN64_LIBS})
+			SET(LIBS_FILES ${LIBS_FILES} debug "${INTERNAL_LIBRARIES}/Debug/ceres-debug.lib")
+			MESSAGE( STATUS "Ceres debud library was found in precompiled libraries and added to the project.")
+		
+		ELSE(${USE_PREBUILD_WIN64_LIBS})
+			SET(CERES_DEBUG_LIBRARY CACHE PATH FORCE)
+			IF(NOT CERES_DEBUG_LIBRARY STREQUAL "")
+				SET(LIBS_FILES ${LIBS_FILES} debug "${CERES_DEBUG_LIBRARY}")
+			ELSE(NOT CERES_DEBUG_LIBRARY STREQUAL "")
+				MESSAGE( STATUS "Ceres found but the debud compilation was not found... please add path to ceres-debug.lib to variable CERES_DEBUG_LIBRARY to enable debuging of the code." )
+			ENDIF(NOT CERES_DEBUG_LIBRARY STREQUAL "")
+		ENDIF(${USE_PREBUILD_WIN64_LIBS})	
 	ELSE(WIN32)
 		SET(LIBS_FILES ${LIBS_FILES} ${CERES_LIBRARIES})
 	ENDIF(WIN32)
 	
 ELSE( CERES_FOUND )
-	IF(WIN32)
-		MESSAGE( STATUS "Ceres will be included manualy...")
-		MESSAGE( STATUS "> include paths: ./config, ./include, ./internal, ./internal/ceres and ./ceres/miniglog" )
-		MESSAGE( STATUS "> Release added library: ${INTERNAL_LIBRARIES}/Release/ceres.lib" )
-		MESSAGE( STATUS "> Debug added library: ${INTERNAL_LIBRARIES}/Debug/ceres-debug.lib" )
-		SET(INCLUDE_DIRS ${INCLUDE_DIRS} 
-			"${CERES_ROOT_DIR}/config"        
-			"${CERES_ROOT_DIR}/include"
-			"${CERES_ROOT_DIR}/internal"
-			"${CERES_ROOT_DIR}/internal/ceres"
-			"${CERES_ROOT_DIR}/ceres/miniglog") 
-		SET(LIBS_FILES ${LIBS_FILES} 
-			optimized "${INTERNAL_LIBRARIES}/Release/ceres.lib"
-			debug "${INTERNAL_LIBRARIES}/Debug/ceres-debug.lib")
-	ELSEIF( UNIX )
-		MESSAGE( WARNING "First, you should install Ceres libraries. Follow this guideline: http://ceres-solver.org/installation.html")
-	ENDIF()
+	IF(UNIX)
+		MESSAGE( WARNING "Ceres was not found ... please install Ceres libraries. You can follow the guideline: http://ceres-solver.org/installation.html")
+	ELSE(UNIX)
+		IF(${USE_PREBUILD_WIN64_LIBS})
+			SET(INCLUDE_DIRS ${INCLUDE_DIRS} 
+				"${CERES_ROOT_DIR}/config"        
+				"${CERES_ROOT_DIR}/include"
+				"${CERES_ROOT_DIR}/internal"
+				"${CERES_ROOT_DIR}/internal/ceres"
+				"${CERES_ROOT_DIR}/ceres/miniglog") 
+			SET(LIBS_FILES ${LIBS_FILES} 
+				optimized "${INTERNAL_LIBRARIES}/Release/ceres.lib"
+				debug "${INTERNAL_LIBRARIES}/Debug/ceres-debug.lib")
+			MESSAGE( STATUS "Ceres was included from precompiled libraries." )
+			MESSAGE( STATUS "> Include paths: ./config, ./include, ./internal, ./internal/ceres and ./ceres/miniglog" )
+			MESSAGE( STATUS "> Release library: ${INTERNAL_LIBRARIES}/Release/ceres.lib" )
+			MESSAGE( STATUS "> Debug library: ${INTERNAL_LIBRARIES}/Debug/ceres-debug.lib" )
+			
+		ELSE(${USE_PREBUILD_WIN64_LIBS})
+			MESSAGE( WARNING "Ceres was not found ... please install Ceres libraries. You can follow the guideline: http://ceres-solver.org/installation.html")
+		ENDIF(${USE_PREBUILD_WIN64_LIBS})
+	ENDIF(UNIX)
 ENDIF( CERES_FOUND )
 
 
 
 
 # -----------------------------------------------------------------------------
-# IntelMKL -> BLAS & LAPACK ( MAGMA was tested with this implementation of BLAS and LAPACK )
+# IntelMKL -> BLAS & LAPACK
 # -----------------------------------------------------------------------------
-# For IntelMKL do not exist the configuration file
-option(MKL_SUPPORT "Include Intel MKL libraries" OFF)
-IF (MKL_SUPPORT)
-  SET(INCLUDE_DIRS ${INCLUDE_DIRS} "${MKL_ROOT_DIR}/include")
-  IF(WIN32)
-  	SET(LIBS_FILES ${LIBS_FILES}
-  		"${INTERNAL_LIBRARIES}/Release/mkl_intel_lp64_dll.lib"
-  		"${INTERNAL_LIBRARIES}/Release/mkl_intel_thread_dll.lib"
-  		"${INTERNAL_LIBRARIES}/Release/mkl_core_dll.lib"
-  		"${INTERNAL_LIBRARIES}/Release/libiomp5md.lib")
-  ENDIF()
-ENDIF()
+option(UNC_MKL_SUPPORT "Include Intel MKL libraries (include BLAS and LAPACK)" OFF)
+IF (UNC_MKL_SUPPORT)
+	find_package(MKL)
+	IF(MKL_FOUND)
+		MESSAGE( STATUS "Found Intel MKL" )
+		MESSAGE( STATUS "> MKL_INCLUDE_DIR: ${MKL_INCLUDE_DIR}"   )
+		MESSAGE( STATUS "> MKL_LIBRARIES: ${MKL_LIBRARIES}" )
+		SET(INCLUDE_DIRS ${INCLUDE_DIRS} ${MKL_INCLUDE_DIR})
+		SET(LIBS_FILES ${LIBS_FILES} ${MKL_LIBRARIES})
+		
+	ELSE(MKL_FOUND)
+		IF(UNIX)
+			MESSAGE( WARNING "Intel MKL was not found ... please install Intel MKL libraries or shutdown UNC_MKL_SUPPORT and add another version of BLAS and LAPACK.")
+		ELSE(UNIX)
+			IF(${USE_PREBUILD_WIN64_LIBS})
+				SET(INCLUDE_DIRS ${INCLUDE_DIRS} "${MKL_ROOT_DIR}/include")
+				SET(LIBS_FILES ${LIBS_FILES}
+  					"${INTERNAL_LIBRARIES}/Release/mkl_intel_lp64_dll.lib"
+  					"${INTERNAL_LIBRARIES}/Release/mkl_intel_thread_dll.lib"
+  					"${INTERNAL_LIBRARIES}/Release/mkl_core_dll.lib"
+  					"${INTERNAL_LIBRARIES}/Release/libiomp5md.lib")
+				MESSAGE(STATUS "Intel MKL was not found ... there were included precompiled libraries." )
+			
+			ELSE(${USE_PREBUILD_WIN64_LIBS})
+				SET(MKL_ALL_LIBRARIES CACHE PATH FORCE)
+				SET(MKL_INCLUDE CACHE PATH FORCE)
+				
+				IF(NOT MKL_ALL_LIBRARIES STREQUAL "")
+					MESSAGE(STATUS "MKL_ALL_LIBRARIES: ${MKL_ALL_LIBRARIES}")
+					SET(LIBS_FILES ${LIBS_FILES} ${MKL_LIBRARIES})
+				ELSE(NOT MKL_ALL_LIBRARIES STREQUAL "")
+					MESSAGE( WARNING "Intel MKL was not found ... please add path to required libraries (use Intel MKL link advisor)")
+					MESSAGE( WARNING "  e.g. <PATH_TO_LIBS>/mkl_intel_lp64_dll.lib,<PATH_TO_LIBS/mkl_intel_thread_dll.lib...")
+				ENDIF(NOT MKL_ALL_LIBRARIES STREQUAL "")	
+				
+				IF(NOT MKL_INCLUDE STREQUAL "")
+					MESSAGE(STATUS "MKL_INCLUDE: ${MKL_INCLUDE}")
+					SET(INCLUDE_DIRS ${INCLUDE_DIRS} "${MKL_INCLUDE)")
+				ELSE(NOT MKL_INCLUDE STREQUAL "")
+					MESSAGE( WARNING "Intel MKL was not found ... please add path to include directory (e.g. <MKL_ROOT_DIR>/include)")
+				ENDIF(NOT MKL_INCLUDE STREQUAL "")	
+			ENDIF(${USE_PREBUILD_WIN64_LIBS})
+		ENDIF(UNIX)
+	ENDIF(MKL_FOUND)
+ENDIF(UNC_MKL_SUPPORT)
 
 
 # -----------------------------------------------------------------------------
 # LAPACK AND BLAS LIBS
 # -----------------------------------------------------------------------------
-IF (NOT MKL_SUPPORT)
-  find_package( LAPACK )
-  SET(LIBS_FILES ${LIBS_FILES} ${LAPACK_LIBRARIES})
+IF (NOT UNC_MKL_SUPPORT AND UNIX)
+	find_package( LAPACK )
+	IF(LAPACK_FOUND)
+		SET(LIBS_FILES ${LIBS_FILES} ${LAPACK_LIBRARIES})
+		MESSAGE(STATUS "Found lapack and blas.")
+	ELSE(LAPACK_FOUND)
+		MESSAGE(STATUS "Lapack not found ... please make sure that you have instaled at least one LAPACK and BLAS library.")
+		# TODO check suitesparse etc.
+	ENDIF(LAPACK_FOUND)
 ENDIF()
 
 
 # -----------------------------------------------------------------------------
 # MATLAB interface - MEX libs ( C:/Program Files/MATLAB/R2017a/extern/include; C:/Program Files/MATLAB/R2017a/extern/lib/win64/microsoft )
 # -----------------------------------------------------------------------------
-# MANUALLY REWRITTE THE CERES -> CERES DEBUG FOR DEBUG MODE  ..\libs\compiled_libraries\windows\Debug\ceres-debug.lib
 
-option(MATLAB_SUPPORT "Include MATLAB libraries (enable input from MATLAB)" OFF)
-IF (MATLAB_SUPPORT)
-	add_definitions(-DUSE_MATLAB)
+OPTION(UNC_MATLAB_SUPPORT "Include MATLAB libraries (enable input from MATLAB)" OFF)
+IF (UNC_MATLAB_SUPPORT)
 
-  SET(MEX_INCLUDE_DIR CACHE PATH FORCE)
-  IF(NOT MEX_INCLUDE_DIR STREQUAL "")
-  	MESSAGE(STATUS "MEX_INCLUDE_DIR: ${MEX_INCLUDE_DIR}")
-  	SET(INCLUDE_DIRS ${INCLUDE_DIRS} ${MEX_INCLUDE_DIR})     
-  ELSE()
-  	MESSAGE(WARNING "Setup the include directory for MATLAB MEX interface (contatins mex.h).")
-  ENDIF()
-  SET(MEX_LIBRARIES_DIR CACHE PATH FORCE)
-  IF(NOT MEX_LIBRARIES_DIR STREQUAL "")
-  	MESSAGE(STATUS "MEX_LIBRARIES_DIR: ${MEX_LIBRARIES_DIR}")
-  	IF(WIN32)
-  		SET(LIBS_FILES ${LIBS_FILES} 
-  		"${MEX_LIBRARIES_DIR}/libmx.lib"
-  		"${MEX_LIBRARIES_DIR}/libmat.lib"
-  		"${MEX_LIBRARIES_DIR}/libeng.lib"
-  		"${MEX_LIBRARIES_DIR}/libmex.lib")     
-  	ELSE()
-  		SET(LIBS_FILES ${LIBS_FILES} 
-  		"${MEX_LIBRARIES_DIR}/libmx.so"
-  		"${MEX_LIBRARIES_DIR}/libmat.so"
-  		"${MEX_LIBRARIES_DIR}/libeng.so"
-  		"${MEX_LIBRARIES_DIR}/libmex.so")
-  	ENDIF()
-  ELSE()
-  	MESSAGE(WARNING "Setup the library directory for MATLAB MEX interface (contatins libmx.lib, libmat.lib, libeng.lib, libmex.lib).")
-  ENDIF() 
-  
-ENDIF()
+	FIND_PACKAGE(Matlab)
+	IF(Matlab_FOUND)
+		ADD_DEFINITIONS(-DUSE_MATLAB)
+		MESSAGE(STATUS "Found Matlab libraries")
+		MESSAGE(STATUS "Matlab_INCLUDE_DIRS: ${Matlab_INCLUDE_DIRS}")
+		MESSAGE(STATUS "Matlab_LIBRARIES: ${Matlab_LIBRARIES}")
+		SET(INCLUDE_DIRS ${INCLUDE_DIRS} ${Matlab_INCLUDE_DIRS})
+		GET_FILENAME_COMPONENT(MATLAB_LIBS_ROOT ${Matlab_LIBRARIES} DIRECTORY)  # ${Matlab_LIBRARIES} doesn't contain all required libs
+		IF(UNIX)
+			SET(LIBS_FILES ${LIBS_FILES} 
+				"${MATLAB_LIBS_ROOT}/libmx.so"
+				"${MATLAB_LIBS_ROOT}/libmat.so"
+				"${MATLAB_LIBS_ROOT}/libeng.so"
+				"${MATLAB_LIBS_ROOT}/libmex.so")
+		ELSE(UNIX)
+			SET(LIBS_FILES ${LIBS_FILES} 
+				"${MATLAB_LIBS_ROOT}/libmx.lib"
+				"${MATLAB_LIBS_ROOT}/libmat.lib"
+				"${MATLAB_LIBS_ROOT}/libeng.lib"
+				"${MATLAB_LIBS_ROOT}/libmex.lib")
+		ENDIF(UNIX)
+	ELSE(Matlab_FOUND)
+		SET(MEX_INCLUDE_DIR CACHE PATH FORCE)
+		IF(NOT MEX_INCLUDE_DIR STREQUAL "")
+  			MESSAGE(STATUS "MEX_INCLUDE_DIR: ${MEX_INCLUDE_DIR}")
+  			SET(INCLUDE_DIRS ${INCLUDE_DIRS} ${MEX_INCLUDE_DIR})     
+		ELSE(NOT MEX_INCLUDE_DIR STREQUAL "")
+  			MESSAGE(WARNING "Setup the include directory for MATLAB MEX interface (contatins mex.h).")
+		ENDIF(NOT MEX_INCLUDE_DIR STREQUAL "")
+
+		SET(MEX_LIBRARIES_DIR CACHE PATH FORCE)
+		IF(NOT MEX_LIBRARIES_DIR STREQUAL "")
+  			MESSAGE(STATUS "MEX_LIBRARIES_DIR: ${MEX_LIBRARIES_DIR}")
+  			IF(WIN32)
+  				SET(LIBS_FILES ${LIBS_FILES} 
+  				"${MEX_LIBRARIES_DIR}/libmx.lib"
+  				"${MEX_LIBRARIES_DIR}/libmat.lib"
+  				"${MEX_LIBRARIES_DIR}/libeng.lib"
+  				"${MEX_LIBRARIES_DIR}/libmex.lib")     
+  			ELSE(WIN32)
+  				SET(LIBS_FILES ${LIBS_FILES} 
+  				"${MEX_LIBRARIES_DIR}/libmx.so"
+  				"${MEX_LIBRARIES_DIR}/libmat.so"
+  				"${MEX_LIBRARIES_DIR}/libeng.so"
+  				"${MEX_LIBRARIES_DIR}/libmex.so")
+  			ENDIF(WIN32)
+		ELSE(NOT MEX_LIBRARIES_DIR STREQUAL "")
+			MESSAGE(WARNING "Please setup the library directory for MATLAB MEX interface (contatins libmx.lib, libmat.lib, libeng.lib, libmex.lib).")
+		ENDIF(NOT MEX_LIBRARIES_DIR STREQUAL "") 
+	ENDIF(Matlab_FOUND)	
+ENDIF(UNC_MATLAB_SUPPORT)
 
 
 # -----------------------------------------------------------------------------
 # MAGMA
 # -----------------------------------------------------------------------------
-# For MAGMA do not exist the configuration file
-IF(WIN32)
-  SET(INCLUDE_DIRS ${INCLUDE_DIRS}
-  	"${MAGMA_ROOT_DIR}/include"
-  	"${MAGMA_ROOT_DIR}/control"
-  	"${MAGMA_ROOT_DIR}/sparse/include"
-  	"${MAGMA_ROOT_DIR}/testing")
+FIND_PACKAGE(MAGMA)
+
+IF(MAGMA_FOUND)
+	MESSAGE(STATUS "Found Magma")
+	MESSAGE(STATUS "MAGMA_INCLUDE_DIRS: ${MAGMA_INCLUDE_DIRS}")
+	MESSAGE(STATUS "MAGMA_LIBRARIES: ${MAGMA_LIBRARIES}")
+	SET(INCLUDE_DIRS ${MAGMA_INCLUDE_DIRS} ${MAGMA_INCLUDE_DIRS})
+	SET(LIBS_FILES ${LIBS_FILES} ${MAGMA_LIBRARIES})
+	
+ELSE(MAGMA_FOUND)
+	IF(UNIX)
+		SET(MAGMA_ROOT_DIR CACHE PATH FORCE)
+		IF(NOT MAGMA_ROOT_DIR STREQUAL "")
+			MESSAGE(STATUS "MAGMA_ROOT_DIR: ${MAGMA_ROOT_DIR}")
+			SET(INCLUDE_DIRS ${INCLUDE_DIRS}
+    		"${MAGMA_ROOT_DIR}/include"
+    		"${MAGMA_ROOT_DIR}/control"
+    		"${MAGMA_ROOT_DIR}/sparse/include"
+			"${MAGMA_ROOT_DIR}/sparse/control"
+    		"${MAGMA_ROOT_DIR}/testing")   
+		ELSE(NOT MAGMA_ROOT_DIR STREQUAL "")
+			MESSAGE(WARNING "Magma not found ... please setup the MAGMA_ROOT_DIR")
+		ENDIF(NOT MAGMA_ROOT_DIR STREQUAL "")  
  
-	SET(LIBS_FILES ${LIBS_FILES}
-  	optimized "${INTERNAL_LIBRARIES}/Release/tester.lib"
-  	optimized "${INTERNAL_LIBRARIES}/Release/lapacktest.lib"
-  	optimized "${INTERNAL_LIBRARIES}/Release/magma.lib"
-  	optimized "${INTERNAL_LIBRARIES}/Release/magma_sparse.lib"
-  	debug "${INTERNAL_LIBRARIES}/Debug/tester.lib"
-  	debug "${INTERNAL_LIBRARIES}/Debug/lapacktest.lib"
-  	debug "${INTERNAL_LIBRARIES}/Debug/magma.lib"
-  	debug "${INTERNAL_LIBRARIES}/Debug/magma_sparse.lib")
-   
-ELSE() 
-  SET(MAGMA_ROOT_DIR CACHE PATH FORCE)
-	IF(NOT MAGMA_ROOT_DIR STREQUAL "")
-		MESSAGE(STATUS "MAGMA_ROOT_DIR: ${MAGMA_ROOT_DIR}")
-		SET(INCLUDE_DIRS ${INCLUDE_DIRS}
-    	"${MAGMA_ROOT_DIR}/include"
-    	"${MAGMA_ROOT_DIR}/control"
-    	"${MAGMA_ROOT_DIR}/sparse/include"
-      "${MAGMA_ROOT_DIR}/sparse/control"
-    	"${MAGMA_ROOT_DIR}/testing")   
-	ELSE()
-		MESSAGE(WARNING "Setup the MAGMA_ROOT_DIR")
-	ENDIF()  
+		SET(MAGMA_LIBRARIES_DIR CACHE PATH FORCE)
+		IF(NOT MAGMA_LIBRARIES_DIR STREQUAL "")
+			MESSAGE(STATUS "MAGMA_LIBRARIES_DIR: ${MAGMA_LIBRARIES_DIR}")
+			SET(LIBS_FILES ${LIBS_FILES}
+    		"${MAGMA_LIBRARIES_DIR}/libmagma.a"
+		  # "${MAGMA_LIBRARIES_DIR}/libmagma_sparse.a"
+		    "${MAGMA_LIBRARIES_DIR}/libtester.a"
+    		"${MAGMA_LIBRARIES_DIR}/liblapacktest.a") 
+		ELSE(NOT MAGMA_LIBRARIES_DIR STREQUAL "")
+			MESSAGE(WARNING "Magma not found ... please setup the MAGMA_LIBRARIES_DIR")
+		ENDIF(NOT MAGMA_LIBRARIES_DIR STREQUAL "")  
+		
+	ELSE(UNIX)
+		MESSAGE("${MAGMA_ROOT_DIR_PRE}")
+		IF(${USE_PREBUILD_WIN64_LIBS})
+			SET(INCLUDE_DIRS ${INCLUDE_DIRS}
+  				"${MAGMA_ROOT_DIR_PRE}/include"
+  				"${MAGMA_ROOT_DIR_PRE}/control"
+  				"${MAGMA_ROOT_DIR_PRE}/sparse/include"
+  				"${MAGMA_ROOT_DIR_PRE}/testing")
+			SET(LIBS_FILES ${LIBS_FILES}
+  				optimized "${INTERNAL_LIBRARIES}/Release/tester.lib"
+  				optimized "${INTERNAL_LIBRARIES}/Release/lapacktest.lib"
+  				optimized "${INTERNAL_LIBRARIES}/Release/magma.lib"
+  				optimized "${INTERNAL_LIBRARIES}/Release/magma_sparse.lib"
+  				debug "${INTERNAL_LIBRARIES}/Debug/tester.lib"
+  				debug "${INTERNAL_LIBRARIES}/Debug/lapacktest.lib"
+  				debug "${INTERNAL_LIBRARIES}/Debug/magma.lib"
+  				debug "${INTERNAL_LIBRARIES}/Debug/magma_sparse.lib")
+			
+		ELSE(${USE_PREBUILD_WIN64_LIBS})
+			
+			SET(MAGMA_ROOT_DIR CACHE PATH FORCE)
+			IF(NOT MAGMA_ROOT_DIR STREQUAL "")
+				MESSAGE(STATUS "MAGMA_ROOT_DIR: ${MAGMA_ROOT_DIR}")
+				SET(INCLUDE_DIRS ${INCLUDE_DIRS}
+    			"${MAGMA_ROOT_DIR}/include"
+    			"${MAGMA_ROOT_DIR}/control"
+    			"${MAGMA_ROOT_DIR}/sparse/include"
+				"${MAGMA_ROOT_DIR}/sparse/control"
+    			"${MAGMA_ROOT_DIR}/testing")   
+			ELSE(NOT MAGMA_ROOT_DIR STREQUAL "")
+				MESSAGE(WARNING "Magma not found ... please setup the MAGMA_ROOT_DIR")
+			ENDIF(NOT MAGMA_ROOT_DIR STREQUAL "")  
  
-  SET(MAGMA_INCLUDE_DIR CACHE PATH FORCE)
-	IF(NOT MAGMA_INCLUDE_DIR STREQUAL "")
-		MESSAGE(STATUS "MAGMA_INCLUDE_DIR: ${MAGMA_INCLUDE_DIR}")
-		SET(LIBS_FILES ${LIBS_FILES}
-    	"${MAGMA_INCLUDE_DIR}/libmagma.a"
-     # "${MAGMA_INCLUDE_DIR}/libmagma_sparse.a"
-      "${MAGMA_INCLUDE_DIR}/libtester.a"
-    	"${MAGMA_INCLUDE_DIR}/liblapacktest.a") 
-	ELSE()
-		MESSAGE(WARNING "Setup the MAGMA_INCLUDE_DIR")
-	ENDIF()  
-ENDIF()
+			SET(MAGMA_LIBRARIES_DIR CACHE PATH FORCE)
+			IF(NOT MAGMA_LIBRARIES_DIR STREQUAL "")
+				MESSAGE(STATUS "MAGMA_LIBRARIES_DIR: ${MAGMA_LIBRARIES_DIR}")
+				SET(LIBS_FILES ${LIBS_FILES}
+    			"${MAGMA_LIBRARIES_DIR}/libmagma.lib"
+			    "${MAGMA_LIBRARIES_DIR}/libmagma_sparse.lib"
+				"${MAGMA_LIBRARIES_DIR}/libtester.lib"
+    			"${MAGMA_LIBRARIES_DIR}/liblapacktest.lib") 
+			ELSE(NOT MAGMA_LIBRARIES_DIR STREQUAL "")
+				MESSAGE(WARNING "Magma not found ... please setup the MAGMA_LIBRARIES_DIR")
+			ENDIF(NOT MAGMA_LIBRARIES_DIR STREQUAL "")  
+					
+		ENDIF(${USE_PREBUILD_WIN64_LIBS})
+	ENDIF(UNIX)
+ENDIF(MAGMA_FOUND)
 
 
 # -----------------------------------------------------------------------------
 # CUDA
 # -----------------------------------------------------------------------------
-find_package( CUDA )
+FIND_PACKAGE( CUDA )
 IF ( CUDA_FOUND )
-	message( STATUS "Found CUDA ${CUDA_VERSION}" )
-	message( STATUS "> CUDA_INCLUDE_DIRS:   ${CUDA_INCLUDE_DIRS}"   )
-	message( STATUS "> CUDA_LIBRARIES: ${CUDA_LIBRARIES}" )
-	message( STATUS "> CUDA_CUBLAS_LIBRARIES: ${CUDA_CUBLAS_LIBRARIES}" )
-	message( STATUS "> CUDA_CUDART_LIBRARY: ${CUDA_cusparse_LIBRARY}" )
+	MESSAGE( STATUS "Found CUDA ${CUDA_VERSION}" )
+	MESSAGE( STATUS "> CUDA_INCLUDE_DIRS:   ${CUDA_INCLUDE_DIRS}"   )
+	MESSAGE( STATUS "> CUDA_LIBRARIES: ${CUDA_LIBRARIES}" )
+	MESSAGE( STATUS "> CUDA_CUBLAS_LIBRARIES: ${CUDA_CUBLAS_LIBRARIES}" )
+	MESSAGE( STATUS "> CUDA_CUDART_LIBRARY: ${CUDA_cusparse_LIBRARY}" )
 	SET(INCLUDE_DIRS ${INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS})
 	SET(LIBS_FILES ${LIBS_FILES} ${CUDA_LIBRARIES};${CUDA_CUBLAS_LIBRARIES};${CUDA_cusparse_LIBRARY})
 
 ELSE( CUDA_FOUND )
 	IF(WIN32)
-		message( STATUS "CUDA 8.0 will be included manualy...")
+		MESSAGE( STATUS "CUDA 8.0 will be included manualy...")
 		MESSAGE( STATUS "> include path: ${CUDA8_ROOT_DIR}/include" )
 		MESSAGE( STATUS "> libraries directory: ${INTERNAL_LIBRARIES}/Release" )
 		MESSAGE( STATUS "> added libraries: cublas.lib, cusparse.lib, cublas_device.lib, cudadevrt.lib, cudart_static.lib" )
@@ -377,19 +559,19 @@ ELSE( CUDA_FOUND )
 			"${INTERNAL_LIBRARIES}/Release/cublas_device.lib"
 			"${INTERNAL_LIBRARIES}/Release/cudadevrt.lib"
 			"${INTERNAL_LIBRARIES}/Release/cudart_static.lib" )
-	ELSEIF( UNIX )
+	ELSE(WIN32)
 		MESSAGE( WARNING "Install Cuda libraries first. Follow this guideline: https://askubuntu.com/questions/799184/how-can-i-install-cuda-on-ubuntu-16-04")
-	ENDIF()
+	ENDIF(WIN32)
 ENDIF( CUDA_FOUND )
-
 
 
 
 # -----------------------------------------------------------------------------
 # OpenMVG
 # -----------------------------------------------------------------------------
-option(OPENMVG_SUPPORT "Include OpenMVG libraries (enable input from OpenMVG)" OFF)
-IF (OPENMVG_SUPPORT)
+# TODO add find package ...
+option(UNC_OPENMVG_SUPPORT "Include OpenMVG libraries (enable input from OpenMVG)" OFF)
+IF (UNC_OPENMVG_SUPPORT)
 	add_definitions(-DUSE_OPENMVG)
 	
 	SET(OPENMVG_SRC_DIR CACHE PATH FORCE)
@@ -424,15 +606,11 @@ IF (OPENMVG_SUPPORT)
 			"${OPENMVG_BUILD_DIR}/third_party/tiff"
 			"${OPENMVG_BUILD_DIR}/third_party/lemon") 
 
-    IF(WIN32)  
-  		SET(LIBS_FILES ${LIBS_FILES} 
-  			optimized "${OPENMVG_BUILD_DIR}/third_party/flann/lib/Release/flann_cpp_s.lib"
-  			debug "${OPENMVG_BUILD_DIR}/third_party/flann/lib/Debug/flann_cpp_s.lib")   
-    ELSE()
-      #SET(LIBS_FILES ${LIBS_FILES} 
-      #  "${OPENMVG_BUILD_DIR}/third_party/flann/lib/flann_cpp_s.a")  
-    ENDIF()
-       
+		IF(WIN32)  
+  			SET(LIBS_FILES ${LIBS_FILES} 
+  				optimized "${OPENMVG_BUILD_DIR}/third_party/flann/lib/Release/flann_cpp_s.lib"
+  				debug "${OPENMVG_BUILD_DIR}/third_party/flann/lib/Debug/flann_cpp_s.lib")   
+		ENDIF()
 	ELSE()
 		MESSAGE(WARNING "Setup the OpenMVG root directory (contatins ./src).")
 	ENDIF()
@@ -520,32 +698,86 @@ ENDIF()
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
-# INCLUDE ALL DIRECTORIES
+
+
+
 # -----------------------------------------------------------------------------
-message("INCLUDE_DIRS: ${INCLUDE_DIRS}")
+# Set sources and create executable target
+# -----------------------------------------------------------------------------
+FILE(GLOB HEADERS "${PROJECT_SOURCE_DIR}/include/*.h")
+FILE(GLOB SOURCES "${PROJECT_SOURCE_DIR}/src/*.cpp")
+FILE(GLOB MODUL_DEFINITION_FILES "${PROJECT_SOURCE_DIR}/src/*.def")
+
+# Executable - binary file with txt input
+ADD_EXECUTABLE(uncertainty ${HEADERS} ${SOURCES})
 target_include_directories(uncertainty PUBLIC ${INCLUDE_DIRS})
-#target_include_directories(uncertainty_lib PUBLIC ${INCLUDE_DIRS})
-#target_include_directories(uncertainty_mex PUBLIC ${INCLUDE_DIRS})
-
-# -----------------------------------------------------------------------------
-# ADD ALL LIBRARIES
-# -----------------------------------------------------------------------------
-message("LIBS_FILES: ${LIBS_FILES}")
 target_link_libraries (uncertainty ${LIBS_FILES})
-#target_link_libraries (uncertainty_lib ${LIBS_FILES})
-#target_link_libraries (uncertainty_mex ${LIBS_FILES})
 
 
-# SEARCHED LIBS DIRS
-IF (WIN32)
-	# required for debug - TODO...
-	link_directories("c:/Program Files (x86)/IntelSWTools/compilers_and_libraries_2017.4.210/windows/compiler/lib/intel64_win")
+# -----------------------------------------------------------------------------
+# Library output
+# -----------------------------------------------------------------------------
+OPTION(UNC_BUILD_STATIC_LIB "Build uncertainty_static library" OFF)
+OPTION(UNC_BUILD_SHARED_LIB "Bulid uncertainty_shared library" OFF)
+
+IF (UNC_BUILD_STATIC_LIB)
+	ADD_LIBRARY(uncertainty_static STATIC ${HEADERS} ${SOURCES})
+	target_include_directories(uncertainty_static PUBLIC ${INCLUDE_DIRS})
+	target_link_libraries (uncertainty_static ${LIBS_FILES})
+ENDIF (UNC_BUILD_STATIC_LIB)
+
+IF (UNC_BUILD_SHARED_LIB)
+	ADD_LIBRARY(uncertainty_shared SHARED ${HEADERS} ${SOURCES})
+	target_include_directories(uncertainty_shared PUBLIC ${INCLUDE_DIRS})
+	target_link_libraries (uncertainty_shared ${LIBS_FILES})
+ENDIF (UNC_BUILD_SHARED_LIB)
+
+
+# -----------------------------------------------------------------------------
+# Compile MEX
+# -----------------------------------------------------------------------------
+OPTION(UNC_BUILD_MEX "Build uncertainty_mex file" OFF)
+
+# Check if the matlab libs are setup
+IF(UNC_BUILD_MEX AND NOT UNC_MATLAB_SUPPORT)
+	MESSAGE( FATAL_ERROR "Please, include matlab libraries and headers (i.e. UNC_MATLAB_SUPPORT = ON) to build mex file (i.e. UNC_BUILD_MEX = ON)." )
+ENDIF(UNC_BUILD_MEX AND NOT UNC_MATLAB_SUPPORT)
+
+IF(UNC_BUILD_MEX) 
+	add_library(uncertainty-mex SHARED ${HEADERS} ${SOURCES} ${MODUL_DEFINITION_FILES})
+	add_definitions(-DMATLAB_MEX_FILE)
+	SET_TARGET_PROPERTIES(uncertainty_mex PROPERTIES LINK_FLAGS "/export:mexFunction /dll")
+	SET_TARGET_PROPERTIES(uncertainty_mex PROPERTIES SUFFIX ".mexw64")
 	
+	
+ENDIF(UNC_BUILD_MEX) 
+
+
+
+
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
+
+
+# -----------------------------------------------------------------------------
+# PLATFORM SPECIFIC ERRORS
+# -----------------------------------------------------------------------------
+
+# The debud on windows may need additional libraries
+SET(INTEL_COMPILER_DEBUD_LIBRARIES_DIRECTORY "c:/Program Files (x86)/IntelSWTools/compilers_and_libraries_2017.4.210/windows/compiler/lib/intel64_win")
+IF (WIN32)
+	IF (EXISTS ${INTEL_COMPILER_DEBUD_LIBRARIES_DIRECTORY})
+		link_directories(INTEL_COMPILER_DEBUD_LIBRARIES_DIRECTORY)
+	ELSE(EXISTS ${INTEL_COMPILER_DEBUD_LIBRARIES_DIRECTORY})
+		MESSAGE(STATUS "For the debuging on windows platform may required an additional libraries (e.g. ifconsole.lib).")
+		MESSAGE(STATUS "Please add the library path (e.g. 'c:/Program Files (x86)/IntelSWTools/compilers_and_libraries_2017.4.210/windows/compiler/lib/intel64_win')")
+	ENDIF(EXISTS ${INTEL_COMPILER_DEBUD_LIBRARIES_DIRECTORY})
 ENDIF(WIN32)
 
-
 # -----------------------------------------------------------------------------
-# Copy the examples and dll files if not exist
+# COPY OF THE EXAMPLES
 # -----------------------------------------------------------------------------
 SET(TEST_JACOBIANS_DIR "${PROJECT_SOURCE_DIR}/test/input_jacobians")
 file(GLOB TEST_JACOBIANS_FILES "${TEST_JACOBIANS_DIR}/*")
@@ -566,6 +798,7 @@ IF(NOT EXISTS ${RELEASE_IN_DIR})
 		file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/Release/out")
 	ENDIF()
 ENDIF()
+
 # Debug
 SET(DEBUG_DIR "${CMAKE_BINARY_DIR}/Debug")
 SET(DEBUG_IN_DIR "${CMAKE_BINARY_DIR}/Debug/in")
@@ -579,7 +812,31 @@ IF(NOT EXISTS ${DEBUG_IN_DIR})
 	ENDIF()
 ENDIF()
 
+
+# -----------------------------------------------------------------------------
+# INSTALL LIBRARIES
 # -----------------------------------------------------------------------------
 
+# TODO ...
 
-# TODO: install library and generate UncertaintyConfig.cmake
+
+
+# -----------------------------------------------------------------------------
+# STATUS
+# -----------------------------------------------------------------------------
+MESSAGE(STATUS " ")
+MESSAGE(STATUS "---------------------------------------------------------")
+MESSAGE(STATUS "SUMMARY")
+MESSAGE(STATUS "---------------------------------------------------------")
+MESSAGE(STATUS "UNC_BUILD_STATIC_LIB: ${UNC_BUILD_STATIC_LIB}")
+MESSAGE(STATUS "UNC_BUILD_SHARED_LIB: ${UNC_BUILD_SHARED_LIB}")
+
+MESSAGE(STATUS "UNC_OPENMVG_SUPPORT: ${UNC_OPENMVG_SUPPORT}")
+MESSAGE(STATUS "UNC_MKL_SUPPORT: ${UNC_MKL_SUPPORT}")
+MESSAGE(STATUS "UNC_MATLAB_SUPPORT: ${UNC_MATLAB_SUPPORT}")
+MESSAGE(STATUS "UNC_BUILD_MEX: ${UNC_BUILD_MEX}")
+
+MESSAGE(STATUS " ")
+MESSAGE(STATUS "INCLUDE_DIRS: ${INCLUDE_DIRS}")
+MESSAGE(STATUS "LIBS_FILES: ${LIBS_FILES}")
+
