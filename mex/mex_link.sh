@@ -1,0 +1,3 @@
+gcc-4.9 -g -Wall -fPIC -std=c++11 -pthread -fPIC -DMX_COMPAT_32 -DMATLAB_MEX_FILE -DUSE_MATLAB -I/usr/local/MATLAB/R2017a/extern/include -I../include -c ../mex/uncertainty_mex.cpp -o ../mex/uncertainty_mex.o 
+mex -g -cxx CC='/usr/bin/gcc-4.9' CXX='/usr/bin/gcc-4.9' LD='/usr/bin/gcc-4.9' GCC='/usr/bin/gcc-4.9' -L./ -lpthread -lunc -lrt -DUSE_MATLAB -largeArrayDims LDFLAGS='$LDFLAGS -fopenmp' -output ../mex/uncertainty_mex ../mex/uncertainty_mex.o
+mv ../mex/uncertainty_mex.mexa64 /media/policmic/DATA/MichalPolic/libs/TE-inversion/build

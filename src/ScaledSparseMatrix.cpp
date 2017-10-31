@@ -1,4 +1,7 @@
 #include "ScaledSparseMatrix.h"
+#ifdef USE_MATLAB
+    #include <mex.h>
+#endif
 
 using namespace Eigen;
 

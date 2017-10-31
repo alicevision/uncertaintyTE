@@ -1,4 +1,5 @@
 #ifdef USE_MATLAB
+#include <mex.h>
 #include "compute.h"
 #include "matlabInterface.h"
 #include "snavely_reprojection_error.h"
@@ -116,7 +117,7 @@ ceres::examples::BALProblem loadSceneMatlab(const mxArray *prhs[]) {
 		tmp = mxGetFieldByNumber(prhs[0], 0, i);
 		std::string name = mxGetFieldNameByNumber(prhs[0], i);
 		if (tmp == NULL) {
-			mexPrintf("Field %s is empty.\n", name);
+			mexPrintf("Field %s is empty.\n", name.c_str());
 			continue;
 		}
 		else {

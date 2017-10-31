@@ -4,6 +4,9 @@
 #include "ScaledDenseMatrix.h" 
 #include <Eigen/QR>
 
+#ifdef USE_MATLAB
+    #include <mex.h>
+#endif
 
 using namespace std;
 using namespace Eigen;
@@ -25,15 +28,15 @@ double timeDuration(tp from, tp to) {
 }
 #endif
 
-tp t(tp s, char* txt) {
+tp t(tp s, std::string txt) {
 	cout << " " << timeDuration(s, Clock::now()) << "s\n";
 	cout << txt;
 	return Clock::now();
 }
 
-tp t(tp s, char* txt, double *time) {
+tp t(tp s, std::string txt, double *time) {
 	*time = timeDuration(s, Clock::now());
-	cout << " " << (*time) << "s\n";
+	cout << " " << time << "s\n";
 	cout << txt;
 	return Clock::now();
 }

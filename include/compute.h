@@ -10,9 +10,6 @@
 #include <Eigen/Eigen>
 #include <ctime>
 
-#ifdef USE_MATLAB
-  #include <mex.h>
-#endif
 
 #ifdef USE_OPENMVG
   #include "openMVG/sfm/sfm_data.hpp"

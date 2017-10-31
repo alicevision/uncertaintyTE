@@ -5,6 +5,10 @@
   #include "openMVG/sfm/sfm_data_BA_ceres_camera_functor.hpp"
 #endif
 
+#ifdef USE_MATLAB
+  #include <mex.h>
+#endif
+
 #include <random>
 
 #ifndef DBL_MIN

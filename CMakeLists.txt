@@ -1,5 +1,5 @@
 CMAKE_MINIMUM_REQUIRED (VERSION 3.5)
-SET(CMAKE_VERBOSE_MAKEFILE ON)
+#SET(CMAKE_VERBOSE_MAKEFILE ON)
 
 # About the project
 PROJECT (Uncertatinty)
@@ -22,25 +22,13 @@ IF (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 ENDIF()
 
 # Add path to find_package modules
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake")
-
-# -----------------------------------------------------------------------------
-# COMPILER FLAGS
-# -----------------------------------------------------------------------------
-IF( UNIX )
-	SET( GCC_COVERAGE_COMPILE_FLAGS "-lpthread")
-	SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++11 ${GCC_COVERAGE_LINK_FLAGS}" )
-	SET( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${GCC_COVERAGE_LINK_FLAGS}" )
-	SET( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "~/documents/libs/ceres-solver-install/lib/cmake/Ceres")
-ENDIF()
-
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/modules")
 
 
 
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
-
 
 
 # -----------------------------------------------------------------------------
@@ -50,13 +38,13 @@ MESSAGE(STATUS "REQUIRED LIBRARIES")
 MESSAGE(STATUS " Gflags")
 MESSAGE(STATUS " Eigen")
 MESSAGE(STATUS " Blas and Lapack")
-MESSAGE(STATUS " SuiteSparse")
+MESSAGE(STATUS " Cuda")
 MESSAGE(STATUS " Ceres")
 MESSAGE(STATUS " Magma dense")
 MESSAGE(STATUS "")
 MESSAGE(STATUS "OPTIONAL LIBRARIES")
+MESSAGE(STATUS " SuiteSparse")
 MESSAGE(STATUS " Matlab mex")
-#MESSAGE(STATUS " Colmap")
 MESSAGE(STATUS " OpenMVG (AliceVision)")
 MESSAGE(STATUS "---------------------------------------------------------")
 
@@ -78,54 +66,54 @@ ENDIF(UNIX)
 # PACKAGES FOR LINUX
 # -----------------------------------------------------------------------------
 IF(UNIX)
-	MESSAGE(STATUS "You can download the prebuild most of the repositories by calling: ")
-	MESSAGE(STATUS " sudo apt-get install \
-    cmake \
-    build-essential \
-    libboost-all-dev \
-    libeigen3-dev \
-    libsuitesparse-dev \
-    libfreeimage-dev \
-    libgoogle-glog-dev \
-    libgflags-dev \
-    libglew-dev \
-    qtbase5-dev \
-    libqt5opengl5-dev \
-	libatlas-base-dev \
-    libsuitesparse-dev")
-	MESSAGE(STATUS " git clone https://ceres-solver.googlesource.com/ceres-solver")
+    MESSAGE(STATUS "You can download most of the repositories by calling: ")
+    MESSAGE(STATUS " sudo apt-get install cmake")
+    MESSAGE(STATUS " sudo apt-get install build-essential")
+    MESSAGE(STATUS " sudo apt-get install libboost-all-dev")
+    MESSAGE(STATUS " sudo apt-get install libeigen3-dev")
+    MESSAGE(STATUS " sudo apt-get install libsuitesparse-dev")
+    MESSAGE(STATUS " sudo apt-get install libfreeimage-dev")
+    MESSAGE(STATUS " sudo apt-get install libgoogle-glog-dev")
+    MESSAGE(STATUS " sudo apt-get install libgflags-dev")
+    MESSAGE(STATUS " sudo apt-get install libglew-dev")
+    MESSAGE(STATUS " sudo apt-get install qtbase5-dev")
+    MESSAGE(STATUS " sudo apt-get install libqt5opengl5-dev")
+    MESSAGE(STATUS " sudo apt-get install libatlas-base-dev")
+    MESSAGE(STATUS " sudo apt-get install libsuitesparse-dev")
+    MESSAGE(STATUS " git clone https://ceres-solver.googlesource.com/ceres-solver")
     MESSAGE(STATUS " cd ceres-solver")
-	MESSAGE(STATUS " mkdir build")
-	MESSAGE(STATUS " cd build")
-	MESSAGE(STATUS " cmake ..")
-	MESSAGE(STATUS " sudo make install")
-	MESSAGE(STATUS "---------------------------------------------------------")
+    MESSAGE(STATUS " mkdir build")
+    MESSAGE(STATUS " cd build")
+    MESSAGE(STATUS " cmake ..")
+    MESSAGE(STATUS " sudo make install")
+    MESSAGE(STATUS "---------------------------------------------------------")
 ENDIF(UNIX)
 
 
 # -----------------------------------------------------------------------------
 # PREBUILDED LIBRARIES FOR WINDOWS - SETUP PATHS
 # -----------------------------------------------------------------------------
-IF (NOT EXISTS "${PROJECT_SOURCE_DIR}/libs")
-	MESSAGE(STATUS "You can download the prebuild libraries for win64 at: 'cmp.felk.cvut.cz/~policmic/files/uncer_libs_win64.zip'")
-	MESSAGE(STATUS "Please unpack it into the root project directory.")
-	MESSAGE(STATUS "---------------------------------------------------------")
-ELSE (NOT EXIST "${PROJECT_SOURCE_DIR}/libs")
-	SET(USE_PREBUILD_WIN64_LIBS "ON")
-	MESSAGE(STATUS "There were foud precompiled libraries. They will be used in case of not detected the instaled ones.")
-	MESSAGE(STATUS "---------------------------------------------------------")
-	
-	# Third party paths
-	SET(INTERNAL_LIBRARIES "${PROJECT_SOURCE_DIR}/libs/compiled_libraries/windows")
-	SET(CERES_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/ceres-solver")
-	SET(CUDA8_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/cuda-8.0")
-	SET(EIGEN3_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/eigen-3.3.4")
-	SET(GFLAGS_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/gflags")
-	SET(MKL_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/IntelMKL")
-	SET(MAGMA_ROOT_DIR_PRE "${PROJECT_SOURCE_DIR}/libs/third_party/magma-2.2.0")
-	SET(SUITESPARSE_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/suitesparse-metis-for-windows")
-ENDIF(NOT EXISTS "${PROJECT_SOURCE_DIR}/libs")
+IF(WIN32)
+    IF (NOT EXISTS "${PROJECT_SOURCE_DIR}/libs")
+            MESSAGE(STATUS "You can download the prebuild libraries for win64 at: 'cmp.felk.cvut.cz/~policmic/files/uncer_libs_win64.zip'")
+            MESSAGE(STATUS "Please unpack it into the root project directory.")
+            MESSAGE(STATUS "---------------------------------------------------------")
+    ELSE (NOT EXIST "${PROJECT_SOURCE_DIR}/libs")
+            SET(USE_PREBUILD_WIN64_LIBS "ON")
+            MESSAGE(STATUS "There were foud precompiled libraries. They will be used in case of not detected the instaled ones.")
+            MESSAGE(STATUS "---------------------------------------------------------")
 
+            # Third party paths
+            SET(INTERNAL_LIBRARIES "${PROJECT_SOURCE_DIR}/libs/compiled_libraries/windows")
+            SET(CERES_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/ceres-solver")
+            SET(CUDA8_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/cuda-8.0")
+            SET(EIGEN3_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/eigen-3.3.4")
+            SET(GFLAGS_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/gflags")
+            SET(MKL_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/IntelMKL")
+            SET(MAGMA_ROOT_DIR_PRE "${PROJECT_SOURCE_DIR}/libs/third_party/magma-2.2.0")
+            SET(SUITESPARSE_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/suitesparse-metis-for-windows")
+    ENDIF(NOT EXISTS "${PROJECT_SOURCE_DIR}/libs")
+ENDIF(WIN32)
 
 
 # -----------------------------------------------------------------------------
@@ -176,7 +164,7 @@ ENDIF()
 # -----------------------------------------------------------------------------
 # EIGEN
 # -----------------------------------------------------------------------------
-FIND_PACKAGE (Eigen3 NO_MODULE)
+FIND_PACKAGE (Eigen3 3.3.4 NO_MODULE)
 
 IF (EIGEN3_FOUND)
 	MESSAGE( STATUS "Found Eigen${EIGEN3_VERSION_STRING}" )
@@ -707,11 +695,12 @@ ENDIF()
 FILE(GLOB HEADERS "${PROJECT_SOURCE_DIR}/include/*.h")
 FILE(GLOB SOURCES "${PROJECT_SOURCE_DIR}/src/*.cpp")
 FILE(GLOB MODUL_DEFINITION_FILES "${PROJECT_SOURCE_DIR}/src/*.def")
+SET(INCLUDE_DIRS ${INCLUDE_DIRS} "${PROJECT_SOURCE_DIR}/include")
 
 # Executable - binary file with txt input
 ADD_EXECUTABLE(uncertainty ${HEADERS} ${SOURCES})
 target_include_directories(uncertainty PUBLIC ${INCLUDE_DIRS})
-target_link_libraries (uncertainty ${LIBS_FILES})
+target_link_libraries (uncertainty ${LIBS_FILES})  # "-lm" "-lstdc++"
 
 
 # -----------------------------------------------------------------------------
@@ -744,12 +733,35 @@ IF(UNC_BUILD_MEX AND NOT UNC_MATLAB_SUPPORT)
 ENDIF(UNC_BUILD_MEX AND NOT UNC_MATLAB_SUPPORT)
 
 IF(UNC_BUILD_MEX) 
-	add_library(uncertainty-mex SHARED ${HEADERS} ${SOURCES} ${MODUL_DEFINITION_FILES})
-	add_definitions(-DMATLAB_MEX_FILE)
-	SET_TARGET_PROPERTIES(uncertainty_mex PROPERTIES LINK_FLAGS "/export:mexFunction /dll")
-	SET_TARGET_PROPERTIES(uncertainty_mex PROPERTIES SUFFIX ".mexw64")
-	
-	
+        IF(WIN32)
+            add_library(uncertainty_mex SHARED ${HEADERS} ${SOURCES} ${MODUL_DEFINITION_FILES})
+            target_include_directories(uncertainty_mex PUBLIC ${INCLUDE_DIRS})
+            target_link_libraries (uncertainty_mex ${LIBS_FILES})
+            add_definitions(-DMATLAB_MEX_FILE)
+            SET_TARGET_PROPERTIES(uncertainty_mex PROPERTIES LINK_FLAGS "/export:mexFunction /dll")
+            SET_TARGET_PROPERTIES(uncertainty_mex PROPERTIES SUFFIX ".mexw64")
+	ELSE(WIN32)
+            # Build shared library, create another project, generate make, execute it
+            ADD_LIBRARY(unc SHARED ${HEADERS} ${SOURCES})
+            target_include_directories(unc PUBLIC ${INCLUDE_DIRS})
+            target_link_libraries (unc ${LIBS_FILES})
+
+            # Generate shell script for compilation
+            SET(CM_DIR "${PROJECT_SOURCE_DIR}/mex")
+            SET(MEX_SH "${CM_DIR}/mex_link.sh")
+            file(WRITE ${MEX_SH}
+                "gcc-4.9 -g -Wall -fPIC -std=c++11 -pthread -fPIC -DMX_COMPAT_32 -DMATLAB_MEX_FILE -DUSE_MATLAB "
+                "-I${Matlab_INCLUDE_DIRS} -I../include -c ../mex/uncertainty_mex.cpp -o ../mex/uncertainty_mex.o \n")
+            file(APPEND ${MEX_SH} 
+                "mex -g -cxx CC='/usr/bin/gcc-4.9' CXX='/usr/bin/gcc-4.9' LD='/usr/bin/gcc-4.9' GCC='/usr/bin/gcc-4.9' -L./ -lpthread "
+                "-lunc -lrt -DUSE_MATLAB -largeArrayDims LDFLAGS='$LDFLAGS -fopenmp' "
+                "-output ../mex/uncertainty_mex ../mex/uncertainty_mex.o\n") 
+            file(APPEND ${MEX_SH} 
+                "mv ../mex/uncertainty_mex.mexa64 ${CMAKE_BINARY_DIR}")   
+
+            # Execute the script after the build
+            ADD_CUSTOM_COMMAND(TARGET unc POST_BUILD COMMAND "sh" ${MEX_SH})
+        ENDIF(WIN32)
 ENDIF(UNC_BUILD_MEX) 
 
 
@@ -775,6 +787,17 @@ IF (WIN32)
 		MESSAGE(STATUS "Please add the library path (e.g. 'c:/Program Files (x86)/IntelSWTools/compilers_and_libraries_2017.4.210/windows/compiler/lib/intel64_win')")
 	ENDIF(EXISTS ${INTEL_COMPILER_DEBUD_LIBRARIES_DIRECTORY})
 ENDIF(WIN32)
+
+
+# -----------------------------------------------------------------------------
+# LINUX COMPILER FLAGS
+# -----------------------------------------------------------------------------
+IF( UNIX )
+	SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++11" )
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lpthread -lm")
+	SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "~/documents/libs/ceres-solver-install/lib/cmake/Ceres")
+ENDIF()
+
 
 # -----------------------------------------------------------------------------
 # COPY OF THE EXAMPLES
@@ -839,4 +862,6 @@ MESSAGE(STATUS "UNC_BUILD_MEX: ${UNC_BUILD_MEX}")
 MESSAGE(STATUS " ")
 MESSAGE(STATUS "INCLUDE_DIRS: ${INCLUDE_DIRS}")
 MESSAGE(STATUS "LIBS_FILES: ${LIBS_FILES}")
+
+
 

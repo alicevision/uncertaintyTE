@@ -1,4 +1,7 @@
 #include "ScaledDenseMatrix.h"
+#ifdef USE_MATLAB
+    #include <mex.h>
+#endif
 
 
 ScaledDenseMatrix::ScaledDenseMatrix() {}

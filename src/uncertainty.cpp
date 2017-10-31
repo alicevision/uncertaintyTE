@@ -2,8 +2,11 @@
 #include "auxCmd.h"
 
 #ifdef USE_MATLAB
-  #include "matlabInterface.h"
+    #include <mex.h>
+    #include "matlabInterface.h"
+    #include "uncertainty_mex.h"
 #endif
+
 
 #ifdef _WIN32
 	#define EXECUTABLE_FILE "uncertainty.exe"
@@ -95,9 +98,9 @@ In:
 
 /*
 Matlab interface, call in Matlab: unc( .... ) 
-*/
+*/  
 #ifdef USE_MATLAB
-void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+void MEX_FUNCTION_NAME(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	cov::Statistic statistic = cov::Statistic();
 	cov::Options options = cov::Options();
 	ceres::CRSMatrix jacobian = ceres::CRSMatrix();

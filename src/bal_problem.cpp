@@ -39,6 +39,7 @@
 #include "ceres/rotation.h"
 #include "glog/logging.h"
 #include <random>
+#include <math.h>
 
 #ifdef USE_MATLAB
   #include <mex.h>
