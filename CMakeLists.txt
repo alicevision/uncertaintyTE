@@ -1,5 +1,5 @@
 CMAKE_MINIMUM_REQUIRED (VERSION 3.5)
-#SET(CMAKE_VERBOSE_MAKEFILE ON)
+SET(CMAKE_VERBOSE_MAKEFILE ON)
 
 # About the project
 PROJECT (Uncertatinty)
@@ -73,7 +73,7 @@ IF(UNIX)
     MESSAGE(STATUS " sudo apt-get install libeigen3-dev")
     MESSAGE(STATUS " sudo apt-get install libsuitesparse-dev")
     MESSAGE(STATUS " sudo apt-get install libfreeimage-dev")
-    MESSAGE(STATUS " sudo apt-get install libgoogle-glog-dev")
+    MESSAGE(STATUS " sudo apt-get install libgoogle-glog-dev")  # may cause problems in MEX ( unresolved symbol _Unwind.. )
     MESSAGE(STATUS " sudo apt-get install libgflags-dev")
     MESSAGE(STATUS " sudo apt-get install libglew-dev")
     MESSAGE(STATUS " sudo apt-get install qtbase5-dev")
@@ -204,14 +204,14 @@ ENDIF(EIGEN3_FOUND)
 # -----------------------------------------------------------------------------
 # SuiteSparse 
 # -----------------------------------------------------------------------------
-FIND_PACKAGE(SuiteSparse QUIET NO_MODULE)
+FIND_PACKAGE(SuiteSparse)
 
 IF( SuiteSparse_FOUND )
 	MESSAGE( STATUS "Found SuiteSparse" )
-	MESSAGE( STATUS "> SUITESPARSE_INCLUDE_DIRS:   ${SuiteSparse_INCLUDE_DIRS}" )
-	MESSAGE( STATUS "> SUITESPARSE_LIBRARIES:   ${SuiteSparse_LIBRARIES}" )
-	SET(INCLUDE_DIRS ${INCLUDE_DIRS} ${SuiteSparse_INCLUDE_DIRS})
-	SET(LIBS_FILES ${LIBS_FILES} ${SuiteSparse_LIBRARIES}) 
+	MESSAGE( STATUS "> SUITESPARSE_INCLUDE_DIRS:   ${SUITESPARSE_INCLUDE_DIRS}" )
+	MESSAGE( STATUS "> SUITESPARSE_LIBRARIES:   ${SUITESPARSE_LIBRARIES}" )
+	SET(INCLUDE_DIRS ${INCLUDE_DIRS} ${SUITESPARSE_INCLUDE_DIRS})
+	SET(LIBS_FILES ${LIBS_FILES} ${SUITESPARSE_LIBRARIES}) 
 	
 ELSE (SuiteSparse_FOUND)
 	IF(UNIX)
@@ -696,12 +696,14 @@ FILE(GLOB HEADERS "${PROJECT_SOURCE_DIR}/include/*.h")
 FILE(GLOB SOURCES "${PROJECT_SOURCE_DIR}/src/*.cpp")
 FILE(GLOB MODUL_DEFINITION_FILES "${PROJECT_SOURCE_DIR}/src/*.def")
 SET(INCLUDE_DIRS ${INCLUDE_DIRS} "${PROJECT_SOURCE_DIR}/include")
+SET(LIBS_FILES ${LIBS_FILES}) 
 
 # Executable - binary file with txt input
-ADD_EXECUTABLE(uncertainty ${HEADERS} ${SOURCES})
-target_include_directories(uncertainty PUBLIC ${INCLUDE_DIRS})
-target_link_libraries (uncertainty ${LIBS_FILES})  # "-lm" "-lstdc++"
-
+IF(NOT UNC_BUILD_MEX) 
+    ADD_EXECUTABLE(uncertainty ${HEADERS} ${SOURCES})
+    target_include_directories(uncertainty PUBLIC ${INCLUDE_DIRS})
+    target_link_libraries (uncertainty ${LIBS_FILES})
+ENDIF(NOT UNC_BUILD_MEX)
 
 # -----------------------------------------------------------------------------
 # Library output
@@ -742,20 +744,24 @@ IF(UNC_BUILD_MEX)
             SET_TARGET_PROPERTIES(uncertainty_mex PROPERTIES SUFFIX ".mexw64")
 	ELSE(WIN32)
             # Build shared library, create another project, generate make, execute it
-            ADD_LIBRARY(unc SHARED ${HEADERS} ${SOURCES})
+            ADD_LIBRARY(unc STATIC ${HEADERS} ${SOURCES})
             target_include_directories(unc PUBLIC ${INCLUDE_DIRS})
             target_link_libraries (unc ${LIBS_FILES})
+            set_property(TARGET unc PROPERTY POSITION_INDEPENDENT_CODE ON)
 
             # Generate shell script for compilation
             SET(CM_DIR "${PROJECT_SOURCE_DIR}/mex")
             SET(MEX_SH "${CM_DIR}/mex_link.sh")
             file(WRITE ${MEX_SH}
-                "gcc-4.9 -g -Wall -fPIC -std=c++11 -pthread -fPIC -DMX_COMPAT_32 -DMATLAB_MEX_FILE -DUSE_MATLAB "
+                "g++ -g -Wall -fPIC -std=c++11 -pthread -fPIC -DMX_COMPAT_32 -DMATLAB_MEX_FILE -DUSE_MATLAB "
                 "-I${Matlab_INCLUDE_DIRS} -I../include -c ../mex/uncertainty_mex.cpp -o ../mex/uncertainty_mex.o \n")
             file(APPEND ${MEX_SH} 
-                "mex -g -cxx CC='/usr/bin/gcc-4.9' CXX='/usr/bin/gcc-4.9' LD='/usr/bin/gcc-4.9' GCC='/usr/bin/gcc-4.9' -L./ -lpthread "
-                "-lunc -lrt -DUSE_MATLAB -largeArrayDims LDFLAGS='$LDFLAGS -fopenmp' "
-                "-output ../mex/uncertainty_mex ../mex/uncertainty_mex.o\n") 
+                "mex -g -cxx CC='/usr/bin/g++' CXX='/usr/bin/g++' LD='/usr/bin/g++' GCC='/usr/bin/g++' "
+                "-DUSE_MATLAB -L./ -L../../magma-2.2.0/build/lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib -L/usr/local/lib "
+                "-lpthread -lunc -lmagma -llapacktest -ltester -lcudart_static -lrt -lcublas -lcusparse "
+                "-llapack -lf77blas -latlas -lsuitesparseconfig -lspqr -lcholmod -lccolamd -lcamd -lcolamd "
+                "-lcolamd -lamd -lgflags -lceres -ldl -lrt -largeArrayDims "
+                "LDFLAGS='$LDFLAGS -fopenmp' -output ../mex/uncertainty_mex ../mex/uncertainty_mex.o\n") 
             file(APPEND ${MEX_SH} 
                 "mv ../mex/uncertainty_mex.mexa64 ${CMAKE_BINARY_DIR}")   
 
@@ -793,8 +799,8 @@ ENDIF(WIN32)
 # LINUX COMPILER FLAGS
 # -----------------------------------------------------------------------------
 IF( UNIX )
-	SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++11" )
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lpthread -lm")
+	SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++11 ")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 	SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "~/documents/libs/ceres-solver-install/lib/cmake/Ceres")
 ENDIF()
 
@@ -862,6 +868,7 @@ MESSAGE(STATUS "UNC_BUILD_MEX: ${UNC_BUILD_MEX}")
 MESSAGE(STATUS " ")
 MESSAGE(STATUS "INCLUDE_DIRS: ${INCLUDE_DIRS}")
 MESSAGE(STATUS "LIBS_FILES: ${LIBS_FILES}")
-
+MESSAGE(STATUS " ")
+MESSAGE(STATUS " ")
 
 
