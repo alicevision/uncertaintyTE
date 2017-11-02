@@ -11,6 +11,9 @@ vs2015*/
 *.props
 libs*/
 nbproject*/
+CMakeCache.txt
+CMakeFiles*/
+
 
 #Ignore thumbnails created by Windows
 Thumbs.db
