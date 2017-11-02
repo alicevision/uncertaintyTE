@@ -65,12 +65,10 @@ void loadJacobian(std::ifstream& file, int algorithm, ceres::CRSMatrix& jacobian
 	jacobian.values = values;
 }
 
-void saveResults(std::string& process_file_name, const std::string& current_dir, cov::Options& options, cov::Statistic& statistic,
+void saveResults(const std::string& out_dir, cov::Options& options, cov::Statistic& statistic,
 	int num_camera_covar_values, double* camUnc, double *ptsUnc) {
 	std::cout << "\nPrinting the results to file... ";
-	replaceAll(process_file_name, "in", "out");
-	replaceAll(process_file_name, ".jacob", ".cov");
-	std::ofstream outfile(current_dir + process_file_name);
+	std::ofstream outfile(out_dir + std::string("output.cov"));
 	outfile << "# ---- Covariance v0.1 ----\n";
 	outfile << "# Number of cameras: " << options._numCams << "\n";
 	outfile << "# Number of camera parameters: " << options._camParams << "\n";
@@ -167,6 +165,7 @@ void printJacobianMEX(ceres::CRSMatrix &J) {
 	mexPrintf("\n\n\n");
 }
 #endif
+
 
 #ifdef USE_OPENMVG
 int loadSceneOpenMVG(std::string sSfM_Data_Filename_In, openMVG::sfm::SfM_Data &sfm_data) {
@@ -340,3 +339,4 @@ void openmvgSfM2Jacobian(openMVG::sfm::SfM_Data &sfm_data, ceres::CRSMatrix &jac
 	opt._maxIterTE = -1;
 }
 #endif
+

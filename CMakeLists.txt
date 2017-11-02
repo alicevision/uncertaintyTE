@@ -746,7 +746,9 @@ IF(UNC_BUILD_MEX)
             # Build shared library, create another project, generate make, execute it
             ADD_LIBRARY(unc STATIC ${HEADERS} ${SOURCES})
             target_include_directories(unc PUBLIC ${INCLUDE_DIRS})
-            target_link_libraries (unc ${LIBS_FILES})
+            #SET (MYLIB -Wl,--whole-archive)
+            #set(LINK_FLAGS ${LINK_FLAGS} "-Wl,-whole-archive")
+            target_link_libraries (unc ${LIBS_FILES})  #${MYLIB}
             set_property(TARGET unc PROPERTY POSITION_INDEPENDENT_CODE ON)
 
             # Generate shell script for compilation
@@ -756,12 +758,14 @@ IF(UNC_BUILD_MEX)
                 "g++ -g -Wall -fPIC -std=c++11 -pthread -fPIC -DMX_COMPAT_32 -DMATLAB_MEX_FILE -DUSE_MATLAB "
                 "-I${Matlab_INCLUDE_DIRS} -I../include -c ../mex/uncertainty_mex.cpp -o ../mex/uncertainty_mex.o \n")
             file(APPEND ${MEX_SH} 
-                "mex -g -cxx CC='/usr/bin/g++' CXX='/usr/bin/g++' LD='/usr/bin/g++' GCC='/usr/bin/g++' "
-                "-DUSE_MATLAB -L./ -L../../magma-2.2.0/build/lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib -L/usr/local/lib "
+                "mex -v -g -cxx CC='/usr/bin/g++' CXX='/usr/bin/g++' LD='/usr/bin/g++' GCC='/usr/bin/g++' "  
+                "-DUSE_MATLAB -L./ -L/media/policmic/DATA/MichalPolic/libs/magma-2.2.0/build/lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib -L/usr/local/lib "
                 "-lpthread -lunc -lmagma -llapacktest -ltester -lcudart_static -lrt -lcublas -lcusparse "
                 "-llapack -lf77blas -latlas -lsuitesparseconfig -lspqr -lcholmod -lccolamd -lcamd -lcolamd "
                 "-lcolamd -lamd -lgflags -lceres -ldl -lrt -largeArrayDims "
                 "LDFLAGS='$LDFLAGS -fopenmp' -output ../mex/uncertainty_mex ../mex/uncertainty_mex.o\n") 
+            #"COMPFLAGS='$COMPFLAGS -Wl,--whole-archive' "
+            # -Wl,--whole-archive
             file(APPEND ${MEX_SH} 
                 "mv ../mex/uncertainty_mex.mexa64 ${CMAKE_BINARY_DIR}")   
 

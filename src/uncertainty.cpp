@@ -1,18 +1,38 @@
 #include "compute.h"
 #include "auxCmd.h"
+#include "FactoryIO.h"
+#include "IO.h"
+#include "ColmapIO.h"
+#include "JacobianIO.h"
+#include "JacobianComposer.h"
 
 #ifdef USE_MATLAB
     #include <mex.h>
     #include "matlabInterface.h"
     #include "uncertainty_mex.h"
 #endif
-
-
 #ifdef _WIN32
 	#define EXECUTABLE_FILE "uncertainty.exe"
 #elif __linux__ 
 	#define EXECUTABLE_FILE "uncertainty"
 #endif
+
+
+#ifndef LOAD_CMD_IO_FLAGS
+    #define LOAD_CMD_IO_FLAGS
+    DEFINE_string(alg, "/media/policmic/DATA/MichalPolic/data/RedundantSFM/colmap_sparse_reconstruction",
+            "algorithm for inversion of Schur complement matrix (SVD_QR_ITERATION, SVD_DEVIDE_AND_CONQUER, TAYLOR_EXPANSION)\n");
+    DEFINE_string(in, "/media/policmic/DATA/MichalPolic/data/RedundantSFM/colmap_sparse_reconstruction",
+            "path to input scene files (e.g. directory which contains cameras.txt, images.txt, points3D.tx for COLMAP;\n"
+            " selected file <path_to_file>.jacob for Jacobian, etc. )\n");
+    DEFINE_string(in_form, "COLMAP",
+            "the format of input data (e.g. COLMAP, JACOBIAN, OPENMVG ...)\n");
+    DEFINE_string(out, "/media/policmic/DATA/MichalPolic/data/RedundantSFM/colmap_sparse_reconstruction",
+            "path to output covariance files\n");
+#endif
+
+
+
 
 /*
 Main function called from command line: unc.exe
@@ -23,44 +43,55 @@ Main function called from command line: unc.exe
   Example OpenMVG:  unc.exe 2 input/myFile.[bin,json,xml]
 */
 int main(int argc, char* argv[]) {
-	ceres::CRSMatrix jacobian = ceres::CRSMatrix();
-	cov::Options options = cov::Options();
-	cov::Statistic statistic = cov::Statistic();
-	options._svdRemoveN = 7;
+    google::ParseCommandLineFlags(&argc, &argv, true);
+    
+    ceres::CRSMatrix jacobian = ceres::CRSMatrix();
+    cov::Options options = cov::Options();
+    cov::Statistic statistic = cov::Statistic();
+    
+    // read input data
+    IO* io = FactoryIO::createIO(FLAGS_in_form);
+    if (io->data_type() == SCENE_DATA){
+        Scene scene = Scene();
+        if ( !io->read( FLAGS_in, scene ) ) 
+            exit(1);
+        cout << scene;
+        
+        JacobianComposer jc = JacobianComposer();
+        jc.scene2Jacobian(scene, jacobian, options);
+        
+    }else{
+        std::ifstream file(FLAGS_in, std::ios_base::in);
+        loadJacobian(file, 2, jacobian, options);       // FLAGS_algorithm = 2
+    }
+    
+    // TODO: add to the loader
+    /*#ifdef USE_OPENMVG
+    std::cout << "Loading a OpenMVG scene: " << input_file << '\n';
+    openMVG::sfm::SfM_Data sfm_data;
+    loadSceneOpenMVG(input_file, sfm_data);
+    openmvgSfM2Jacobian(sfm_data, jacobian, options);
+    #endif // USE_OPENMVG
+     */
+    
+    
+    options._svdRemoveN = 7;
 
-	// Read reconstruction values from file (jacobian, number of cameras, .... )
-	std::string current_exec_name = argv[0];
-	std::string process_file_name = argv[2];
-	const std::string current_dir = current_exec_name.substr(0, current_exec_name.find(EXECUTABLE_FILE));
-	const std::string input_file(current_dir + process_file_name);
-	if (input_file.find(std::string(".jacob")) != std::string::npos) { // jacobian file
-		std::cout << "Loading the Jacobian from: " << input_file << '\n';
-		std::ifstream file(input_file, std::ios_base::in);
-		loadJacobian(file, std::stod(argv[1]), jacobian, options);
-	} else {	// OpenMVG file
-		#ifdef USE_OPENMVG
-			std::cout << "Loading a OpenMVG scene: " << input_file << '\n';
-			openMVG::sfm::SfM_Data sfm_data;
-			loadSceneOpenMVG(input_file, sfm_data);
-			openmvgSfM2Jacobian(sfm_data, jacobian, options);
-		#endif // USE_OPENMVG
-	}
+    // alocate output arrays
+    int num_camera_covar_values = 0.5 * options._camParams * (options._camParams + 1);   // save only half of each symmetric matrix
+    int camUnc_size = num_camera_covar_values * options._numCams;
+    double* camUnc = (double*)malloc(camUnc_size * sizeof(double));
+    assert(camUnc != NULL);
+    double* ptsUnc = (double*)malloc(6 * options._numPoints * sizeof(double));
+    assert(ptsUnc != NULL);
 
-	// alocate output arrays
-	int num_camera_covar_values = 0.5 * options._camParams * (options._camParams + 1);   // save only half of each symmetric matrix
-	int camUnc_size = num_camera_covar_values * options._numCams;
-	double* camUnc = (double*)malloc(camUnc_size * sizeof(double));
-	assert(camUnc != NULL);
-	double* ptsUnc = (double*)malloc(6 * options._numPoints * sizeof(double));
-	assert(ptsUnc != NULL);
+    // COMPUTE COVARIANCES
+    computeCovariances(options, statistic, jacobian, camUnc, ptsUnc);
 
-	// COMPUTE COVARIANCES
-	computeCovariances(options, statistic, jacobian, camUnc, ptsUnc);
-
-	// write results to the outut file 
-	saveResults(process_file_name, current_dir, options, statistic, num_camera_covar_values, camUnc, ptsUnc);
-	std::cout << "Main function... [done]\n";
-	return 0;
+    // write results to the outut file 
+    saveResults(FLAGS_out, options, statistic, num_camera_covar_values, camUnc, ptsUnc);
+    std::cout << "Main function... [done]\n";
+    return 0;
 }
 
 

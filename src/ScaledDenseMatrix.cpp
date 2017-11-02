@@ -224,14 +224,14 @@ void ScaledDenseMatrix::inv() {
 	double *sL, *sR;
 	scaleMat(LEFT, &sL, &cL);
 	scaleMat(RIGHT, &sR, &cR);
-
+        
 	// LU decomposition
 	magma_int_t     *ipiv, iunused[1], info;
 	TESTING_CHECK(magma_imalloc_cpu(&ipiv, MINIMUM(_nr, _nc)));
 	lapackf77_dgetrf(&(_nr), &(_nc), _sA, &(_nr), ipiv, &info);
 	if (info != 0)
 		std::cerr << "Lapack LU decomposition error.";
-
+        
 	// init size of the work array
 	double *work, unused[1] = { 0 }, tmp = 0;
 	magma_int_t lwork = -1;
@@ -240,13 +240,13 @@ void ScaledDenseMatrix::inv() {
 		std::cerr << "Lapack init work array size error.";
 	lwork = static_cast<int>(tmp);
 	TESTING_CHECK(magma_dmalloc_cpu(&work, static_cast<int>(lwork)));
-
+        
 	// inverse
 	lapackf77_dgetri(&(_nr), _sA, &(_nr), ipiv, work, &lwork, &info);
 	if (info != 0)
 		std::cerr << "Lapack inverse error.";
 	_cA = 1 / _cA;
-	
+        
 	// inverse: cL -> icL, sL -> isL, .... cR -> icR, sR -> isR
 	cL = 1 / cL;
 	for (int i = 0; i < nrows(); ++i)

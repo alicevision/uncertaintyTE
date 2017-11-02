@@ -1,4 +1,6 @@
 build*/
+build_linux*/
+build_win*/
 Build*/
 build_linux*/
 bin*/
@@ -8,7 +10,7 @@ BUILD_*/
 vs2015*/
 *.props
 libs*/
-
+nbproject*/
 
 #Ignore thumbnails created by Windows
 Thumbs.db

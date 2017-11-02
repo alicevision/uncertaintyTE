@@ -191,6 +191,7 @@ void buildJacobian(ceres::examples::BALProblem *bal_problem, ceres::CRSMatrix &j
 
 	// Configure covarivnce engine ( find the indexes of the most distatnt points etc. )
 	setPts2Fix(opt, bal_problem->num_points(), bal_problem->mutable_points());
+
 	opt._numCams = bal_problem->num_cameras();
 	opt._camParams = bal_problem->camera_block_size();
 	opt._numPoints = bal_problem->num_points();
