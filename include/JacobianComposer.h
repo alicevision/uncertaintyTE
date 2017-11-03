@@ -24,8 +24,12 @@ public:
     ~JacobianComposer();
     
     // functions 
-    void scene2Jacobian(Scene &scene, ceres::CRSMatrix &jacobian, cov::Options &options);
+    void scene2Jacobian(std::string cam_model, Scene &scene, ceres::CRSMatrix &jacobian, cov::Options &options);
+    
 private:
+    // functions 
+    void findPts2Fix(cov::Options &opt, int n, map<int, Point3D> &pts3D);
+    void Scene2Problem(Scene &s, ceres::Problem* problem);
 
 };
 

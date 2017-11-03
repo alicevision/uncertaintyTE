@@ -68,7 +68,7 @@ void loadJacobian(std::ifstream& file, int algorithm, ceres::CRSMatrix& jacobian
 void saveResults(const std::string& out_dir, cov::Options& options, cov::Statistic& statistic,
 	int num_camera_covar_values, double* camUnc, double *ptsUnc) {
 	std::cout << "\nPrinting the results to file... ";
-	std::ofstream outfile(out_dir + std::string("output.cov"));
+	std::ofstream outfile(out_dir + std::string("/output.cov"));
 	outfile << "# ---- Covariance v0.1 ----\n";
 	outfile << "# Number of cameras: " << options._numCams << "\n";
 	outfile << "# Number of camera parameters: " << options._camParams << "\n";

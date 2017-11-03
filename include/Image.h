@@ -43,8 +43,14 @@ public:
     double _C[3];    // image center
     vector<Point2D> _point2D;
     
+    // camera parameters --> replace with proper models
+    double _f;      // focal length
+    double _r[2];   // radial distortion
+    
     Image();
     virtual ~Image();
+    
+    void qt2aaRC();  // recompute the Colmap input (quatrnion and translation) to the model parameters 
 private:
 
 };

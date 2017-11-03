@@ -14,7 +14,7 @@ Optional:
 Installation on Windows: 
 This tutorial shows how to create the project in Visual Studio by Cmake. At first, you need to download the repository. You can use any GIT client for that. We recommend the GitExtensions which is simple and intuitive. 
 1) Download the precompiled libraries or compile the libs described in the Cmake
-2) Build the project, compile it and try it by calling 'uncertatinty.exe 2 in/01_Cube.jacob' in command line
+2) Build the project, compile it and try it by calling 'uncertatinty.exe -in=./in/01_Cube.jacob' in command line
 
 
 Installation on Linux:
@@ -23,7 +23,7 @@ Installation on Linux:
 3) Install all the required libraries (described in cmake output)
 4) Download and compile Magma (http://icl.cs.utk.edu/magma/software/index.html)
    Set up the root of the source code and the directory with compiled libraries. It is not necessary to install magma.
-5) Try the framework by calling 'uncertatinty 2 Release/in/01_Cube.jacob'
+5) Try the framework by calling 'uncertatinty -in=./Release/in/01_Cube.jacob'
 
 
 -----------------------------------------------------

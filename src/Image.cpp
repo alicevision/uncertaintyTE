@@ -28,6 +28,14 @@ Image::Image() {}
 
 Image::~Image() {}
 
+
+void Image::qt2aaRC(){
+    
+    
+}
+
+
+
 ostream& operator<< (ostream& out, const Image& i){
     out << "> Image [id:" << i._id << ", nobs:" << i._point2D.size() 
             << ", q:" << i._q[0] << "," << i._q[1] << "," << i._q[2] << "," << i._q[3] 
@@ -43,13 +51,3 @@ ostream& operator<< (ostream& out, const Image& i){
     }
     return out ;
 };
-
-//int _id;
-//    int _cam_id;
-//    double _q[4];    // quaternion (Eigen format)
-//    double _R[9];    // rotation matrix (Eigen format)
-//    double _aa[3];   // Euler vector - angle * axis 
-//    
-//    double _t[3];    // image translation 
-//    double _C[3];    // image center
-//    vector<Point2D> point2D;

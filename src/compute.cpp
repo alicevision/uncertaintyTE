@@ -462,7 +462,10 @@ void computeCovariances(cov::Options &options, cov::Statistic &statistic, ceres:
        
 	// Create sparse matrix with separated scale coefficient 
 	SSM *J = new SSM(jacobian.num_rows, jacobian.num_cols, jacobian.rows.data(), jacobian.cols.data(), jacobian.values.data());        
-	
+	J->printBlock2Matlab3("J",0,0,1000,1000);
+        return;
+        
+        
         // Main algorithm
 	int Ncams = options._numCams * options._camParams;
 	int Npar = Ncams + options._numPoints * 3;

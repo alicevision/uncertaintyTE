@@ -29,6 +29,9 @@
             "the format of input data (e.g. COLMAP, JACOBIAN, OPENMVG ...)\n");
     DEFINE_string(out, "/media/policmic/DATA/MichalPolic/data/RedundantSFM/colmap_sparse_reconstruction",
             "path to output covariance files\n");
+    DEFINE_string(cam, "RADIAL",
+            "the model of camera ( now just RADIAL ... in future PINHOLE, SIMPLE_RADIAL, OPENCV, FULL_OPENCV, ...)\n");
+    
 #endif
 
 
@@ -39,8 +42,8 @@ Main function called from command line: unc.exe
   In: 
 	- algorithm: 0 = SVD_QR_ITERATION, 1 = SVD_DEVIDE_AND_CONQUER, 2 = TAYLOR_EXPANSION
     - jacobian/openMVG_scene: path to the file without spaces
-  Example Jacobain: unc.exe 2 input/myFile.jacob
-  Example OpenMVG:  unc.exe 2 input/myFile.[bin,json,xml]
+  Example Jacobain: unc.exe -in=input/myFile.jacob
+  Example OpenMVG:  unc.exe -in=input/myFile.[bin,json,xml]  // TODO ...
 */
 int main(int argc, char* argv[]) {
     google::ParseCommandLineFlags(&argc, &argv, true);
@@ -55,14 +58,12 @@ int main(int argc, char* argv[]) {
         Scene scene = Scene();
         if ( !io->read( FLAGS_in, scene ) ) 
             exit(1);
-        cout << scene;
-        
         JacobianComposer jc = JacobianComposer();
-        jc.scene2Jacobian(scene, jacobian, options);
+        jc.scene2Jacobian( FLAGS_cam, scene, jacobian, options );
         
     }else{
-        std::ifstream file(FLAGS_in, std::ios_base::in);
-        loadJacobian(file, 2, jacobian, options);       // FLAGS_algorithm = 2
+        std::ifstream in_file(FLAGS_in, std::ios_base::in);
+        loadJacobian(in_file, 2, jacobian, options);       // FLAGS_algorithm = 2
     }
     
     // TODO: add to the loader

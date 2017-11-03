@@ -40,7 +40,10 @@ public:
     double _r[2] = {0,0};    // radial distortion 1-2 params
     
     Camera();
-    ~Camera();
+    virtual ~Camera();
+    
+    //virtual int nParameters();
+    //virtual double* getParameters();
 private:
 
 };

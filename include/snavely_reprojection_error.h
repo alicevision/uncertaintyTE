@@ -106,9 +106,86 @@ else {
 }
 }
 
+template<typename T> inline
+void AngleAxisRotatePointRC(const T aa[3], const T pt[3], T result[3]) {
+    const T theta2 = DotProduct(aa, aa);
+    if (theta2 > T(std::numeric_limits<double>::epsilon())) {
+            const T theta = sqrt(theta2);
+            const T costheta = cos(theta);
+            const T sintheta = sin(theta);
+            const T theta_inverse = 1.0 / theta;
+
+            const T w[3] = {aa[0] * theta_inverse,
+                            aa[1] * theta_inverse,
+                            aa[2] * theta_inverse };
+
+            // Cross product
+            const T w_cross_pt[3] = {   w[1] * pt[2] - w[2] * pt[1],
+                                        w[2] * pt[0] - w[0] * pt[2],
+                                        w[0] * pt[1] - w[1] * pt[0] };
+            const T tmp = (w[0] * pt[0] + w[1] * pt[1] + w[2] * pt[2]) * (T(1.0) - costheta);
+
+            result[0] = pt[0] * costheta + w_cross_pt[0] * sintheta + w[0] * tmp;
+            result[1] = pt[1] * costheta + w_cross_pt[1] * sintheta + w[1] * tmp;
+            result[2] = pt[2] * costheta + w_cross_pt[2] * sintheta + w[2] * tmp;
+    }
+    else {
+            const T w_cross_pt[3] = {   aa[1] * pt[2] - aa[2] * pt[1],
+                                        aa[2] * pt[0] - aa[0] * pt[2],
+                                        aa[0] * pt[1] - aa[1] * pt[0] };
+            result[0] = pt[0] + w_cross_pt[0];
+            result[1] = pt[1] + w_cross_pt[1];
+            result[2] = pt[2] + w_cross_pt[2];
+    }
+}
+
+
 
 namespace examples {
 
+    
+struct PinholeCameraReprojectionError {
+    PinholeCameraReprojectionError(const double observed_x, const double observed_y, const double f, const double *r) : 
+        _observed_x(observed_x), _observed_y(observed_y), _f(f), _r1(r[0]), _r2(r[1]) {}
+
+    template <typename T>
+    bool operator()(const T* const aa, const T* const C, const T* const point, T* residuals) const {
+        T p[3];
+        T pC[3];
+        
+        pC[0] = point[0] - C[0];
+        pC[1] = point[1] - C[1];
+        pC[2] = point[2] - C[2];
+        
+        ceres::AngleAxisRotatePointRC(aa, pC, p);
+        T x = p[0] / p[2];
+        T y = p[1] / p[2];
+        
+        T dist = x*x + y*y;
+        T distortion = T(1.0) + T(_r1)*dist + T(_r2)*dist*dist;
+        T predicted_x = T(_f) * x * distortion;
+        T predicted_y = T(_f) * y * distortion;
+
+        residuals[0] = predicted_x - T(_observed_x); 
+        residuals[1] = predicted_y - T(_observed_y);
+        return true;
+    }
+
+  // Factory to hide the construction of the CostFunction object from the client code.
+  static ceres::CostFunction* Create(const double observed_x, const double observed_y, const double f, const double *r) {
+    return (new ceres::AutoDiffCostFunction<PinholeCameraReprojectionError, 2, 3, 3, 3>(new PinholeCameraReprojectionError(observed_x, observed_y, f, r)));
+  }
+  double _observed_x;
+  double _observed_y;
+  double _f;
+  double _r1;
+  double _r2;
+};
+
+    
+    
+
+    
 // Templated pinhole camera model for used with Ceres.  The camera is
 // parameterized using 9 parameters: 3 for rotation, 3 for translation, 1 for
 // focal length and 2 for radial distortion. The principal point is not modeled
