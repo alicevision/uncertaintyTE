@@ -24,3 +24,16 @@ Installation on Linux:
 4) Download and compile Magma (http://icl.cs.utk.edu/magma/software/index.html)
    Set up the root of the source code and the directory with compiled libraries. It is not necessary to install magma.
 5) Try the framework by calling 'uncertatinty 2 Release/in/01_Cube.jacob'
+
+
+-----------------------------------------------------
+
+Output:
+The covariance matrices are symmetric. Therfore, our output is just the upper triangle of their covariance matrices.
+So, the camera which is in our model represented by 9 parameters has upper triangle composed of 45 values and the 
+covariances of points are represented by 6 values:
+-----------
+| 1  2  3 |
+| 2  4  5 |
+| 3  5  6 |
+----------- 

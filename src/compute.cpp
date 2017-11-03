@@ -24,7 +24,7 @@ double timeDuration(tp from, tp to) {
 }
 #else
 double timeDuration(tp from, tp to) {
-	return 0;
+	return 0.0;
 }
 #endif
 
@@ -124,14 +124,14 @@ void teInverse(tp *s, int N, cov::Options &options, cov::Statistic &statistic, S
 #ifdef USE_MATLAB
 	mexPrintf("using lambda: %e\n\n", lambda);
 #endif
-        
+
 	// Z -> iZ
 	iZ->inv();
 	*s = t(*s, "Taylor expansion ... ", &(statistic.timeInvZ));
 #ifdef USE_MATLAB
 	mexPrintf("Taylor expansion ... ");
 #endif
-        
+
 	// TE
 	double old_change = DBL_MAX, k, change;
 	SDM *iZorig = new SDM(*iZ);
@@ -459,11 +459,10 @@ void computeCovariances(cov::Options &options, cov::Statistic &statistic, ceres:
 
 	cout << "\n------ " << algorihm2str2(options._algorithm) << " ------\n";
 	tp s = Clock::now(); tp s1 = s; cout << "Creating sJ ... ";
-
+       
 	// Create sparse matrix with separated scale coefficient 
-	SSM *J = new SSM(jacobian.num_rows, jacobian.num_cols, jacobian.rows.data(), jacobian.cols.data(), jacobian.values.data());
-
-        
+	SSM *J = new SSM(jacobian.num_rows, jacobian.num_cols, jacobian.rows.data(), jacobian.cols.data(), jacobian.values.data());        
+	
         // Main algorithm
 	int Ncams = options._numCams * options._camParams;
 	int Npar = Ncams + options._numPoints * 3;
@@ -489,9 +488,8 @@ void computeCovariances(cov::Options &options, cov::Statistic &statistic, ceres:
 		fixPts(&s, options._pts2fix, options, statistic, J);
 		SSM *Y = new SSM();
 		iZ = new SDM(Ncams, Ncams);
-		composeZ(&s, options, statistic, *J, &diagRightScaleJ, Y, iZ);   // "iZ" contains Z
+		composeZ(&s, options, statistic, *J, &diagRightScaleJ, Y, iZ);   // "iZ" contains Z		
 		teInverse(&s, Ncams, options, statistic, iZ);		// "iZ" is inversed to iZ
-                return;
 		removeScaleJ4Z(&s, diagRightScaleJ, options, iZ, camUnc);
 		memset(ptsUnc, 0, 6 * (options._numPoints-3) * sizeof(double));
 		delete Y;

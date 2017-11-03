@@ -175,7 +175,7 @@ void ScaledSparseMatrix::printBlock2Matlab2(char* name, int row_from, int col_fr
 		for (int j = row(i); j < row(i + 1); j++) {
 			if (col(j) >= col_from && col(j) < col_to)
 				mexPrintf("%s(%d,%d) = %e;",name,(i - row_from + 1),(col(j) - col_from + 1), val(j));
-			mexPrintf("\n");
+			//mexPrintf("\n");
 		}
 	}
 	mexPrintf("\n\n\n");
