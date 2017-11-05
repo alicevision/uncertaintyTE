@@ -144,8 +144,8 @@ void AngleAxisRotatePointRC(const T aa[3], const T pt[3], T result[3]) {
 namespace examples {
 
     
-struct PinholeCameraReprojectionError {
-    PinholeCameraReprojectionError(const double observed_x, const double observed_y, const double f, const double *r) : 
+struct SimplePinholeCameraReprojectionError {
+	SimplePinholeCameraReprojectionError(const double observed_x, const double observed_y, const double f, const double *r) :
         _observed_x(observed_x), _observed_y(observed_y), _f(f), _r1(r[0]), _r2(r[1]) {}
 
     template <typename T>
@@ -173,7 +173,7 @@ struct PinholeCameraReprojectionError {
 
   // Factory to hide the construction of the CostFunction object from the client code.
   static ceres::CostFunction* Create(const double observed_x, const double observed_y, const double f, const double *r) {
-    return (new ceres::AutoDiffCostFunction<PinholeCameraReprojectionError, 2, 3, 3, 3>(new PinholeCameraReprojectionError(observed_x, observed_y, f, r)));
+    return (new ceres::AutoDiffCostFunction<SimplePinholeCameraReprojectionError, 2, 3, 3, 3>(new SimplePinholeCameraReprojectionError(observed_x, observed_y, f, r)));
   }
   double _observed_x;
   double _observed_y;
@@ -182,8 +182,124 @@ struct PinholeCameraReprojectionError {
   double _r2;
 };
 
+
+struct PinholeCameraReprojectionError {
+	PinholeCameraReprojectionError(const double observed_x, const double observed_y, const double *r) :
+		_observed_x(observed_x), _observed_y(observed_y), _r1(r[0]), _r2(r[1]) {}
+
+	template <typename T>
+	bool operator()(const T* const aa, const T* const C, 
+		const T* const f, const T* const point, T* residuals) const {
+		T p[3];
+		T pC[3];
+
+		pC[0] = point[0] - C[0];
+		pC[1] = point[1] - C[1];
+		pC[2] = point[2] - C[2];
+
+		ceres::AngleAxisRotatePointRC(aa, pC, p);
+		T x = p[0] / p[2];
+		T y = p[1] / p[2];
+
+		T dist = x*x + y*y;
+		T distortion = T(1.0) + T(_r1)*dist + T(_r2)*dist*dist;
+		T predicted_x = f[0] * x * distortion;
+		T predicted_y = f[0] * y * distortion;
+
+		residuals[0] = predicted_x - T(_observed_x);
+		residuals[1] = predicted_y - T(_observed_y);
+		return true;
+	}
+
+	// Factory to hide the construction of the CostFunction object from the client code.
+	static ceres::CostFunction* Create(const double observed_x, const double observed_y, const double *r) {
+		return (new ceres::AutoDiffCostFunction<PinholeCameraReprojectionError, 2, 3, 3, 1, 3>(new PinholeCameraReprojectionError(observed_x, observed_y, r)));
+	}
+	double _observed_x;
+	double _observed_y;
+	double _r1;
+	double _r2;
+};
+
     
+struct SimpleRadialCameraReprojectionError {
+	double _observed_x;
+	double _observed_y;
+	
+	SimpleRadialCameraReprojectionError(const double observed_x, const double observed_y) : _observed_x(observed_x), _observed_y(observed_y) {}
+
+	// The generic residula function
+	template <typename T>
+	bool operator()(const T* const aa,  const T* const C, 
+					const T* const f,   const T* const r, 
+					const T* const point, T* residuals) const {
+		T p[3];
+		T pC[3];
+
+		pC[0] = point[0] - C[0];
+		pC[1] = point[1] - C[1];
+		pC[2] = point[2] - C[2];
+
+		ceres::AngleAxisRotatePointRC(aa, pC, p);
+		T x = p[0] / p[2];
+		T y = p[1] / p[2];
+
+		T dist = x*x + y*y;
+		T distortion = T(1.0) + r[0]*dist;
+		T predicted_x = f[0] * x * distortion;
+		T predicted_y = f[0] * y * distortion;
+
+		residuals[0] = predicted_x - T(_observed_x);
+		residuals[1] = predicted_y - T(_observed_y);
+		return true;
+	}
+
+	// Factory to hide the construction of the CostFunction object from the client code.
+	static ceres::CostFunction* Create(const double observed_x, const double observed_y) {
+		return (new ceres::AutoDiffCostFunction<SimpleRadialCameraReprojectionError, 2, 3, 3, 1, 1, 3>(
+			new SimpleRadialCameraReprojectionError(observed_x, observed_y)));
+	}
+};
     
+
+struct RadialCameraReprojectionError {
+	double _observed_x;
+	double _observed_y;
+
+	RadialCameraReprojectionError(const double observed_x, const double observed_y) : _observed_x(observed_x), _observed_y(observed_y) {}
+
+	// The generic residula function
+	template <typename T>
+	bool operator()(const T* const aa, const T* const C,
+		const T* const f, const T* const r,
+		const T* const point, T* residuals) const {
+		T p[3];
+		T pC[3];
+
+		pC[0] = point[0] - C[0];
+		pC[1] = point[1] - C[1];
+		pC[2] = point[2] - C[2];
+
+		ceres::AngleAxisRotatePointRC(aa, pC, p);
+		T x = p[0] / p[2];
+		T y = p[1] / p[2];
+
+		T dist = x*x + y*y;
+		T distortion = T(1.0) + r[0] * dist + r[1] * dist*dist;
+		T predicted_x = f[0] * x * distortion;
+		T predicted_y = f[0] * y * distortion;
+
+		residuals[0] = predicted_x - T(_observed_x);
+		residuals[1] = predicted_y - T(_observed_y);
+		return true;
+	}
+
+	// Factory to hide the construction of the CostFunction object from the client code.
+	static ceres::CostFunction* Create(const double observed_x, const double observed_y) {
+		return (new ceres::AutoDiffCostFunction<RadialCameraReprojectionError, 2, 3, 3, 1, 2, 3>(
+			new RadialCameraReprojectionError(observed_x, observed_y)));
+	}
+};
 
     
 // Templated pinhole camera model for used with Ceres.  The camera is

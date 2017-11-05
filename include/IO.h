@@ -38,8 +38,13 @@ class IO {
 public:
     virtual int data_type() = 0;
     virtual bool read(const string input_dir, Scene& scene) = 0;
-    virtual bool write(const string output_dir, Scene& scene) = 0;
+	virtual bool write(const string output_dir, Scene& scene) = 0;
+
+	bool writeCov2File(const string output_dir, Scene& scene, cov::Statistic& statistic);
 private:
+
+	bool saveResults(const std::string& out_dir, cov::Options& options, cov::Statistic& statistic,
+		int num_camera_covar_values, double* camUnc, double *ptsUnc);
 
 };
 

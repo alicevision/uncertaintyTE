@@ -34,10 +34,12 @@ public:
     bool write(const string output_dir, Scene& scene);
     
     int data_type();
-    
+	
 private:
     string _jacobian_path;
     int _data_type = JACOBIAN_DATA;
+
+	bool loadJacobian(std::ifstream& file, int algorithm, ceres::CRSMatrix& jacobian, cov::Options& options);
 };
 
 #endif /* JACOBIANIO_H */

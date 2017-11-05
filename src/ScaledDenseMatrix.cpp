@@ -118,6 +118,7 @@ void ScaledDenseMatrix::printBlock2Matlab2(char* name, int row_from, int col_fro
 	}
 	mexPrintf("];\n\n\n");
 }
+#endif
 
 void ScaledDenseMatrix::printBlock2Matlab3(char* name, int row_from, int col_from, int row_to, int col_to) {
 	std::ofstream file(std::string(name) + std::string(".txt"));
@@ -130,7 +131,7 @@ void ScaledDenseMatrix::printBlock2Matlab3(char* name, int row_from, int col_fro
 	file << "];";
 	file.close();
 }
-#endif
+
 
 /*
 Scale the matrix by diagonal matrix represented by A = cLR * sLR * sA

@@ -36,6 +36,8 @@ public:
     
     Point2D();
     ~Point2D();
+
+	bool operator < (const Point2D& p) const;
 private:
 
 };

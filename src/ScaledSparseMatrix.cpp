@@ -309,8 +309,10 @@ void ScaledSparseMatrix::scaleMat(int type, double **sLR, double *cLR) {
 
 		// scale matrix
 		for (int i = 0; i < nrows(); i++) {
-			for (int j = row(i); j < row(i + 1); j++)
-				_sA->val[j] *= 1 / (*sLR)[i];
+			for (int j = row(i); j < row(i + 1); j++) {
+				if ((*sLR)[i] != 0)
+					_sA->val[j] *= 1 / (*sLR)[i];
+			}
 			//(*sLR)[i] = (*sLR)[i] / asum;
 		}
 		//*cLR = asum;
@@ -333,8 +335,10 @@ void ScaledSparseMatrix::scaleMat(int type, double **sLR, double *cLR) {
 		//asum = sqrt(asum);
 
 		// scale matrix
-		for (int i = 0; i < nnz(); i++)
-			_sA->val[i] *= 1 / (*sLR)[col(i)];
+		for (int i = 0; i < nnz(); i++) {
+			if((*sLR)[col(i)] != 0)
+				_sA->val[i] *= 1 / (*sLR)[col(i)];
+		}	
 		//for (int i = 0; i < ncols(); i++)
 		//	(*sLR)[i] = (*sLR)[i] / asum;
 		//*cLR = asum;

@@ -69,6 +69,7 @@ bool ColmapIO::readCameras(const string file_path, Scene& scene){
     return true;
 }
 
+// Images must be readed after the cameras -> camera f,r is included inside for now
 bool ColmapIO::readImages(const string file_path, Scene& scene){
     ifstream file(file_path, ios_base::in);
     if (!file.good()) {
@@ -100,6 +101,14 @@ bool ColmapIO::readImages(const string file_path, Scene& scene){
                     i._point2D.push_back(p2d);
             }
             
+			// TODO: change this model of camera -> e.g. one f, r for more cameras 
+			i._f = scene._cameras[i._cam_id]._f;
+			i._r[0] = scene._cameras[i._cam_id]._r[0];
+			i._r[1] = scene._cameras[i._cam_id]._r[1];
+
+			// Fill values not mentioned in images.txt
+			i.qt2aaRC();
+
             // save image to scene
             scene._images[i._id] = i;
         }

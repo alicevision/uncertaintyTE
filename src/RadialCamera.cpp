@@ -21,7 +21,7 @@ int RadialCamera::nParameters(){
     return _num_parameters;
 }
 
-double* RadialCamera::getParameters(){
-
-    // TODO: ... change the camera and image class
-}
+//double* RadialCamera::getParameters(){
+//
+//    // TODO: ... change the camera and image class
+//}

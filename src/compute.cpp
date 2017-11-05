@@ -75,23 +75,33 @@ void iZupdate(SDM *iZ, double coeff, SDM *iZadd) {
 }
 
 void composeZ(tp *s, cov::Options &options, cov::Statistic &statistic, SSM &J, double **diagRightScaleJ, SSM *Y, SDM *Z) {
+	J.printBlock2Matlab3("Jbs", 0, 0, J.nrows(), J.ncols());
+	
 	// Scale Jacobian from left by a vector
 	double csJ = 1;
 	J.scaleMat(RIGHT, diagRightScaleJ, &csJ);
+	J.printBlock2Matlab3("Jscale", 0, 0, J.nrows(), J.ncols());
+
 	for (int i = 0; i < J.ncols(); ++i)
 		(*diagRightScaleJ)[i] = 1 / (csJ * (*diagRightScaleJ)[i]);
 	*s = t(*s, "Computing sM ... ", &(statistic.timeNormJ));
 
 	// Compute cJJ * sJJ = sJ'sJ
 	SSM Jt(J.trn());		// create transpose matix and save reference to it
+	Jt.printBlock2Matlab3("Jt", 0, 0, Jt.nrows(), Jt.ncols());
+
 	SSM M(Jt * J);
 	*s = t(*s, "Split sM -> sU, sW, sV ... ", &(statistic.timeMultiplyJJ));
+	M.printBlock2Matlab3("M", 0, 0, M.nrows(), M.ncols());
 
 	// Split cJJ -> U, W, V
 	SSM *U = new SSM(), *W = new SSM(), *V = new SSM(), *iV = new SSM();
 	int camBlockSize = options._numCams * options._camParams;
 	M.splitTo3Blocks(camBlockSize, camBlockSize, U, W, V);
 	*s = t(*s, "Computing siV ... ", &(statistic.timeSplitJJ));
+	U->printBlock2Matlab3("U", 0, 0, U->nrows(), U->ncols());
+	W->printBlock2Matlab3("W", 0, 0, W->nrows(), W->ncols());
+	V->printBlock2Matlab3("V", 0, 0, V->nrows(), V->ncols());
 
 	// Compute inverse of V: sV -> isV
 	V->inv3x3blockSymmDiag(iV);
@@ -434,7 +444,11 @@ void composeCamCovariances(cov::Options &opt, std::vector<int> &cams, SDM *iZ, c
 	}
 }
 
-void fillPtUnc2OutArray(int ptId, Eigen::MatrixXd &Sigma, double *out) {
+void fillPtUnc2OutArray(int ptId, Eigen::MatrixXd &Sigma, cov::Options &opt, double *out) {
+	// fixed points offset
+	for (int i = 0; i < 3; i++)
+		if (ptId >= opt._pts2fix[i]){ ptId++; }
+
 	int offset = ptId * 6;  // one point is represented by 6 vlaues 
 	out[offset + 0] = Sigma(0, 0);
 	out[offset + 1] = Sigma(0, 1);
@@ -462,9 +476,7 @@ void computeCovariances(cov::Options &options, cov::Statistic &statistic, ceres:
        
 	// Create sparse matrix with separated scale coefficient 
 	SSM *J = new SSM(jacobian.num_rows, jacobian.num_cols, jacobian.rows.data(), jacobian.cols.data(), jacobian.values.data());        
-	J->printBlock2Matlab3("J",0,0,1000,1000);
-        return;
-        
+	J->printBlock2Matlab3("J",0,0,J->nrows(),J->ncols());
         
         // Main algorithm
 	int Ncams = options._numCams * options._camParams;
@@ -489,10 +501,16 @@ void computeCovariances(cov::Options &options, cov::Statistic &statistic, ceres:
 	case TAYLOR_EXPANSION:
 		s = t(s, "Fix pts sJ ... ", &(statistic.timeCreateJ));
 		fixPts(&s, options._pts2fix, options, statistic, J);
+		J->printBlock2Matlab3("Jfix", 0, 0, J->nrows(), J->ncols());
+
 		SSM *Y = new SSM();
 		iZ = new SDM(Ncams, Ncams);
-		composeZ(&s, options, statistic, *J, &diagRightScaleJ, Y, iZ);   // "iZ" contains Z		
+		composeZ(&s, options, statistic, *J, &diagRightScaleJ, Y, iZ);   // "iZ" contains Z	
+		iZ->printBlock2Matlab3("Z", 0, 0, iZ->nrows(), iZ->ncols());
+
 		teInverse(&s, Ncams, options, statistic, iZ);		// "iZ" is inversed to iZ
+		iZ->printBlock2Matlab3("iZ", 0, 0, iZ->nrows(), iZ->ncols());
+
 		removeScaleJ4Z(&s, diagRightScaleJ, options, iZ, camUnc);
 		memset(ptsUnc, 0, 6 * (options._numPoints-3) * sizeof(double));
 		delete Y;
@@ -509,7 +527,7 @@ void computeCovariances(cov::Options &options, cov::Statistic &statistic, ceres:
 		composeCamCovariances(options, pts2cams_ids[i], iZ, diagRightScaleJ, Sigma_cam_u);
 		pinvA = A.completeOrthogonalDecomposition().pseudoInverse();
 		Eigen::MatrixXd Sigma_pt = (pinvA * B) * Sigma_cam_u * (B.transpose() * pinvA.transpose());
-		fillPtUnc2OutArray(i, Sigma_pt, ptsUnc);
+		fillPtUnc2OutArray(i, Sigma_pt, options, ptsUnc);
 	}
 	statistic.timePtsUnc = timeDuration(s, Clock::now());
 	cout << "\nPoints uncertatitny computed in ... " << (statistic.timePtsUnc) << "s\n";

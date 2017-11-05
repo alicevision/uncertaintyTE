@@ -24,7 +24,7 @@ public:
     
     // functions 
     int nParameters();
-    double* getParameters();
+    //double* getParameters();
     
 private:
     int _num_parameters = 9;

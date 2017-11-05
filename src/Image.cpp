@@ -23,6 +23,7 @@
  */
 
 #include "Image.h"
+#include <math.h>
 
 Image::Image() {}
 
@@ -30,8 +31,28 @@ Image::~Image() {}
 
 
 void Image::qt2aaRC(){
-    
-    
+    // convert quatrnion to rotation matrix 
+	_R[0] = 1 - 2 * _q[2] * _q[2] - 2 * _q[3] * _q[3];
+	_R[1] = 2 * _q[1] * _q[2] - 2 * _q[0] * _q[3];
+	_R[2] = 2 * _q[3] * _q[1] + 2 * _q[0] * _q[2];
+	_R[3] = 2 * _q[1] * _q[2] + 2 * _q[0] * _q[3];
+	_R[4] = 1 - 2 * _q[1] * _q[1] - 2 * _q[3] * _q[3];
+	_R[5] = 2 * _q[2] * _q[3] - 2 * _q[0] * _q[1];
+	_R[6] = 2 * _q[3] * _q[1] - 2 * _q[0] * _q[2];
+	_R[7] = 2 * _q[2] * _q[3] + 2 * _q[0] * _q[1];
+	_R[8] = 1 - 2 * _q[1] * _q[1] - 2 * _q[2] * _q[2];
+	
+	// convert quatrnion to angle axis
+	double sinth = sqrt(_q[1]*_q[1] + _q[2]*_q[2] + _q[3]*_q[3]);
+	double angle = 2 * atan2(sinth, _q[0]);
+	_aa[0] = angle * _q[1] / sinth;
+	_aa[1] = angle * _q[2] / sinth;
+	_aa[2] = angle * _q[3] / sinth;
+
+    // convert translation to camera center
+	_C[0] = -(_R[0] * _t[0] + _R[3] * _t[1] + _R[6] * _t[2]);
+	_C[1] = -(_R[1] * _t[0] + _R[4] * _t[1] + _R[7] * _t[2]);
+	_C[2] = -(_R[2] * _t[0] + _R[5] * _t[1] + _R[8] * _t[2]);
 }
 
 

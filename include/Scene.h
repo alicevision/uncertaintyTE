@@ -30,15 +30,30 @@
 #include "Image.h"
 #include "Point3D.h"
 #include "Point2D.h"
+#include "uncertainty.h"
+#include "ceres/rotation.h"
 
 class Scene {
 public:
+	// input parameters
     map<int, Camera> _cameras;
     map<int, Image> _images;
     map<int, Point3D> _points3D;
-    
+
+	// internal / input parameters and settings
+	ceres::CRSMatrix _jacobian;
+	cov::Options _options;
+
+	// output scene covariances
+	double *_camUnc = NULL;
+	double *_ptsUnc = NULL;
+
+
     Scene();
     ~Scene();
+
+	int Scene::nCamCovVal();
+	void allocateOutputArrays();
 private:
 
 };

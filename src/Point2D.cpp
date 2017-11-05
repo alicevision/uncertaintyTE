@@ -28,6 +28,10 @@ Point2D::Point2D() {}
 
 Point2D::~Point2D() {}
 
+bool Point2D::operator < (const Point2D& p) const {
+	return (_point3D_id < p._point3D_id);
+}
+
 ostream& operator<< (ostream& out, const Point2D& p2D){
     out << ">>> xy: " << p2D._xy[0] << ", " << p2D._xy[1] << "-> p3D: " << p2D._point3D_id << "\n";
     return out;

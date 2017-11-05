@@ -14,22 +14,26 @@
 #ifndef JACOBIANCOMPOSER_HPP
 #define JACOBIANCOMPOSER_HPP
 
+#include <random>
+
 #include "uncertainty.h"
 #include "Scene.h"
+#include "snavely_reprojection_error.h"
 
 
 class JacobianComposer {
 public:
-    JacobianComposer();
-    ~JacobianComposer();
-    
     // functions 
-    void scene2Jacobian(std::string cam_model, Scene &scene, ceres::CRSMatrix &jacobian, cov::Options &options);
+    static void scene2Jacobian(std::string cam_model, std::string algorithm, Scene &scene);
     
 private:
+	// constructors 
+	JacobianComposer();
+	~JacobianComposer();
+
     // functions 
-    void findPts2Fix(cov::Options &opt, int n, map<int, Point3D> &pts3D);
-    void Scene2Problem(Scene &s, ceres::Problem* problem);
+	static void findPts2Fix(cov::Options &opt, int n, map<int, Point3D> &pts3D);
+	static void Scene2Problem(Scene &s, ceres::Problem* problem, std::string cam_model);
 
 };
 
