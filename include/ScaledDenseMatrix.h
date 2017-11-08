@@ -40,9 +40,9 @@ public:
 
 	void print();
 
-	void printBlock2Matlab(char* name, int row_from, int col_from, int row_to, int col_to);
-	void printBlock2Matlab2(char* name, int row_from, int col_from, int row_to, int col_to);
-	void printBlock2Matlab3(char* name, int row_from, int col_from, int row_to, int col_to);
+	void printBlock2Matlab(std::string name, int row_from, int col_from, int row_to, int col_to);
+	void printBlock2Matlab2(std::string name, int row_from, int col_from, int row_to, int col_to);
+	void printBlock2Matlab3(std::string name, int row_from, int col_from, int row_to, int col_to);
 
 	/*
 	Scale the matrix by diagonal matrix represented by A = cLR * sLR * sA

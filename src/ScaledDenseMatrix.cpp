@@ -99,7 +99,7 @@ void ScaledDenseMatrix::print() {
 }
 
 #ifdef USE_MATLAB
-void ScaledDenseMatrix::printBlock2Matlab(char* name, int row_from, int col_from, int row_to, int col_to) {
+void ScaledDenseMatrix::printBlock2Matlab(std::string name, int row_from, int col_from, int row_to, int col_to) {
 	std::cout << "\n\n" << name << " = [";
 	for (int i = row_from; i < row_to; i++) {
 		for (int j = col_from; j < col_to; j++)
@@ -109,7 +109,7 @@ void ScaledDenseMatrix::printBlock2Matlab(char* name, int row_from, int col_from
 	std::cout << "];\n\n\n";
 }
 
-void ScaledDenseMatrix::printBlock2Matlab2(char* name, int row_from, int col_from, int row_to, int col_to) {
+void ScaledDenseMatrix::printBlock2Matlab2(std::string name, int row_from, int col_from, int row_to, int col_to) {
 	mexPrintf("\n\n %s = [",name);
 	for (int i = row_from; i < row_to; i++) {
 		for (int j = col_from; j < col_to; j++)
@@ -120,7 +120,7 @@ void ScaledDenseMatrix::printBlock2Matlab2(char* name, int row_from, int col_fro
 }
 #endif
 
-void ScaledDenseMatrix::printBlock2Matlab3(char* name, int row_from, int col_from, int row_to, int col_to) {
+void ScaledDenseMatrix::printBlock2Matlab3(std::string name, int row_from, int col_from, int row_to, int col_to) {
 	std::ofstream file(std::string(name) + std::string(".txt"));
 	file << name << " = [";
 	for (int i = row_from; i < row_to; i++) {

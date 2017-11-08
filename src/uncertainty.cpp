@@ -24,15 +24,15 @@
             "algorithm for inversion of Schur complement matrix [SVD_QR_ITERATION, SVD_DEVIDE_AND_CONQUER, TAYLOR_EXPANSION]\n"
 			" -> default: TAYLOR_EXPANSION\n");
     
-	DEFINE_string(in, ".",
-			"path to input scene files (e.g. directory which contains cameras.txt, images.txt, points3D.tx for COLMAP;\n"
-			" or jacobian file <path_to_file>.jacob )\n"
-			" -> default: .\n");
+    DEFINE_string(in, ".",
+                    "path to input scene files (e.g. directory which contains cameras.txt, images.txt, points3D.tx for COLMAP;\n"
+                    " or jacobian file <path_to_file>.jacob )\n"
+                    " -> default: .\n");
    
-	// TODO: enable the openMVG
-	DEFINE_string(in_form, "COLMAP",
-            "the format of input data [COLMAP, JACOBIAN, OPENMVG]\n"
-			" -> default: COLMAP\n");
+    // TODO: enable the openMVG
+    DEFINE_string(in_form, "COLMAP",
+        "the format of input data [COLMAP, JACOBIAN, OPENMVG]\n"
+                    " -> default: COLMAP\n");
 
     DEFINE_string(out, ".",
             "path to output covariance files\n"
@@ -42,6 +42,8 @@
             "camera model ( SIMPLE_PINHOLE, PINHOLE, SIMPLE_RADIAL, RADIAL )\n"
 			" -> default: SIMPLE_RADIAL\n");
     
+    DEFINE_bool(debug, false,
+            "Print all the used matrices to txt files.\n");
 #endif
 
 
@@ -61,14 +63,17 @@ int main(int argc, char* argv[]) {
     
     // read input data
     IO* io = FactoryIO::createIO(FLAGS_in_form);
-	Scene scene = Scene();
+    Scene scene = Scene();
     if ( !io->read( FLAGS_in, scene ) ) 
         exit(1);
         
-	// compose Jacobian if not exist
-	if( scene._jacobian.values.size() == 0 )
-		JacobianComposer::scene2Jacobian( FLAGS_cam, FLAGS_alg, scene );
+    // compose Jacobian if not exist
+    if( scene._jacobian.values.size() == 0 )
+        JacobianComposer::scene2Jacobian( FLAGS_cam, FLAGS_alg, scene );
 
+    // debug -> print matrices
+    scene._options._debug = FLAGS_debug;
+    
     // alocate output arrays (_camUnc & _ptsUnc)
     scene.allocateOutputArrays();
 

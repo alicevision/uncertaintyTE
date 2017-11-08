@@ -18,6 +18,7 @@ namespace cov{
 		double _epsilon, _lambda;
 		int _algorithm, _numCams, _camParams, _numPoints, _numObs, _svdRemoveN, _maxIterTE;
 		int *_pts2fix = NULL;
+                bool _debug = false;
 
 		Options() : _lambda(-1), _svdRemoveN(-1), _maxIterTE(-1) {}
 

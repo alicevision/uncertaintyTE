@@ -158,7 +158,7 @@ void ScaledSparseMatrix::printAll() const {
 }
 
 #ifdef USE_MATLAB
-void ScaledSparseMatrix::printBlock2Matlab(char* name, int row_from, int col_from, int row_to, int col_to) {
+void ScaledSparseMatrix::printBlock2Matlab(std::string name, int row_from, int col_from, int row_to, int col_to) {
 	std::cout << "\n\n" << name << " = zeros(" << (row_to - row_from) << ", " << (col_to - col_from) << ");\n";
 	for (int i = row_from; i < row_to; i++) {
 		for (int j = row(i); j < row(i + 1); j++) {
@@ -169,7 +169,7 @@ void ScaledSparseMatrix::printBlock2Matlab(char* name, int row_from, int col_fro
 	std::cout << "\n\n\n";
 }
 
-void ScaledSparseMatrix::printBlock2Matlab2(char* name, int row_from, int col_from, int row_to, int col_to) {
+void ScaledSparseMatrix::printBlock2Matlab2(std::string name, int row_from, int col_from, int row_to, int col_to) {
 	mexPrintf("\n\n %s = zeros(%d,%d);\n", name, (row_to - row_from), (col_to - col_from));
 	for (int i = row_from; i < row_to; i++) {
 		for (int j = row(i); j < row(i + 1); j++) {
@@ -182,7 +182,7 @@ void ScaledSparseMatrix::printBlock2Matlab2(char* name, int row_from, int col_fr
 }
 #endif
 
-void ScaledSparseMatrix::printBlock2Matlab3(char* name, int row_from, int col_from, int row_to, int col_to) {
+void ScaledSparseMatrix::printBlock2Matlab3(std::string name, int row_from, int col_from, int row_to, int col_to) {
 	std::ofstream file(std::string(name) + std::string(".txt"));
 	file << name << " = zeros(" << (row_to - row_from) << ", " << (col_to - col_from) << ");\n";
 	for (int i = row_from; i < row_to; i++) {

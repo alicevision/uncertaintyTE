@@ -47,12 +47,12 @@ public:
 	// output scene covariances
 	double *_camUnc = NULL;
 	double *_ptsUnc = NULL;
-
+	
 
     Scene();
     ~Scene();
 
-	int Scene::nCamCovVal();
+	int nCamCovVal();
 	void allocateOutputArrays();
 private:
 
