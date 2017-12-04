@@ -93,30 +93,20 @@ In:
   - h_ptUnc: array which contatins covariances for points
 */
 #ifdef _WIN32
-	extern "C" __declspec(dllexport) void getCovariances(
-		cov::Options &options,
-		cov::Statistic &statistic,
-		ceres::CRSMatrix &jacobian,
-		double* points3D,
-		double* h_camUnc,
-		double* h_ptUnc)
-	{
-		JacobianComposer::findPts2Fix(options, options._numPoints, points3D); 
-		computeCovariances(options, statistic, jacobian, h_camUnc, h_ptUnc);
-	}
-#elif __linux__ 
-	void getCovariances(
-		cov::Options &options,
-		cov::Statistic &statistic,
-		ceres::CRSMatrix &jacobian,
-		double* points3D,
-		double* h_camUnc,
-		double* h_ptUnc)
-	{
-		JacobianComposer::findPts2Fix(options, options._numPoints, points3D);
-		computeCovariances(options, statistic, jacobian, h_camUnc, h_ptUnc);
-	}
+	extern "C" __declspec(dllexport)
 #endif
+void getCovariances(
+	cov::Options &options,
+	cov::Statistic &statistic,
+	ceres::CRSMatrix &jacobian,
+	double* points3D,
+	double* h_camUnc,
+	double* h_ptUnc)
+{
+	JacobianComposer::findPts2Fix(options, options._numPoints, points3D); 
+	computeCovariances(options, statistic, jacobian, h_camUnc, h_ptUnc);
+}
+
 
 
 /*

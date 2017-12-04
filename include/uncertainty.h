@@ -47,19 +47,13 @@ namespace cov{
 
 
 #ifdef _WIN32
-	extern "C" __declspec(dllexport) void getCovariances(
+	extern "C" __declspec(dllexport) 
+#endif		
+void getCovariances(
 		cov::Options &options,
 		cov::Statistic &statistic,
 		ceres::CRSMatrix &jacobian,
 		double* points3D,
 		double* h_camUnc,
 		double* h_ptUnc);
-#elif __linux__ 
-	void getCovariances(
-		cov::Options &options,
-		cov::Statistic &statistic,
-		ceres::CRSMatrix &jacobian,
-		double* points3D,
-		double* h_camUnc,
-		double* h_ptUnc);
-#endif
+
