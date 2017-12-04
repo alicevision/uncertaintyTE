@@ -14,6 +14,8 @@
 #ifndef OPENMVGIO_H
 #define OPENMVGIO_H
 
+#define _USE_MATH_DEFINES
+#include <cmath>
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -33,6 +35,7 @@ public:
 	bool read(const string input_dir, Scene& scene);
 	bool write(const string output_dir, Scene& scene);
 
+	int data_type();
 private:
 
 };

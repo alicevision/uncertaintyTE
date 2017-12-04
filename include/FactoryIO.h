@@ -25,10 +25,14 @@
 #ifndef FACTORYIO_H
 #define FACTORYIO_H
 
+#define _USE_MATH_DEFINES
+#include <cmath>
 #include <string>
+
 #include "IO.h"
 #include "ColmapIO.h"
 #include "JacobianIO.h"
+#include "OpenmvgIO.h"
 
 using namespace std;
 

@@ -189,14 +189,15 @@ OpenmvgIO::~OpenmvgIO() {}
 //	opt._maxIterTE = -1;
 //}
 
-bool OpenmvgIO::read(const string input_dir, Scene& scene) {
+bool OpenmvgIO::read(const string input_file, Scene& scene) {
 #ifdef USE_OPENMVG
-	std::cout << "Loading a OpenMVG scene: " << input_dir << '\n';
+	std::cout << "Loading a OpenMVG scene: " << input_file << '\n';
 	openMVG::sfm::SfM_Data sfm_data;
 	loadSceneOpenMVG(input_file, sfm_data);
 	scene._jacobian = ceres::CRSMatrix();
 	scene._options = cov::Options();
 	openmvgSfM2Jacobian(sfm_data, scene._jacobian, scene._options);    // work for just 9 params for camera representation
+	return true;
 #else
 	std::cerr << "Load OpenMVG library to enable it's input.";
 	exit(1);
@@ -207,3 +208,7 @@ bool OpenmvgIO::write(const string output_dir, Scene& scene) {
 	std::cerr << "OpenMVG output is not implemented yet.";
 	exit(1);
 }
+
+int OpenmvgIO::data_type() {
+	return -1;
+};

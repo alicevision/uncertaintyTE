@@ -148,7 +148,7 @@ void openmvgSfM2Jacobian(openMVG::sfm::SfM_Data &sfm_data, ceres::CRSMatrix &jac
 	openMVG::Hash_Map<openMVG::IndexT, std::vector<double> > map_poses;
 
 	// Setup Poses data & subparametrization  -- UNCOMMENT FOR RUN OPENMVG
-	/*for (openMVG::sfm::Poses::const_iterator itPose = sfm_data.poses.begin(); itPose != sfm_data.poses.end(); ++itPose){
+	for (openMVG::sfm::Poses::const_iterator itPose = sfm_data.poses.begin(); itPose != sfm_data.poses.end(); ++itPose){
 		const openMVG::IndexT indexPose = itPose->first;
 
 		const openMVG::geometry::Pose3 & pose = itPose->second;
@@ -168,7 +168,7 @@ void openmvgSfM2Jacobian(openMVG::sfm::SfM_Data &sfm_data, ceres::CRSMatrix &jac
 		double * parameter_block = &map_poses[indexPose][0];
 		problem.AddParameterBlock(parameter_block, 6);
 		parameter_blocks.push_back(parameter_block);
-	}*/
+	}
 
 	// ----------------------------------------------------------------------------------------------------
 	// TODO: covarince propagation for diferent camera types ( usually not used in practise )
@@ -210,7 +210,7 @@ void openmvgSfM2Jacobian(openMVG::sfm::SfM_Data &sfm_data, ceres::CRSMatrix &jac
 
 	// Set a LossFunction to be less penalized by false measurements
 	//  - set it to NULL if you don't want use a lossFunction.
-	ceres::LossFunction * p_LossFunction = new ceres::HuberLoss(openMVG::Square(4.0));
+	ceres::LossFunction * p_LossFunction = NULL; // new ceres::HuberLoss(openMVG::Square(4.0));
 	// TODO: make the LOSS function and the parameter an option
 
 	// For all visibility add reprojections errors:
@@ -226,15 +226,14 @@ void openmvgSfM2Jacobian(openMVG::sfm::SfM_Data &sfm_data, ceres::CRSMatrix &jac
 			// Each Residual block takes a point and a camera as input and outputs a 2
 			// dimensional residual. Internally, the cost function stores the observed
 			// image location and compares the reprojection against the observation.
-			ceres::CostFunction* cost_function = NULL;
-				//IntrinsicsToCostFunction(sfm_data.intrinsics[view->id_intrinsic].get(), observationIt.second.x);
+			ceres::CostFunction* cost_function = IntrinsicsToCostFunction(sfm_data.intrinsics[view->id_intrinsic].get(), observationIt.second.x);
 
-			/*if (cost_function)
+			if (cost_function)
 				problem.AddResidualBlock(cost_function,
 					p_LossFunction,
 					&map_intrinsics[view->id_intrinsic][0],
 					&map_poses[view->id_pose][0],
-					landmarkIt.second.X.data()); */  //Do we need to copy 3D point to avoid false motion, if failure ?
+					landmarkIt.second.X.data());   //Do we need to copy 3D point to avoid false motion, if failure ?
 		}
 		parameter_blocks.push_back(landmarkIt.second.X.data());
 		mutable_points.push_back(landmarkIt.second.X(0));

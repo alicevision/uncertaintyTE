@@ -1,4 +1,8 @@
 #pragma once
+
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 #include "uncertainty.h"
 
 #include <cuda.h>
@@ -38,8 +42,6 @@
 	#define MINIMUM std::min
 	#define MAXIMUM std::max
 #endif
-
-
 
 
 

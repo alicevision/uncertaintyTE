@@ -28,7 +28,7 @@
 IO* FactoryIO::createIO(const string type){
     string COLMAP = string("COLMAP");
     //string YASFM = string("YASFM");
-    //string OPENMVG = string("OPENMVG");
+    string OPENMVG = string("OPENMVG");
     string JACOBIAN = string("JACOBIAN");
     
     IO* io = NULL;
@@ -38,7 +38,11 @@ IO* FactoryIO::createIO(const string type){
     }else if(JACOBIAN.compare(type) == 0){
         io = new JacobianIO();
         
-    }
+	}
+	else if (OPENMVG.compare(type) == 0) {
+		io = new OpenmvgIO();
+
+	}
     // ...
     
     return io;

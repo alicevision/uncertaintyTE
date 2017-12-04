@@ -21,26 +21,21 @@
 #ifndef LOAD_CMD_IO_FLAGS
     #define LOAD_CMD_IO_FLAGS
     DEFINE_string(alg, "TAYLOR_EXPANSION",
-            "algorithm for inversion of Schur complement matrix [SVD_QR_ITERATION, SVD_DEVIDE_AND_CONQUER, TAYLOR_EXPANSION]\n"
-			" -> default: TAYLOR_EXPANSION\n");
+            "algorithm for inversion of Schur complement matrix [SVD_QR_ITERATION, SVD_DEVIDE_AND_CONQUER, TAYLOR_EXPANSION]");
     
     DEFINE_string(in, ".",
                     "path to input scene files (e.g. directory which contains cameras.txt, images.txt, points3D.tx for COLMAP;\n"
-                    " or jacobian file <path_to_file>.jacob )\n"
-                    " -> default: .\n");
+                    " or jacobian file <path_to_file>.jacob )");
    
     // TODO: enable the openMVG
     DEFINE_string(in_form, "COLMAP",
-        "the format of input data [COLMAP, JACOBIAN, OPENMVG]\n"
-                    " -> default: COLMAP\n");
+        "the format of input data [COLMAP, JACOBIAN, OPENMVG]");
 
     DEFINE_string(out, ".",
-            "path to output covariance files\n"
-			" -> default: .\n");
+            "path to output covariance files");
 
     DEFINE_string(cam, "SIMPLE_RADIAL",
-            "camera model ( SIMPLE_PINHOLE, PINHOLE, SIMPLE_RADIAL, RADIAL )\n"
-			" -> default: SIMPLE_RADIAL\n");
+            "camera model ( SIMPLE_PINHOLE, PINHOLE, SIMPLE_RADIAL, RADIAL )");
     
     DEFINE_bool(debug, false,
             "Print all the used matrices to txt files.\n");
