@@ -25,14 +25,16 @@ class JacobianComposer {
 public:
     // functions 
     static void scene2Jacobian(std::string cam_model, std::string algorithm, Scene &scene);
-    
+    static void  findPts2Fix(cov::Options &opt, int N, double* points3D);
+	static void findPts2Fix(cov::Options &opt, int n, std::map<int, Point3D> &pts3D);
+	static void findPts2Fix(cov::Options &opt, int N, std::vector<Point3D> &pts3D);
+
 private:
 	// constructors 
 	JacobianComposer();
 	~JacobianComposer();
 
     // functions 
-	static void findPts2Fix(cov::Options &opt, int n, map<int, Point3D> &pts3D);
 	static void Scene2Problem(Scene &s, ceres::Problem* problem, std::string cam_model);
 
 };

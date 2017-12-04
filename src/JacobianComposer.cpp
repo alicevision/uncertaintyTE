@@ -38,6 +38,17 @@ double dist(Point3D &p1, Point3D &p2, Point3D &p3) {
 	return dist(p1, p2) + dist(p1, p3) + dist(p2, p3);
 }
 
+void JacobianComposer::findPts2Fix(cov::Options &opt, int N, double* points3Darr) {
+	// refactor points into the structure Point3D
+	std::vector<Point3D> pts3D;
+	for (int i = 0; i < N; i++)
+		pts3D.push_back(Point3D(i, points3Darr + (3*i)));
+
+	// the simplest variant of RANSAC -> find triple of most distant points
+	findPts2Fix(opt, N, pts3D);
+}
+
+
 void JacobianComposer::findPts2Fix(cov::Options &opt, int N, map<int, Point3D> &points3D){
     // Convert points to vector
     std::vector<Point3D> pts3D = std::vector<Point3D>();
@@ -46,24 +57,29 @@ void JacobianComposer::findPts2Fix(cov::Options &opt, int N, map<int, Point3D> &
         pts3D.push_back(p3D.second);
     
     // the simplest variant of RANSAC -> find triple of most distant points
-    double max_dist = DBL_MIN;
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<> dis(0, N);
-    int i = 0;
-    while (i < 100000) {
-        int p1 = floor(dis(gen));
-        int p2 = floor(dis(gen));
-        int p3 = floor(dis(gen));
-        if (p1 == p2 || p2 == p3 || p1 == p3) continue;
-        double d = dist(pts3D[p1], pts3D[p2], pts3D[p3]);
-        if (d > max_dist) {
-                max_dist = d;
-                opt._pts2fix = new int[3]{ p1, p2, p3 };
-        }
-        i++;
-    }
-    std::sort(opt._pts2fix, opt._pts2fix + 2);
+	findPts2Fix(opt, N, pts3D);
+}
+
+void JacobianComposer::findPts2Fix(cov::Options &opt, int N, std::vector<Point3D> &pts3D) {
+	// the simplest variant of RANSAC -> find triple of most distant points
+	double max_dist = DBL_MIN;
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_real_distribution<> dis(0, N);
+	int i = 0;
+	while (i < 100000) {
+		int p1 = floor(dis(gen));
+		int p2 = floor(dis(gen));
+		int p3 = floor(dis(gen));
+		if (p1 == p2 || p2 == p3 || p1 == p3) continue;
+		double d = dist(pts3D[p1], pts3D[p2], pts3D[p3]);
+		if (d > max_dist) {
+			max_dist = d;
+			opt._pts2fix = new int[3]{ p1, p2, p3 };
+		}
+		i++;
+	}
+	std::sort(opt._pts2fix, opt._pts2fix + 2);
 }
 
 void JacobianComposer::Scene2Problem(Scene &s, ceres::Problem* problem, std::string cam_model) {

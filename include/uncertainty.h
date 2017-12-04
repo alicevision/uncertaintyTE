@@ -51,6 +51,7 @@ namespace cov{
 		cov::Options &options,
 		cov::Statistic &statistic,
 		ceres::CRSMatrix &jacobian,
+		double* points3D,
 		double* h_camUnc,
 		double* h_ptUnc);
 #elif __linux__ 
@@ -58,6 +59,7 @@ namespace cov{
 		cov::Options &options,
 		cov::Statistic &statistic,
 		ceres::CRSMatrix &jacobian,
+		double* points3D,
 		double* h_camUnc,
 		double* h_ptUnc);
 #endif
