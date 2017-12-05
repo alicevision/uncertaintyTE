@@ -687,64 +687,11 @@ IF (UNC_OPENMVG_SUPPORT)
 	ENDIF()
 ENDIF()
 
-
-
-
-
 # -----------------------------------------------------------------------------
+# Add project source code
 # -----------------------------------------------------------------------------
-# -----------------------------------------------------------------------------
+add_subdirectory(src)
 
-
-
-# -----------------------------------------------------------------------------
-# Set sources and create executable target
-# -----------------------------------------------------------------------------
-FILE(GLOB HEADERS "${PROJECT_SOURCE_DIR}/include/*.h")
-FILE(GLOB SOURCES "${PROJECT_SOURCE_DIR}/src/*.cpp")
-FILE(GLOB MODUL_DEFINITION_FILES "${PROJECT_SOURCE_DIR}/src/*.def")
-SET(INCLUDE_DIRS ${INCLUDE_DIRS} "${PROJECT_SOURCE_DIR}/include")
-SET(LIBS_FILES ${LIBS_FILES}) 
-
-# Executable - binary file with txt input
-IF(NOT UNC_BUILD_MEX) 
-    ADD_EXECUTABLE(uncertainty ${HEADERS} ${SOURCES})
-    target_include_directories(uncertainty PUBLIC ${INCLUDE_DIRS})
-    target_link_libraries (uncertainty ${LIBS_FILES})
-ENDIF(NOT UNC_BUILD_MEX)
-
-# -----------------------------------------------------------------------------
-# Library output
-# -----------------------------------------------------------------------------
-OPTION(UNC_BUILD_STATIC_LIB "Build uncertainty as static library" OFF)
-OPTION(UNC_BUILD_SHARED_LIB "Build uncertainty as shared library" OFF)
-
-IF (UNC_BUILD_STATIC_LIB)
-	ADD_LIBRARY(uncertainty_static STATIC ${HEADERS} ${SOURCES})
-	target_include_directories(uncertainty_static PUBLIC ${INCLUDE_DIRS})
-	target_link_libraries (uncertainty_static ${LIBS_FILES})
-        install(TARGETS uncertainty_static
-          DESTINATION lib
-          EXPORT uncertainty-targets
-        )
-ENDIF (UNC_BUILD_STATIC_LIB)
-
-IF (UNC_BUILD_SHARED_LIB)
-	ADD_LIBRARY(uncertainty_shared SHARED ${HEADERS} ${SOURCES})
-	target_include_directories(uncertainty_shared PUBLIC ${INCLUDE_DIRS})
-	target_link_libraries (uncertainty_shared ${LIBS_FILES})
-        install(TARGETS uncertainty_shared
-          DESTINATION lib
-          EXPORT uncertainty-targets
-        )
-ENDIF (UNC_BUILD_SHARED_LIB)
-
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
-  DESTINATION include
-  COMPONENT headers
-  FILES_MATCHING PATTERN "*.hpp" PATTERN "*.h"
-  # EXPORT uncertainty-targets
-  )
 
 # -----------------------------------------------------------------------------
 # Compile MEX
