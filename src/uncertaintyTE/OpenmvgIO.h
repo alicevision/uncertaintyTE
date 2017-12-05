@@ -32,8 +32,8 @@ public:
     ~OpenmvgIO();
     
 	// Functions and methods
-	bool read(const string input_dir, Scene& scene);
-	bool write(const string output_dir, Scene& scene);
+    bool read(const std::string& input_dir, Scene& scene);
+    bool write(const std::string& output_dir, Scene& scene);
 
 	int data_type();
 private:

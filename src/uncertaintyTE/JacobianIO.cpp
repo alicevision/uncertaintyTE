@@ -21,16 +21,16 @@ int JacobianIO::data_type(){
     return _data_type;
 }
 
-bool JacobianIO::read(const string input_dir, Scene& scene){
+bool JacobianIO::read(const std::string& input_dir, Scene& scene){
 	std::ifstream in_file(input_dir, std::ios_base::in);   // TODO: move it to the JacobianIO
-	return loadJacobian(in_file, 2, scene._jacobian, scene._options);
+    return loadJacobian(in_file, cov::eAlgorithmSvdTaylorExpansion, scene._jacobian, scene._options);
 }
 
-bool JacobianIO::write(const string output_dir, Scene& scene){
+bool JacobianIO::write(const std::string& output_dir, Scene& scene){
     exit(1);
 }
 
-bool JacobianIO::loadJacobian(std::ifstream& file, int algorithm, ceres::CRSMatrix& jacobian, cov::Options& options) {
+bool JacobianIO::loadJacobian(std::ifstream& file, cov::EAlgorithm algorithm, ceres::CRSMatrix& jacobian, cov::Options& options) {
 	if (!file.good()) {
 		std::cerr << "\nThe input file doesn't exist.\n";
 		return false;

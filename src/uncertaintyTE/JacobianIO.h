@@ -22,16 +22,14 @@
 #include "IO.h"
 #include "Scene.h"
 
-using namespace std;
-
 
 class JacobianIO : public IO {
 public:
     JacobianIO();
     ~JacobianIO();
     
-    bool read(const string input_dir, Scene& scene);
-    bool write(const string output_dir, Scene& scene);
+    bool read(const std::string& input_dir, Scene& scene);
+    bool write(const std::string& output_dir, Scene& scene);
     
     int data_type();
 	
@@ -39,7 +37,7 @@ private:
     string _jacobian_path;
     int _data_type = JACOBIAN_DATA;
 
-	bool loadJacobian(std::ifstream& file, int algorithm, ceres::CRSMatrix& jacobian, cov::Options& options);
+    bool loadJacobian(std::ifstream& file, cov::EAlgorithm algorithm, ceres::CRSMatrix& jacobian, cov::Options& options);
 };
 
 #endif /* JACOBIANIO_H */

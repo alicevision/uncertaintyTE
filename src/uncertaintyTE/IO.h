@@ -34,20 +34,21 @@
 #define JACOBIAN_DATA 1
 
 
-using namespace std;
+bool saveResults(const std::string& filepath, cov::Options& options, cov::Statistic& statistic,
+    int num_camera_covar_values, const double* camUnc, const double* ptsUnc);
+
+inline bool saveResults(const std::string& filepath, cov::Options& options, cov::Statistic& statistic, const cov::Uncertainty& uncertainty)
+{
+    return saveResults(filepath, options, statistic, uncertainty._nbCovarianceValuePerCam, &uncertainty._camerasUnc[0], &uncertainty._pointsUnc[0]);
+}
 
 class IO {
 public:
     virtual int data_type() = 0;
-    virtual bool read(const string input_dir, Scene& scene) = 0;
-	virtual bool write(const string output_dir, Scene& scene) = 0;
+    virtual bool read(const std::string& input_dir, Scene& scene) = 0;
+    virtual bool write(const std::string& output_dir, Scene& scene) = 0;
 
-	bool writeCov2File(const string output_dir, Scene& scene, cov::Statistic& statistic);
-private:
-
-	bool saveResults(const std::string& out_dir, cov::Options& options, cov::Statistic& statistic,
-		int num_camera_covar_values, double* camUnc, double *ptsUnc);
-
+    bool writeCov2File(const std::string& filepath, Scene& scene, cov::Statistic& statistic);
 };
 
 #endif /* IO_H */

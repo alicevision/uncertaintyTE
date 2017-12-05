@@ -19,36 +19,21 @@ typedef std::unique_ptr<SDM> uDM;
 typedef SparseMatrix<float, RowMajor> SM;
 typedef MatrixXf DM;
 
-#ifdef _WIN32	
-double timeDuration(tp from, tp to) {
-	return std::chrono::duration_cast<std::chrono::nanoseconds>(to - from).count() * 1e-9;
+double timeDuration(const tp& from, const tp& to) {
+    return std::chrono::duration_cast<std::chrono::milliseconds>(to - from).count() * 10e-3;
 }
-#else
-double timeDuration(tp from, tp to) {
-	return 0.0;
-}
-#endif
 
-tp t(tp s, std::string txt) {
+tp t(const tp& s, const std::string& txt) {
 	cout << " " << timeDuration(s, Clock::now()) << "s\n";
 	cout << txt;
 	return Clock::now();
 }
 
-tp t(tp s, std::string txt, double *time) {
+tp t(const tp& s, const std::string& txt, double *time) {
 	*time = timeDuration(s, Clock::now());
 	cout << " " << (*time) << "s\n";
 	cout << txt;
 	return Clock::now();
-}
-
-std::string algorihm2str2(int alg) {
-	switch (alg) {
-	case 0: return "SVD_QR_ITERATION";
-	case 1: return "SVD_DEVIDE_AND_CONQUER";
-	case 2: return "TAYLOR_EXPANSION";
-	default: return "not defined";
-	}
 }
 
 void symmetrizeMatrix(int N, SDM* A) {
@@ -200,7 +185,7 @@ void svdInverse(magma_int_t *info, int N, cov::Options &options, SSM &J, SDM *iZ
 
 	// Use Intel MKL Lapack SVD   ( aprox. 3-4x faster then GPU variant working with double )
 	switch (options._algorithm) {
-	case SVD_QR_ITERATION:				// additional memory requirements: N*N + 3*N + 2*N*32 DOUBLE
+    case cov::eAlgorithmSvdQrIteration:				// additional memory requirements: N*N + 3*N + 2*N*32 DOUBLE
 		lwork = N*N + 3 * N + 2 * N * 32;
 		hwork = (double*)malloc(lwork * sizeof(double));
 		assert(hwork != NULL);
@@ -209,7 +194,7 @@ void svdInverse(magma_int_t *info, int N, cov::Options &options, SSM &J, SDM *iZ
 		free(hwork);
 		break;
 
-	case SVD_DEVIDE_AND_CONQUER:		// additional memory requirements: 4*N*N + 7*N DOUBLE  + 8*N INT
+    case cov::eAlgorithmSvdDeviceAndconquer:		// additional memory requirements: 4*N*N + 7*N DOUBLE  + 8*N INT
 		lwork = 4 * N*N + 7 * N;
 		hwork = (double*)malloc(lwork * sizeof(double));
 		assert(hwork != NULL);
@@ -472,7 +457,7 @@ void computeCovariances(cov::Options &options, cov::Statistic &statistic, ceres:
 	magma_queue_create(info, &queue);
 	magma_print_environment();
 
-	cout << "\n------ " << algorihm2str2(options._algorithm) << " ------\n";
+    cout << "\n------ " << EAlgorithm_enumToString(options._algorithm) << " ------\n";
 	tp s = Clock::now(); tp s1 = s; cout << "Creating sJ ... ";
        
 	// Create sparse matrix with separated scale coefficient 
@@ -485,21 +470,21 @@ void computeCovariances(cov::Options &options, cov::Statistic &statistic, ceres:
 	double *diagRightScaleJ = NULL;
 	SDM *iZ = NULL;
 	switch (options._algorithm) {
-	case SVD_QR_ITERATION:
+    case cov::eAlgorithmSvdQrIteration:
 		s = t(s, "Computing sJJ ... ", &(statistic.timeCreateJ));
 		iZ = new SDM(Npar, Npar);
 		svdInverse(&info, Npar, options, *J, iZ);
 		removeScaleJ4Z(&s, diagRightScaleJ, options, iZ, camUnc);
 		break;
 
-	case SVD_DEVIDE_AND_CONQUER:
+    case cov::eAlgorithmSvdDeviceAndconquer:
 		s = t(s, "Computing sJJ ... ", &(statistic.timeCreateJ));
 		iZ = new SDM(Npar, Npar);
 		svdInverse(&info, Npar, options, *J, iZ);
 		removeScaleJ4Z(&s, diagRightScaleJ, options, iZ, camUnc);
 		break;
 
-	case TAYLOR_EXPANSION:
+    case cov::eAlgorithmSvdTaylorExpansion:
 		s = t(s, "Fix pts sJ ... ", &(statistic.timeCreateJ));
 		fixPts(&s, options._pts2fix, options, statistic, J);
 		if(options._debug) J->printBlock2Matlab3("Jfix", 0, 0, J->nrows(), J->ncols());
@@ -531,8 +516,7 @@ void computeCovariances(cov::Options &options, cov::Statistic &statistic, ceres:
 		fillPtUnc2OutArray(i, Sigma_pt, options, ptsUnc);
 	}
 	statistic.timePtsUnc = timeDuration(s, Clock::now());
-	cout << "\nPoints uncertatitny computed in ... " << (statistic.timePtsUnc) << "s\n";
-
+    cout << "\nPoints uncertainty computed in ... " << (statistic.timePtsUnc) << "s\n";
 
 	free(diagRightScaleJ);
 	delete iZ;

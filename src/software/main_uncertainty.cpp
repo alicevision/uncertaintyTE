@@ -32,7 +32,7 @@
         "the format of input data [COLMAP, JACOBIAN, OPENMVG]");
 
     DEFINE_string(out, ".",
-            "path to output covariance files");
+            "path to output covariance file");
 
     DEFINE_string(cam, "SIMPLE_RADIAL",
             "camera model ( SIMPLE_PINHOLE, PINHOLE, SIMPLE_RADIAL, RADIAL )");
@@ -68,12 +68,11 @@ int main(int argc, char* argv[]) {
 
     // debug -> print matrices
     scene._options._debug = FLAGS_debug;
-    
-    // alocate output arrays (_camUnc & _ptsUnc)
-    scene.allocateOutputArrays();
 
+    scene._uncertainty.init(scene._options);
+    
     // COMPUTE COVARIANCES
-    computeCovariances(scene._options, statistic, scene._jacobian, scene._camUnc, scene._ptsUnc);
+    computeCovariances(scene._options, statistic, scene._jacobian, &scene._uncertainty._camerasUnc[0], &scene._uncertainty._pointsUnc[0]);
 
     // write results to the outut file 
     io->writeCov2File(FLAGS_out, scene, statistic );

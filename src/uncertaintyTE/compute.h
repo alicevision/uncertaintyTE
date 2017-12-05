@@ -62,22 +62,12 @@ class ScaledSparseMatrix;
 typedef ScaledSparseMatrix SSM;
 
 //////////////////////////////////////////////////////////////////////////////////////
-// TIME MEASURING
-#ifdef _WIN32		// ORIGINAL TIME MEASURING
 #include <chrono>
 typedef std::chrono::high_resolution_clock Clock;
 typedef std::chrono::time_point<std::chrono::system_clock> s_clock;
-typedef std::chrono::steady_clock::time_point tp;
+typedef Clock::time_point tp;
 
-#else      // DISABLE <chrono> for measuring the time - time is alwas 0
-typedef double tp;
-struct Clock {
-	static double now() {
-		return 0;
-	}
-};
-#endif
-double timeDuration(tp from, tp to);
+double timeDuration(const tp& from, const tp& to);
 //////////////////////////////////////////////////////////////////////////////////////
 
 

@@ -3,18 +3,18 @@
 #include "auxCmd.h"
 
 
-bool IO::saveResults(const std::string& out_dir, cov::Options& options, cov::Statistic& statistic,
-	int num_camera_covar_values, double* camUnc, double *ptsUnc)
+bool saveResults(const std::string& filepath, cov::Options& options, cov::Statistic& statistic,
+    int num_camera_covar_values, const double* camUnc, const double* ptsUnc)
 {
 	std::cout << "\nPrinting the results to file... ";
-	std::ofstream outfile(out_dir + std::string("/output.cov"));
+    std::ofstream outfile(filepath);
 	outfile << "# ---- Covariance v0.1 ----\n";
 	outfile << "# Number of cameras: " << options._numCams << "\n";
 	outfile << "# Number of camera parameters: " << options._camParams << "\n";
 	outfile << "# Number of points in 3D: " << options._numPoints << "\n";
 	outfile << "# Number of observations: " << options._numObs << "\n";
-	outfile << "# Used algorithm: " << algorihm2str(options._algorithm) << "\n";
-	if (options._algorithm == TAYLOR_EXPANSION) {
+    outfile << "# Used algorithm: " << EAlgorithm_enumToString(options._algorithm) << "\n";
+    if (options._algorithm == cov::eAlgorithmSvdTaylorExpansion) {
 		if (statistic.fixedPts != NULL)
 			outfile << "# Fixed points: " << statistic.fixedPts[0] << ", " << statistic.fixedPts[1] << ", " << statistic.fixedPts[2] << "\n";
 		outfile << "# Used lambda: " << statistic.lambda << "\n";
@@ -51,6 +51,6 @@ bool IO::saveResults(const std::string& out_dir, cov::Options& options, cov::Sta
 }
 
 
-bool IO::writeCov2File(const string output_dir, Scene& scene, cov::Statistic& statistic) {
-	return saveResults(output_dir, scene._options, statistic, scene.nCamCovVal(), scene._camUnc, scene._ptsUnc);
+bool IO::writeCov2File(const std::string& filepath, Scene& scene, cov::Statistic& statistic) {
+    return saveResults(filepath, scene._options, statistic, scene._uncertainty._nbCovarianceValuePerCam, &scene._uncertainty._camerasUnc[0], &scene._uncertainty._pointsUnc[0]);
 }
