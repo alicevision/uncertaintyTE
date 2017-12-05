@@ -15,14 +15,6 @@
 #define DBL_MIN -1e999
 #endif
 
-std::string algorihm2str(int alg) {
-	switch (alg) {
-	case 0: return "SVD_QR_ITERATION";
-	case 1: return "SVD_DEVIDE_AND_CONQUER";
-	case 2: return "TAYLOR_EXPANSION";
-	default: return "not defined";
-	}
-}
 
 void replaceAll(std::string& str, const std::string& from, const std::string& to) {
 	if (from.empty())

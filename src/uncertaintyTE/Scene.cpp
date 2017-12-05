@@ -26,22 +26,7 @@
 
 Scene::Scene() {}
 
-Scene::~Scene() {
-	free(_camUnc);
-	free(_ptsUnc);
-}
-
-int Scene::nCamCovVal() {
-	return 0.5 * _options._camParams * (_options._camParams + 1);
-}
-
-void Scene::allocateOutputArrays() {
-	_camUnc = (double*)malloc(nCamCovVal() * _options._numCams * sizeof(double));
-	assert(_camUnc != NULL);
-	_ptsUnc = (double*)malloc(6 * _options._numPoints * sizeof(double));
-	assert(_ptsUnc != NULL);
-
-}
+Scene::~Scene() {}
 
 ostream& operator<< (ostream& out, const Scene& s){
     out << "Scene [cams:" << " - " << s._cameras.size() 

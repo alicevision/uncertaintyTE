@@ -22,7 +22,7 @@ int ColmapIO::data_type(){
     return _data_type;
 }
 
-bool ColmapIO::read(const string input_dir, Scene& scene){
+bool ColmapIO::read(const std::string& input_dir, Scene& scene){
     cout << "Read COLMAP reconstruction from: " << input_dir << "\n";
 
     if (readCameras(string(input_dir + "/cameras.txt"), scene)  && 
@@ -36,7 +36,7 @@ bool ColmapIO::read(const string input_dir, Scene& scene){
         return false;
 }
 
-bool ColmapIO::readCameras(const string file_path, Scene& scene){
+bool ColmapIO::readCameras(const std::string& file_path, Scene& scene){
     ifstream file(file_path, ios_base::in);
     if (!file.good()) {
         cerr << "\nERROR: The file '" << file_path << "' does not exist!\n";
@@ -70,7 +70,7 @@ bool ColmapIO::readCameras(const string file_path, Scene& scene){
 }
 
 // Images must be readed after the cameras -> camera f,r is included inside for now
-bool ColmapIO::readImages(const string file_path, Scene& scene){
+bool ColmapIO::readImages(const std::string& file_path, Scene& scene){
     ifstream file(file_path, ios_base::in);
     if (!file.good()) {
         cerr << "\nERROR: The file '" << file_path << "' does not exist!\n";
@@ -118,7 +118,7 @@ bool ColmapIO::readImages(const string file_path, Scene& scene){
     return true;
 }
 
-bool ColmapIO::readPoints3D(const string file_path, Scene& scene){
+bool ColmapIO::readPoints3D(const std::string& file_path, Scene& scene){
     ifstream file(file_path, ios_base::in);
     if (!file.good()) {
         cerr << "\nERROR: The file '" << file_path << "' does not exist!\n";
@@ -147,7 +147,7 @@ bool ColmapIO::readPoints3D(const string file_path, Scene& scene){
 }
 
 
-bool ColmapIO::write(const string output_dir, Scene& scene){
+bool ColmapIO::write(const std::string& output_dir, Scene& scene){
     cout << "Write COLMAP reconstruction to: " << output_dir << "\n";
     
     

@@ -16,8 +16,6 @@
 #include "IO.h"
 #include "Scene.h"
 
-using namespace std;
-
 
 class ColmapIO : public IO {
 public:
@@ -26,12 +24,12 @@ public:
     ~ColmapIO();
     
     // Functions and methods
-    bool read(const string input_dir, Scene& scene);
-    bool readCameras(const string file_path, Scene& scene);
-    bool readImages(const string file_path, Scene& scene);
-    bool readPoints3D(const string file_path, Scene& scene);
+    bool read(const std::string& input_dir, Scene& scene);
+    bool readCameras(const std::string& file_path, Scene& scene);
+    bool readImages(const std::string& file_path, Scene& scene);
+    bool readPoints3D(const std::string& file_path, Scene& scene);
     
-    bool write(const string output_dir, Scene& scene);
+    bool write(const std::string& output_dir, Scene& scene);
     
     int data_type();
     

@@ -44,17 +44,10 @@ public:
 	ceres::CRSMatrix _jacobian;
 	cov::Options _options;
 
-	// output scene covariances
-	double *_camUnc = NULL;
-	double *_ptsUnc = NULL;
-	
+    cov::Uncertainty _uncertainty;
 
     Scene();
     ~Scene();
-
-	int nCamCovVal();
-	void allocateOutputArrays();
-private:
 
 };
 

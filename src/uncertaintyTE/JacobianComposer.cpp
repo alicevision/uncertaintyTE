@@ -11,6 +11,7 @@
  * Created on November 2, 2017, 4:41 PM
  */
 
+#include "uncertainty.h"
 #include "JacobianComposer.h"
 
 #ifndef DBL_MIN
@@ -185,15 +186,8 @@ void JacobianComposer::scene2Jacobian(std::string cam_model, std::string algorit
 	s._options._numPoints = s._points3D.size();
 	s._options._numObs = n_obs;
 
-    if (algorithm.compare(std::string("SVD_QR_ITERATION")) == 0) {
-		s._options._camParams = SVD_QR_ITERATION;
-	}
-	else if (algorithm.compare(std::string("SVD_DEVIDE_AND_CONQUER")) == 0) {
-		s._options._camParams = SVD_DEVIDE_AND_CONQUER;
-	}
-	else if (algorithm.compare(std::string("TAYLOR_EXPANSION")) == 0) {
-		s._options._algorithm = TAYLOR_EXPANSION;
-	}
+    s._options._camParams = cov::EAlgorithm_stringToEnum(algorithm);
+
 	s._options._epsilon = 1e-10;
 	s._options._lambda = -1;
 	s._options._svdRemoveN = 7;

@@ -1,15 +1,15 @@
-#include "compute.h"
-#include "auxCmd.h"
-#include "FactoryIO.h"
-#include "IO.h"
-#include "ColmapIO.h"
-#include "JacobianIO.h"
-#include "JacobianComposer.h"
+#include <uncertaintyTE/compute.h>
+#include <uncertaintyTE/auxCmd.h>
+#include <uncertaintyTE/FactoryIO.h>
+#include <uncertaintyTE/IO.h>
+#include <uncertaintyTE/ColmapIO.h>
+#include <uncertaintyTE/JacobianIO.h>
+#include <uncertaintyTE/JacobianComposer.h>
 
 #ifdef USE_MATLAB
     #include <mex.h>
-    #include "matlabInterface.h"
-    #include "uncertainty_mex.h"
+    #include <uncertaintyTE/matlabInterface.h>
+    #include <uncertaintyTE/uncertainty_mex.h>
 #endif
 #ifdef _WIN32
 	#define EXECUTABLE_FILE "uncertainty.exe"
@@ -32,7 +32,7 @@
         "the format of input data [COLMAP, JACOBIAN, OPENMVG]");
 
     DEFINE_string(out, ".",
-            "path to output covariance files");
+            "path to output covariance file");
 
     DEFINE_string(cam, "SIMPLE_RADIAL",
             "camera model ( SIMPLE_PINHOLE, PINHOLE, SIMPLE_RADIAL, RADIAL )");
@@ -68,43 +68,17 @@ int main(int argc, char* argv[]) {
 
     // debug -> print matrices
     scene._options._debug = FLAGS_debug;
-    
-    // alocate output arrays (_camUnc & _ptsUnc)
-    scene.allocateOutputArrays();
 
+    scene._uncertainty.init(scene._options);
+    
     // COMPUTE COVARIANCES
-    computeCovariances(scene._options, statistic, scene._jacobian, scene._camUnc, scene._ptsUnc);
+    computeCovariances(scene._options, statistic, scene._jacobian, &scene._uncertainty._camerasUnc[0], &scene._uncertainty._pointsUnc[0]);
 
     // write results to the outut file 
     io->writeCov2File(FLAGS_out, scene, statistic );
 
     std::cout << "Main function... [done]\n";
     return 0;
-}
-
-
-/*
-Library function for C++ call: getCovariances( ... )
-In:
-  - options: informations about the reconstruction (numCams, camParams, numPoints, numObs)
-  - statistic: blank object for the output statistics
-  - jacobian: sparse matrix (form Ceres-solver) with jacobian ( you can use the output of the computation of jacobian in Ceres as the input )
-  - h_camUnc: array which contatins covariances for cameras
-  - h_ptUnc: array which contatins covariances for points
-*/
-#ifdef _WIN32
-	extern "C" __declspec(dllexport)
-#endif
-void getCovariances(
-	cov::Options &options,
-	cov::Statistic &statistic,
-	ceres::CRSMatrix &jacobian,
-	double* points3D,
-	double* h_camUnc,
-	double* h_ptUnc)
-{
-	JacobianComposer::findPts2Fix(options, options._numPoints, points3D); 
-	computeCovariances(options, statistic, jacobian, h_camUnc, h_ptUnc);
 }
 
 

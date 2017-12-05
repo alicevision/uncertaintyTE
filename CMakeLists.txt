@@ -2,16 +2,19 @@ CMAKE_MINIMUM_REQUIRED (VERSION 3.5)
 SET(CMAKE_VERBOSE_MAKEFILE ON)
 
 # About the project
-PROJECT (Uncertatinty)
-SET (VERSION_MAJOR 1)
-SET (VERSION_MINOR 2)
-SET (VERSION_PATCH 0)
-SET (VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
-SET(CMAKE_BUILD_TYPE "Release")
+PROJECT (UncertaintyTE
+  LANGUAGES C CXX
+  VERSION 1.2.0)
+#SET(CMAKE_BUILD_TYPE "Release")
 SET(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+
 MESSAGE(STATUS "---------------------------------------------------------")
-MESSAGE(STATUS "TE-inverse uncertainty framework v.${VERSION}")
+MESSAGE(STATUS "TE-inverse uncertainty framework v.${PROJECT_VERSION}")
 MESSAGE(STATUS "CMAKE_CONFIGURATION_TYPES: ${CMAKE_CONFIGURATION_TYPES}")
 MESSAGE(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 MESSAGE(STATUS "---------------------------------------------------------")
@@ -123,6 +126,8 @@ find_package ( gflags )
 
 IF(NOT GFLAGS_VERSION_STRING STREQUAL "")
 	MESSAGE( "Found Gflags ${GFLAGS_VERSION_STRING}" )
+	SET(GFLAGS_INCLUDE_DIR $ENV{GFLAGS_INCLUDE_DIR})
+	SET(GFLAGS_LIBRARIES $ENV{GFLAGS_LIBRARIES}) 
 	MESSAGE( STATUS "> GFLAGS_INCLUDE_DIR:   ${GFLAGS_INCLUDE_DIR}" )
 	MESSAGE( STATUS "> GFLAGS_LIBRARIES:   ${GFLAGS_LIBRARIES}" )
 	SET(INCLUDE_DIRS ${INCLUDE_DIRS} ${GFLAGS_INCLUDE_DIR})
@@ -166,12 +171,14 @@ ENDIF()
 # -----------------------------------------------------------------------------
 # EIGEN
 # -----------------------------------------------------------------------------
-FIND_PACKAGE (Eigen3 3.3.4 NO_MODULE)
+FIND_PACKAGE (Eigen3 3.3 NO_MODULE)
 
 IF (EIGEN3_FOUND)
 	MESSAGE( "Found Eigen${EIGEN3_VERSION_STRING}" )
 	MESSAGE( STATUS "> EIGEN3_INCLUDE_DIRS:   ${EIGEN3_INCLUDE_DIRS}"   )
 	SET(INCLUDE_DIRS ${INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS})
+  add_definitions("-DEIGEN_DONT_ALIGN_STATICALLY=1")
+  add_definitions("-DEIGEN_DONT_VECTORIZE=1")
 
 ELSE(EIGEN3_FOUND)
 	IF(UNIX)
@@ -444,7 +451,7 @@ IF(MAGMA_FOUND)
 	MESSAGE("Found Magma")
 	MESSAGE(STATUS "MAGMA_INCLUDE_DIRS: ${MAGMA_INCLUDE_DIRS}")
 	MESSAGE(STATUS "MAGMA_LIBRARIES: ${MAGMA_LIBRARIES}")
-	SET(INCLUDE_DIRS ${MAGMA_INCLUDE_DIRS} ${MAGMA_INCLUDE_DIRS})
+	SET(INCLUDE_DIRS ${INCLUDE_DIRS} ${MAGMA_INCLUDE_DIRS})
 	SET(LIBS_FILES ${LIBS_FILES} ${MAGMA_LIBRARIES})
 	
 ELSE(MAGMA_FOUND)
@@ -683,49 +690,10 @@ IF (UNC_OPENMVG_SUPPORT)
 	ENDIF()
 ENDIF()
 
-
-
-
-
 # -----------------------------------------------------------------------------
+# Add project source code
 # -----------------------------------------------------------------------------
-# -----------------------------------------------------------------------------
-
-
-
-# -----------------------------------------------------------------------------
-# Set sources and create executable target
-# -----------------------------------------------------------------------------
-FILE(GLOB HEADERS "${PROJECT_SOURCE_DIR}/include/*.h")
-FILE(GLOB SOURCES "${PROJECT_SOURCE_DIR}/src/*.cpp")
-FILE(GLOB MODUL_DEFINITION_FILES "${PROJECT_SOURCE_DIR}/src/*.def")
-SET(INCLUDE_DIRS ${INCLUDE_DIRS} "${PROJECT_SOURCE_DIR}/include")
-SET(LIBS_FILES ${LIBS_FILES}) 
-
-# Executable - binary file with txt input
-IF(NOT UNC_BUILD_MEX) 
-    ADD_EXECUTABLE(uncertainty ${HEADERS} ${SOURCES})
-    target_include_directories(uncertainty PUBLIC ${INCLUDE_DIRS})
-    target_link_libraries (uncertainty ${LIBS_FILES})
-ENDIF(NOT UNC_BUILD_MEX)
-
-# -----------------------------------------------------------------------------
-# Library output
-# -----------------------------------------------------------------------------
-OPTION(UNC_BUILD_STATIC_LIB "Build uncertainty_static library" OFF)
-OPTION(UNC_BUILD_SHARED_LIB "Bulid uncertainty_shared library" OFF)
-
-IF (UNC_BUILD_STATIC_LIB)
-	ADD_LIBRARY(uncertainty_static STATIC ${HEADERS} ${SOURCES})
-	target_include_directories(uncertainty_static PUBLIC ${INCLUDE_DIRS})
-	target_link_libraries (uncertainty_static ${LIBS_FILES})
-ENDIF (UNC_BUILD_STATIC_LIB)
-
-IF (UNC_BUILD_SHARED_LIB)
-	ADD_LIBRARY(uncertainty_shared SHARED ${HEADERS} ${SOURCES})
-	target_include_directories(uncertainty_shared PUBLIC ${INCLUDE_DIRS})
-	target_link_libraries (uncertainty_shared ${LIBS_FILES})
-ENDIF (UNC_BUILD_SHARED_LIB)
+add_subdirectory(src)
 
 
 # -----------------------------------------------------------------------------
