@@ -3,6 +3,8 @@
     #include <mex.h>
 #endif
 
+#include <Eigen/SparseCore>
+
 using namespace Eigen;
 
 // Magma sparse matrix multiplied by scalar

@@ -3,6 +3,7 @@
 #include "ScaledSparseMatrix.h" 
 #include "ScaledDenseMatrix.h" 
 #include <Eigen/QR>
+#include <Eigen/SparseCore>
 
 #ifdef USE_MATLAB
     #include <mex.h>

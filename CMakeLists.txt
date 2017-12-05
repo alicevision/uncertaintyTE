@@ -123,6 +123,8 @@ find_package ( gflags )
 
 IF(NOT GFLAGS_VERSION_STRING STREQUAL "")
 	MESSAGE( "Found Gflags ${GFLAGS_VERSION_STRING}" )
+	SET(GFLAGS_INCLUDE_DIR $ENV{GFLAGS_INCLUDE_DIR})
+	SET(GFLAGS_LIBRARIES $ENV{GFLAGS_LIBRARIES}) 
 	MESSAGE( STATUS "> GFLAGS_INCLUDE_DIR:   ${GFLAGS_INCLUDE_DIR}" )
 	MESSAGE( STATUS "> GFLAGS_LIBRARIES:   ${GFLAGS_LIBRARIES}" )
 	SET(INCLUDE_DIRS ${INCLUDE_DIRS} ${GFLAGS_INCLUDE_DIR})
@@ -166,12 +168,14 @@ ENDIF()
 # -----------------------------------------------------------------------------
 # EIGEN
 # -----------------------------------------------------------------------------
-FIND_PACKAGE (Eigen3 3.3.4 NO_MODULE)
+FIND_PACKAGE (Eigen3 3.3 NO_MODULE)
 
 IF (EIGEN3_FOUND)
 	MESSAGE( "Found Eigen${EIGEN3_VERSION_STRING}" )
 	MESSAGE( STATUS "> EIGEN3_INCLUDE_DIRS:   ${EIGEN3_INCLUDE_DIRS}"   )
 	SET(INCLUDE_DIRS ${INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS})
+  add_definitions("-DEIGEN_DONT_ALIGN_STATICALLY=1")
+  add_definitions("-DEIGEN_DONT_VECTORIZE=1")
 
 ELSE(EIGEN3_FOUND)
 	IF(UNIX)
@@ -444,7 +448,7 @@ IF(MAGMA_FOUND)
 	MESSAGE("Found Magma")
 	MESSAGE(STATUS "MAGMA_INCLUDE_DIRS: ${MAGMA_INCLUDE_DIRS}")
 	MESSAGE(STATUS "MAGMA_LIBRARIES: ${MAGMA_LIBRARIES}")
-	SET(INCLUDE_DIRS ${MAGMA_INCLUDE_DIRS} ${MAGMA_INCLUDE_DIRS})
+	SET(INCLUDE_DIRS ${INCLUDE_DIRS} ${MAGMA_INCLUDE_DIRS})
 	SET(LIBS_FILES ${LIBS_FILES} ${MAGMA_LIBRARIES})
 	
 ELSE(MAGMA_FOUND)
@@ -712,21 +716,35 @@ ENDIF(NOT UNC_BUILD_MEX)
 # -----------------------------------------------------------------------------
 # Library output
 # -----------------------------------------------------------------------------
-OPTION(UNC_BUILD_STATIC_LIB "Build uncertainty_static library" OFF)
-OPTION(UNC_BUILD_SHARED_LIB "Bulid uncertainty_shared library" OFF)
+OPTION(UNC_BUILD_STATIC_LIB "Build uncertainty as static library" OFF)
+OPTION(UNC_BUILD_SHARED_LIB "Build uncertainty as shared library" OFF)
 
 IF (UNC_BUILD_STATIC_LIB)
 	ADD_LIBRARY(uncertainty_static STATIC ${HEADERS} ${SOURCES})
 	target_include_directories(uncertainty_static PUBLIC ${INCLUDE_DIRS})
 	target_link_libraries (uncertainty_static ${LIBS_FILES})
+        install(TARGETS uncertainty_static
+          DESTINATION lib
+          EXPORT uncertainty-targets
+        )
 ENDIF (UNC_BUILD_STATIC_LIB)
 
 IF (UNC_BUILD_SHARED_LIB)
 	ADD_LIBRARY(uncertainty_shared SHARED ${HEADERS} ${SOURCES})
 	target_include_directories(uncertainty_shared PUBLIC ${INCLUDE_DIRS})
 	target_link_libraries (uncertainty_shared ${LIBS_FILES})
+        install(TARGETS uncertainty_shared
+          DESTINATION lib
+          EXPORT uncertainty-targets
+        )
 ENDIF (UNC_BUILD_SHARED_LIB)
 
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
+  DESTINATION include
+  COMPONENT headers
+  FILES_MATCHING PATTERN "*.hpp" PATTERN "*.h"
+  # EXPORT uncertainty-targets
+  )
 
 # -----------------------------------------------------------------------------
 # Compile MEX
