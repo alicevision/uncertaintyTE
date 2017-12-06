@@ -6,6 +6,8 @@
 #include <uncertaintyTE/JacobianIO.h>
 #include <uncertaintyTE/JacobianComposer.h>
 
+#include <gflags/gflags.h>
+
 #ifdef USE_MATLAB
     #include <mex.h>
     #include <uncertaintyTE/matlabInterface.h>

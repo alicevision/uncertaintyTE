@@ -6,12 +6,13 @@ FILE(GLOB SOURCES "uncertaintyTE/*.cpp")
 
 FILE(GLOB MODUL_DEFINITION_FILES "${PROJECT_SOURCE_DIR}/src/*.def")
 SET(LIBS_FILES ${LIBS_FILES}) 
+SET(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 
 # -----------------------------------------------------------------------------
 # Library output
 # -----------------------------------------------------------------------------
 OPTION(UNC_BUILD_STATIC_LIB "Build uncertainty as static library" OFF)
-OPTION(UNC_BUILD_SHARED_LIB "Build uncertainty as shared library" OFF)
+OPTION(UNC_BUILD_SHARED_LIB "Build uncertainty as shared library" ON)
 
 IF (UNC_BUILD_STATIC_LIB)
 	ADD_LIBRARY(uncertainty_static STATIC ${HEADERS} ${SOURCES})
@@ -34,16 +35,22 @@ IF (UNC_BUILD_SHARED_LIB)
 ENDIF (UNC_BUILD_SHARED_LIB)
 
 # Executable - binary file with txt input
-IF(NOT UNC_BUILD_MEX)
-    ADD_EXECUTABLE(uncertainty software/main_uncertainty.cpp)
-    target_include_directories(uncertainty PUBLIC . ${INCLUDE_DIRS})
-    target_link_libraries (uncertainty ${LIBS_FILES})
-    if(UNC_BUILD_STATIC_LIB)
-      target_link_libraries (uncertainty uncertainty_static)
-    else()
-      target_link_libraries (uncertainty uncertainty_shared)
-    endif()
-ENDIF(NOT UNC_BUILD_MEX)
+ADD_EXECUTABLE(uncertainty software/main_uncertainty.cpp)
+target_include_directories(uncertainty
+    PUBLIC
+    .
+    ${INCLUDE_DIRS}
+    ${GFLAGS_INCLUDE_DIR})
+
+target_link_libraries(uncertainty
+    ${LIBS_FILES}
+    ${GFLAGS_LIBRARIES})
+
+if(UNC_BUILD_STATIC_LIB)
+    target_link_libraries (uncertainty uncertainty_static)
+else()
+    target_link_libraries (uncertainty uncertainty_shared)
+endif()
 
 
 install(DIRECTORY uncertaintyTE
