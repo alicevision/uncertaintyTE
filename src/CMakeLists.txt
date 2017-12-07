@@ -11,7 +11,7 @@ SET(LIBS_FILES ${LIBS_FILES})
 # Library output
 # -----------------------------------------------------------------------------
 OPTION(UNC_BUILD_STATIC_LIB "Build uncertainty as static library" OFF)
-OPTION(UNC_BUILD_SHARED_LIB "Build uncertainty as shared library" OFF)
+OPTION(UNC_BUILD_SHARED_LIB "Build uncertainty as shared library" ON)
 
 IF (UNC_BUILD_STATIC_LIB)
 	ADD_LIBRARY(uncertainty_static STATIC ${HEADERS} ${SOURCES})
