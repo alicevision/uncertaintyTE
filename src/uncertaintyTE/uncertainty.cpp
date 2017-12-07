@@ -7,9 +7,6 @@
 #include "JacobianComposer.h"
 
 
-#ifdef _WIN32
-    extern "C" __declspec(dllexport)
-#endif
 void getCovariances(
     cov::Options &options,
     cov::Statistic &statistic,

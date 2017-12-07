@@ -3,8 +3,6 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include "compute.h"
-#include <gflags/gflags.h>
-
 
 
 void replaceAll(std::string& str, const std::string& from, const std::string& to);

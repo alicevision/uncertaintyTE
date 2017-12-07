@@ -132,9 +132,6 @@ struct Uncertainty {
  * @param[in] points3D: all 3D points (to select the 3 static points)
  * @param[out] uncertainties: output covariances for cameras and points
  */
-#ifdef _WIN32
-    extern "C" __declspec(dllexport)
-#endif
 void getCovariances(
     cov::Options &options,
     cov::Statistic &statistic,
