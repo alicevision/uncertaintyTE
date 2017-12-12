@@ -70,58 +70,55 @@ struct Statistic {
 };
 
 struct Uncertainty {
+	std::size_t _camParams = 0;
+	std::size_t _numCams = 0;
+	std::size_t _numPoints = 0;
     std::size_t _nbCovarianceValuePerCam = 0;
     std::vector<double> _camerasUnc;
     std::vector<double> _pointsUnc;
 
-    void init(const Options& options)
-    {
-        _nbCovarianceValuePerCam = (0.5 * options._camParams * (options._camParams + 1));
-        _camerasUnc.resize(options._numCams * _nbCovarianceValuePerCam);
-        _pointsUnc.resize(options._numPoints * 6);
-    }
+	void init(const Options& options);
 
     /**
-     * @return 21 values per camera
+     * @return upper triangle of covariance matrix = 1/2*n(n+1) values per camera with n parametes
      */
-    const std::vector<double>& getCamerasUncRaw() const { return _camerasUnc; }
-    /**
+	const std::vector<double> getCamerasUncRaw() const;
+    
+	/**
      * @return matrix of 6x6 values per point
      */
-    const std::vector<double>& getCamerasUncMatrix() const
-    {
-        // TODO
-        return _camerasUnc;
-    }
-    /**
+	const std::vector<double> getCameraUncMatrix(int id) const;
+    
+	/**
+	* @return matrix of 6x6 values per point
+	*/
+	const std::vector<double> getCamerasUncMatrices() const;
+
+	/**
      * @return 6 values per camera
      */
-    const std::vector<double>& getCamerasUncEigenValues() const
-    {
-        // TODO
-        return _camerasUnc;
-    }
+	const std::vector<double> getCamerasUncEigenValues() const;
+
 
     /**
      * @return 6 values per point
      */
-    const std::vector<double>& getPointsUncRaw() const { return _pointsUnc; }
-    /**
+	const std::vector<double> getPointsUncRaw() const;
+    
+	/**
      * @return matrix of 3x3 values per point
      */
-    const std::vector<double>& getPointsUncMatrix() const
-    {
-        // TODO
-        return _pointsUnc;
-    }
+	const std::vector<double> getPointUncMatrix(int id) const;
+	
+	/**
+	* @return matrix of 3x3 values per point
+	*/
+	const std::vector<double> getPointsUncMatrices() const;
+
     /**
      * @return 3 values per point
      */
-    const std::vector<double>& getPointsUncEigenValues() const
-    {
-        // TODO
-        return _pointsUnc;
-    }
+	const std::vector<double> getPointsUncEigenValues() const;
 };
 }
 
