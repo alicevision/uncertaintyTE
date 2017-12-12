@@ -2,16 +2,19 @@ CMAKE_MINIMUM_REQUIRED (VERSION 3.5)
 SET(CMAKE_VERBOSE_MAKEFILE ON)
 
 # About the project
-PROJECT (Uncertatinty)
-SET (VERSION_MAJOR 1)
-SET (VERSION_MINOR 2)
-SET (VERSION_PATCH 0)
-SET (VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
-SET(CMAKE_BUILD_TYPE "Release")
+PROJECT (UncertaintyTE
+  LANGUAGES C CXX
+  VERSION 1.2.0)
+#SET(CMAKE_BUILD_TYPE "Release")
 SET(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+
 MESSAGE(STATUS "---------------------------------------------------------")
-MESSAGE(STATUS "TE-inverse uncertainty framework v.${VERSION}")
+MESSAGE(STATUS "TE-inverse uncertainty framework v.${PROJECT_VERSION}")
 MESSAGE(STATUS "CMAKE_CONFIGURATION_TYPES: ${CMAKE_CONFIGURATION_TYPES}")
 MESSAGE(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 MESSAGE(STATUS "---------------------------------------------------------")
@@ -46,6 +49,7 @@ MESSAGE(STATUS "OPTIONAL LIBRARIES")
 MESSAGE(STATUS " SuiteSparse")
 MESSAGE(STATUS " Matlab mex")
 MESSAGE(STATUS " OpenMVG (AliceVision)")
+MESSAGE(STATUS " Boost")
 MESSAGE(STATUS "---------------------------------------------------------")
 
 # -----------------------------------------------------------------------------
@@ -108,7 +112,7 @@ IF(WIN32)
             SET(CERES_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/ceres-solver")
             SET(CUDA8_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/cuda-8.0")
             SET(EIGEN3_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/eigen-3.3.4")
-            SET(GFLAGS_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/gflags")
+            SET(GFLAGS_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/gflags/BUILD_")
             SET(MKL_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/IntelMKL")
             SET(MAGMA_ROOT_DIR_PRE "${PROJECT_SOURCE_DIR}/libs/third_party/magma-2.2.0")
             SET(SUITESPARSE_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/suitesparse-metis-for-windows")
@@ -121,13 +125,14 @@ ENDIF(WIN32)
 # -----------------------------------------------------------------------------
 find_package ( gflags )
 
-IF(NOT GFLAGS_VERSION_STRING STREQUAL "")
+IF(DEFINED gflags_VERSION_STRING OR DEFINED GFLAGS_VERSION_STRING)
+        # different cmake variable with lower or upper case exist
+        SET(GFLAGS_INCLUDE_DIR ${GFLAGS_INCLUDE_DIR} ${gflags_INCLUDE_DIR})
+        SET(GFLAGS_LIBRARIES ${GFLAGS_LIBRARIES} ${gflags_LIBRARIES})
 	MESSAGE( "Found Gflags ${GFLAGS_VERSION_STRING}" )
 	MESSAGE( STATUS "> GFLAGS_INCLUDE_DIR:   ${GFLAGS_INCLUDE_DIR}" )
 	MESSAGE( STATUS "> GFLAGS_LIBRARIES:   ${GFLAGS_LIBRARIES}" )
-	SET(INCLUDE_DIRS ${INCLUDE_DIRS} ${GFLAGS_INCLUDE_DIR})
-	SET(LIBS_FILES ${LIBS_FILES} ${GFLAGS_LIBRARIES}) 
-	
+
 ELSE()
 	IF(UNIX)
 		MESSAGE(WARNING "Gflags was not found...")
@@ -135,8 +140,8 @@ ELSE()
 		# Precompiled win64
 		IF(${USE_PREBUILD_WIN64_LIBS})
 			MESSAGE( "Found Gflags in precompiled libraries." )
-			SET(INCLUDE_DIRS ${INCLUDE_DIRS} "${GFLAGS_ROOT_DIR}/src")
-			SET(LIBS_FILES ${LIBS_FILES} 
+			SET(GFLAGS_INCLUDE_DIR "${GFLAGS_ROOT_DIR}/include")
+			SET(GFLAGS_LIBRARIES 
 				optimized "${INTERNAL_LIBRARIES}/Release/gflags_static.lib"			
 				debug "${INTERNAL_LIBRARIES}/Debug/gflags_static.lib" )	
 		ELSE(${USE_PREBUILD_WIN64_LIBS})
@@ -144,13 +149,14 @@ ELSE()
 			# Set up gflags install directory
 			SET(GFLAGS_DIR CACHE PATH FORCE)
 			IF(NOT GFLAGS_DIR STREQUAL "")
+
 				MESSAGE( "Gflags should be on manualy selected path ..." )
 				MESSAGE(STATUS "GFLAGS_DIR: ${GFLAGS_DIR}")
 				IF(EXISTS "${GFLAGS_DIR}/include/gflags/gflags.h" AND EXISTS "${GFLAGS_DIR}/include/gflags/gflags.h")
-					SET(INCLUDE_DIRS ${INCLUDE_DIRS} "${GFLAGS_DIR}/include")			# "C:/Program Files/gflags/include"
-					SET(LIBS_FILES ${LIBS_FILES} 
+				    SET(GFLAGS_INCLUDE_DIR "${GFLAGS_DIR}/include") # "C:/Program Files/gflags/include"
+				    SET(GFLAGS_LIBRARIES 
 						optimized "${INTERNAL_LIBRARIES}/Release/gflags_static.lib"			# install generate only Release or Debug, not both libs
-						debug "${INTERNAL_LIBRARIES}/Debug/gflags_static.lib" )				# so, it is generated in advance
+						debug "${INTERNAL_LIBRARIES}/Debug/gflags_static.lib")				# so, it is generated in advance
 				ELSE()
 					MESSAGE(WARNING "Setup the directory where is installed gflags to variable GFLAGS_DIR. It is usually \"C:/Program Files/gflags\" and contains \"./include/gflags/gflags.h\" etc.")
 				ENDIF()
@@ -161,17 +167,25 @@ ELSE()
 	ENDIF(UNIX)
 ENDIF()
 
-
+# SHLWAPI - Used by gflags on WIN32
+#if(WIN32)
+#find_library(SHLWAPI Shlwapi.lib) 
+#SET(GFLAGS_LIBRARIES ${GFLAGS_LIBRARIES} ${SHLWAPI})
+#else()
+#set(SHLWAPI)
+#endif()
 
 # -----------------------------------------------------------------------------
 # EIGEN
 # -----------------------------------------------------------------------------
-FIND_PACKAGE (Eigen3 3.3.4 NO_MODULE)
+FIND_PACKAGE (Eigen3 3.3 NO_MODULE)
 
 IF (EIGEN3_FOUND)
 	MESSAGE( "Found Eigen${EIGEN3_VERSION_STRING}" )
 	MESSAGE( STATUS "> EIGEN3_INCLUDE_DIRS:   ${EIGEN3_INCLUDE_DIRS}"   )
 	SET(INCLUDE_DIRS ${INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS})
+  add_definitions("-DEIGEN_DONT_ALIGN_STATICALLY=1")
+  add_definitions("-DEIGEN_DONT_VECTORIZE=1")
 
 ELSE(EIGEN3_FOUND)
 	IF(UNIX)
@@ -296,7 +310,7 @@ ELSE( CERES_FOUND )
 				"${CERES_ROOT_DIR}/include"
 				"${CERES_ROOT_DIR}/internal"
 				"${CERES_ROOT_DIR}/internal/ceres"
-				"${CERES_ROOT_DIR}/ceres/miniglog") 
+				"${CERES_ROOT_DIR}/internal/ceres/miniglog") 
 			SET(LIBS_FILES ${LIBS_FILES} 
 				optimized "${INTERNAL_LIBRARIES}/Release/ceres.lib"
 				debug "${INTERNAL_LIBRARIES}/Debug/ceres-debug.lib")
@@ -444,7 +458,7 @@ IF(MAGMA_FOUND)
 	MESSAGE("Found Magma")
 	MESSAGE(STATUS "MAGMA_INCLUDE_DIRS: ${MAGMA_INCLUDE_DIRS}")
 	MESSAGE(STATUS "MAGMA_LIBRARIES: ${MAGMA_LIBRARIES}")
-	SET(INCLUDE_DIRS ${MAGMA_INCLUDE_DIRS} ${MAGMA_INCLUDE_DIRS})
+	SET(INCLUDE_DIRS ${INCLUDE_DIRS} ${MAGMA_INCLUDE_DIRS})
 	SET(LIBS_FILES ${LIBS_FILES} ${MAGMA_LIBRARIES})
 	
 ELSE(MAGMA_FOUND)
@@ -684,48 +698,32 @@ IF (UNC_OPENMVG_SUPPORT)
 ENDIF()
 
 
+# -----------------------------------------------------------------------------
+# Boost
+# -----------------------------------------------------------------------------
+FIND_PACKAGE(Boost QUIET)
 
+IF( Boost_FOUND)
+	MESSAGE( "Found Boost" )
+	MESSAGE( STATUS "> Boost_INCLUDE_DIRS:   ${Boost_INCLUDE_DIRS}" )
+	MESSAGE( STATUS "> Boost_LIBRARIES:   ${Boost_LIBRARIES}" )
+	SET(INCLUDE_DIRS ${INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+	SET(LIBS_FILES ${LIBS_FILES} ${Boost_LIBRARIES}) 
+	
+ELSE (Boost_FOUND)
+	MESSAGE(WARNING "Failed to find the Boost library.")
+ENDIF()
+
+# ==============================================================================
+# UNIT TEST framework
+# ==============================================================================
+OPTION(UNC_BUILD_TESTS "Build unit tests for the uncertainty library" OFF)
 
 
 # -----------------------------------------------------------------------------
+# Add project source code
 # -----------------------------------------------------------------------------
-# -----------------------------------------------------------------------------
-
-
-
-# -----------------------------------------------------------------------------
-# Set sources and create executable target
-# -----------------------------------------------------------------------------
-FILE(GLOB HEADERS "${PROJECT_SOURCE_DIR}/include/*.h")
-FILE(GLOB SOURCES "${PROJECT_SOURCE_DIR}/src/*.cpp")
-FILE(GLOB MODUL_DEFINITION_FILES "${PROJECT_SOURCE_DIR}/src/*.def")
-SET(INCLUDE_DIRS ${INCLUDE_DIRS} "${PROJECT_SOURCE_DIR}/include")
-SET(LIBS_FILES ${LIBS_FILES}) 
-
-# Executable - binary file with txt input
-IF(NOT UNC_BUILD_MEX) 
-    ADD_EXECUTABLE(uncertainty ${HEADERS} ${SOURCES})
-    target_include_directories(uncertainty PUBLIC ${INCLUDE_DIRS})
-    target_link_libraries (uncertainty ${LIBS_FILES})
-ENDIF(NOT UNC_BUILD_MEX)
-
-# -----------------------------------------------------------------------------
-# Library output
-# -----------------------------------------------------------------------------
-OPTION(UNC_BUILD_STATIC_LIB "Build uncertainty_static library" OFF)
-OPTION(UNC_BUILD_SHARED_LIB "Bulid uncertainty_shared library" OFF)
-
-IF (UNC_BUILD_STATIC_LIB)
-	ADD_LIBRARY(uncertainty_static STATIC ${HEADERS} ${SOURCES})
-	target_include_directories(uncertainty_static PUBLIC ${INCLUDE_DIRS})
-	target_link_libraries (uncertainty_static ${LIBS_FILES})
-ENDIF (UNC_BUILD_STATIC_LIB)
-
-IF (UNC_BUILD_SHARED_LIB)
-	ADD_LIBRARY(uncertainty_shared SHARED ${HEADERS} ${SOURCES})
-	target_include_directories(uncertainty_shared PUBLIC ${INCLUDE_DIRS})
-	target_link_libraries (uncertainty_shared ${LIBS_FILES})
-ENDIF (UNC_BUILD_SHARED_LIB)
+add_subdirectory(src)
 
 
 # -----------------------------------------------------------------------------
@@ -854,14 +852,6 @@ ENDIF()
 
 
 # -----------------------------------------------------------------------------
-# INSTALL LIBRARIES
-# -----------------------------------------------------------------------------
-
-# TODO ...
-
-
-
-# -----------------------------------------------------------------------------
 # STATUS
 # -----------------------------------------------------------------------------
 MESSAGE(STATUS " ")
@@ -875,6 +865,7 @@ MESSAGE(STATUS "UNC_OPENMVG_SUPPORT: ${UNC_OPENMVG_SUPPORT}")
 MESSAGE(STATUS "UNC_MKL_SUPPORT: ${UNC_MKL_SUPPORT}")
 MESSAGE(STATUS "UNC_MATLAB_SUPPORT: ${UNC_MATLAB_SUPPORT}")
 MESSAGE(STATUS "UNC_BUILD_MEX: ${UNC_BUILD_MEX}")
+MESSAGE(STATUS "UNC_BUILD_TESTS: ${UNC_BUILD_TESTS}")
 
 MESSAGE(STATUS " ")
 MESSAGE(STATUS "INCLUDE_DIRS: ${INCLUDE_DIRS}")
