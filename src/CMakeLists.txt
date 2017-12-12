@@ -59,3 +59,42 @@ install(DIRECTORY uncertaintyTE
   FILES_MATCHING PATTERN "*.hpp" PATTERN "*.h"
   )
 
+
+
+# ==============================================================================
+# UNIT TEST framework
+# ==============================================================================
+if(UNC_BUILD_TESTS)
+  enable_testing()
+endif()
+
+# MACRO to ease UnitTesting
+macro(UNIT_TEST NAMESPACE NAME EXTRA_LIBS)
+  if(UNC_BUILD_TESTS)
+    add_executable(${NAMESPACE}_test_${NAME} ${NAME}_test.cpp)
+
+    set_property(TARGET ${NAMESPACE}_test_${NAME} PROPERTY FOLDER uncertaintyTE/test)
+
+    target_link_libraries(${NAMESPACE}_test_${NAME}
+                          ${EXTRA_LIBS} # Extra libs MUST be first.
+                          ${BOOST_LIBRARIES} uncertainty_shared)
+	
+	target_include_directories(${NAMESPACE}_test_${NAME}
+				PUBLIC
+				.
+				${INCLUDE_DIRS})
+
+    add_test(NAME ${NAMESPACE}_test_${NAME}
+			 WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+			 COMMAND $<TARGET_FILE:${NAMESPACE}_test_${NAME}> --log_level=all)
+  endif()
+endmacro()
+
+
+# Tests 
+add_definitions(-DTESTS_ROOT_DIR="${CMAKE_SOURCE_DIR}/test")
+add_subdirectory(test_eigValues)
+
+
+
+

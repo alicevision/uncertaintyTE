@@ -49,6 +49,7 @@ MESSAGE(STATUS "OPTIONAL LIBRARIES")
 MESSAGE(STATUS " SuiteSparse")
 MESSAGE(STATUS " Matlab mex")
 MESSAGE(STATUS " OpenMVG (AliceVision)")
+MESSAGE(STATUS " Boost")
 MESSAGE(STATUS "---------------------------------------------------------")
 
 # -----------------------------------------------------------------------------
@@ -167,12 +168,12 @@ ELSE()
 ENDIF()
 
 # SHLWAPI - Used by gflags on WIN32
-if(WIN32)
-find_library(SHLWAPI Shlwapi.lib) 
-SET(GFLAGS_LIBRARIES ${GFLAGS_LIBRARIES} ${SHLWAPI})
-else()
-set(SHLWAPI)
-endif()
+#if(WIN32)
+#find_library(SHLWAPI Shlwapi.lib) 
+#SET(GFLAGS_LIBRARIES ${GFLAGS_LIBRARIES} ${SHLWAPI})
+#else()
+#set(SHLWAPI)
+#endif()
 
 # -----------------------------------------------------------------------------
 # EIGEN
@@ -696,6 +697,29 @@ IF (UNC_OPENMVG_SUPPORT)
 	ENDIF()
 ENDIF()
 
+
+# -----------------------------------------------------------------------------
+# Boost
+# -----------------------------------------------------------------------------
+FIND_PACKAGE(Boost QUIET)
+
+IF( Boost_FOUND)
+	MESSAGE( "Found Boost" )
+	MESSAGE( STATUS "> Boost_INCLUDE_DIRS:   ${Boost_INCLUDE_DIRS}" )
+	MESSAGE( STATUS "> Boost_LIBRARIES:   ${Boost_LIBRARIES}" )
+	SET(INCLUDE_DIRS ${INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+	SET(LIBS_FILES ${LIBS_FILES} ${Boost_LIBRARIES}) 
+	
+ELSE (Boost_FOUND)
+	MESSAGE(WARNING "Failed to find the Boost library.")
+ENDIF()
+
+# ==============================================================================
+# UNIT TEST framework
+# ==============================================================================
+OPTION(UNC_BUILD_TESTS "Build unit tests for the uncertainty library" OFF)
+
+
 # -----------------------------------------------------------------------------
 # Add project source code
 # -----------------------------------------------------------------------------
@@ -828,14 +852,6 @@ ENDIF()
 
 
 # -----------------------------------------------------------------------------
-# INSTALL LIBRARIES
-# -----------------------------------------------------------------------------
-
-# TODO ...
-
-
-
-# -----------------------------------------------------------------------------
 # STATUS
 # -----------------------------------------------------------------------------
 MESSAGE(STATUS " ")
@@ -849,6 +865,7 @@ MESSAGE(STATUS "UNC_OPENMVG_SUPPORT: ${UNC_OPENMVG_SUPPORT}")
 MESSAGE(STATUS "UNC_MKL_SUPPORT: ${UNC_MKL_SUPPORT}")
 MESSAGE(STATUS "UNC_MATLAB_SUPPORT: ${UNC_MATLAB_SUPPORT}")
 MESSAGE(STATUS "UNC_BUILD_MEX: ${UNC_BUILD_MEX}")
+MESSAGE(STATUS "UNC_BUILD_TESTS: ${UNC_BUILD_TESTS}")
 
 MESSAGE(STATUS " ")
 MESSAGE(STATUS "INCLUDE_DIRS: ${INCLUDE_DIRS}")
