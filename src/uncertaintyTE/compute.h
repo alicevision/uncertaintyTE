@@ -24,13 +24,6 @@
 #include <Eigen/Eigen>
 #include <ctime>
 
-
-#ifdef USE_OPENMVG
-  #include "openMVG/sfm/sfm_data.hpp"
-  #include "openMVG/sfm/sfm_data_io.hpp"
-#endif
-
-
 #include "thrust/sort.h" 
 #include "magma_v2.h"
 #include "magma_lapack.h"

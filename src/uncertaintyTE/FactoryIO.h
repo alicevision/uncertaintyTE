@@ -20,13 +20,12 @@
 #include "IO.h"
 #include "ColmapIO.h"
 #include "JacobianIO.h"
-#include "OpenmvgIO.h"
+#include "AliceVisionIO.h"
 
-using namespace std;
 
 class FactoryIO {
 public:
-    static IO* createIO(const string type);
+    static IO* createIO(const std::string& type);
 };
 
 #endif /* FACTORYIO_H */

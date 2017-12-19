@@ -38,10 +38,9 @@
     DEFINE_string(in, ".",
                     "path to input scene files (e.g. directory which contains cameras.txt, images.txt, points3D.tx for COLMAP;\n"
                     " or jacobian file <path_to_file>.jacob )");
-   
-    // TODO: enable the openMVG
+
     DEFINE_string(in_form, "COLMAP",
-        "the format of input data [COLMAP, JACOBIAN, OPENMVG]");
+        "the format of input data [COLMAP, JACOBIAN, ALICEVISION]");
 
     DEFINE_string(out, ".",
             "path to output covariance file");
@@ -60,9 +59,9 @@
 Main function called from command line: unc.exe
   In: 
 	- algorithm: 0 = SVD_QR_ITERATION, 1 = SVD_DEVIDE_AND_CONQUER, 2 = TAYLOR_EXPANSION
-    - jacobian/openMVG_scene: path to the file without spaces
+    - jacobian/sfm_scene: path to the file without spaces
   Example Jacobain: unc.exe -in=input/myFile.jacob
-  Example OpenMVG:  unc.exe -in=input/myFile.[bin,json,xml]  // TODO ...
+  Example AliceVision:  unc.exe -in=input/myFile.[json,abc]
 */
 int main(int argc, char* argv[]) {
     google::ParseCommandLineFlags(&argc, &argv, true);

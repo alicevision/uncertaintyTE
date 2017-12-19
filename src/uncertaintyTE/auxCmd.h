@@ -22,9 +22,3 @@ void loadJacobian(std::ifstream& file, int algorithm, ceres::CRSMatrix& jacobian
 void printJacobian(ceres::CRSMatrix &J);
 void printJacobianMEX(ceres::CRSMatrix &J);
 void setPts2Fix(cov::Options &opt, int N, double *pts);
-
-#ifdef USE_OPENMVG
-	int loadSceneOpenMVG(std::string sSfM_Data_Filename_In, openMVG::sfm::SfM_Data &sfm_data);
-	void openmvgSfM2Jacobian(openMVG::sfm::SfM_Data &sfm_data, ceres::CRSMatrix &jacobian, cov::Options &opt);
-#endif
-       

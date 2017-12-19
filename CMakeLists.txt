@@ -48,7 +48,7 @@ MESSAGE(STATUS "")
 MESSAGE(STATUS "OPTIONAL LIBRARIES")
 MESSAGE(STATUS " SuiteSparse")
 MESSAGE(STATUS " Matlab mex")
-MESSAGE(STATUS " OpenMVG (AliceVision)")
+MESSAGE(STATUS " AliceVision")
 MESSAGE(STATUS " Boost")
 MESSAGE(STATUS "---------------------------------------------------------")
 
@@ -573,129 +573,15 @@ ENDIF( CUDA_FOUND )
 
 
 # -----------------------------------------------------------------------------
-# OpenMVG
+# AliceVision
 # -----------------------------------------------------------------------------
-# TODO add find package ...
-option(UNC_OPENMVG_SUPPORT "Include OpenMVG libraries (enable input from OpenMVG)" OFF)
-IF (UNC_OPENMVG_SUPPORT)
-	add_definitions(-DUSE_OPENMVG)
-	
-	SET(OPENMVG_SRC_DIR CACHE PATH FORCE)
-	IF(NOT OPENMVG_SRC_DIR STREQUAL "")
-		MESSAGE(STATUS "OPENMVG_SRC_DIR: ${OPENMVG_SRC_DIR}")
-		SET(INCLUDE_DIRS ${INCLUDE_DIRS} 
-			"${OPENMVG_SRC_DIR}"
-			"${OPENMVG_SRC_DIR}/third_party/jpeg"
-			"${OPENMVG_SRC_DIR}/third_party/png"
-			"${OPENMVG_SRC_DIR}/third_party/zlib"
-			"${OPENMVG_SRC_DIR}/third_party/tiff"
-			"${OPENMVG_SRC_DIR}/third_party"
-			"${OPENMVG_SRC_DIR}/dependencies"
-			"${OPENMVG_SRC_DIR}/dependencies/cereal/include"
-			"${OPENMVG_SRC_DIR}/third_party/lemon"
-			"${OPENMVG_SRC_DIR}/third_party/flann/src/cpp"
-			"${OPENMVG_SRC_DIR}/dependencies/osi_clp/CoinUtils/src"
-			"${OPENMVG_SRC_DIR}/dependencies/osi_clp/Clp/src"
-			"${OPENMVG_SRC_DIR}/dependencies/osi_clp/Clp/src/OsiClp"
-			"${OPENMVG_SRC_DIR}/dependencies/osi_clp/Osi/src/Osi")     
-	ELSE()
-		MESSAGE(WARNING "Setup the OpenMVG root directory (contatins ./dependencies, ./third_party).")
-	ENDIF()
-	
-	SET(OPENMVG_BUILD_DIR CACHE PATH FORCE)
-	IF(NOT OPENMVG_BUILD_DIR STREQUAL "")
-		MESSAGE(STATUS "OPENMVG_BUILD_DIR: ${OPENMVG_BUILD_DIR}")
-		SET(INCLUDE_DIRS ${INCLUDE_DIRS} 
-			"${OPENMVG_BUILD_DIR}/generated"
-			"${OPENMVG_BUILD_DIR}/third_party/jpeg/config"
-			"${OPENMVG_BUILD_DIR}/third_party/png/config"
-			"${OPENMVG_BUILD_DIR}/third_party/tiff"
-			"${OPENMVG_BUILD_DIR}/third_party/lemon") 
-
-		IF(WIN32)  
-  			SET(LIBS_FILES ${LIBS_FILES} 
-  				optimized "${OPENMVG_BUILD_DIR}/third_party/flann/lib/Release/flann_cpp_s.lib"
-  				debug "${OPENMVG_BUILD_DIR}/third_party/flann/lib/Debug/flann_cpp_s.lib")   
-		ENDIF()
-	ELSE()
-		MESSAGE(WARNING "Setup the OpenMVG root directory (contatins ./src).")
-	ENDIF()
-	
-	SET(OPENMVG_LIBRARIES_DIR CACHE PATH FORCE)
-	IF(NOT OPENMVG_LIBRARIES_DIR STREQUAL "")
-		MESSAGE(STATUS "OPENMVG_LIBRARIES_DIR: ${OPENMVG_LIBRARIES_DIR}")
-    IF(WIN32)
-      SET(LIBS_FILES ${LIBS_FILES} 
-  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_system.lib"
-  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_features.lib"
-  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_sfm.lib"
-  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/stlplus.lib"
-  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_lInftyComputerVision.lib"
-  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/lib_clp.lib"
-  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/lib_OsiClpSolver.lib"
-  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/lib_CoinUtils.lib"
-  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/lib_Osi.lib"
-  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_matching.lib"
-  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_image.lib"
-  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/png.lib"
-  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/jpeg.lib"
-  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/tiff.lib"
-  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/zlib.lib"
-  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_multiview.lib"
-  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_numeric.lib"
-  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/lemon.lib"
-  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/vlsift.lib"
-  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/openMVG_exif.lib"
-  			optimized "${OPENMVG_LIBRARIES_DIR}/Release/easyexif.lib"
-  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_system.lib"
-  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_features.lib"
-  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_sfm.lib"
-  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/stlplus.lib"
-  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_lInftyComputerVision.lib"
-  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/lib_clp.lib"
-  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/lib_OsiClpSolver.lib"
-  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/lib_CoinUtils.lib"
-  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/lib_Osi.lib"
-  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_matching.lib"
-  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_image.lib"
-  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/png.lib"
-  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/jpeg.lib"
-  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/tiff.lib"
-  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/zlib.lib"
-  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_multiview.lib"
-  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_numeric.lib"
-  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/lemon.lib"
-  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/vlsift.lib"
-  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/openMVG_exif.lib"
-  			debug "${OPENMVG_LIBRARIES_DIR}/Debug/easyexif.lib")   
-      ELSE()
-        SET(LIBS_FILES ${LIBS_FILES} 
-        "${OPENMVG_LIBRARIES_DIR}/libopenMVG_system.a"
-  			"${OPENMVG_LIBRARIES_DIR}/libopenMVG_features.a"
-  			"${OPENMVG_LIBRARIES_DIR}/libopenMVG_sfm.a"
-  			"${OPENMVG_LIBRARIES_DIR}/libstlplus.a"
-  			"${OPENMVG_LIBRARIES_DIR}/libopenMVG_lInftyComputerVision.a"
-  			"${OPENMVG_LIBRARIES_DIR}/liblib_clp.a"
-  			"${OPENMVG_LIBRARIES_DIR}/liblib_OsiClpSolver.a"
-  			"${OPENMVG_LIBRARIES_DIR}/liblib_CoinUtils.a"
-  			"${OPENMVG_LIBRARIES_DIR}/liblib_Osi.a"
-  			"${OPENMVG_LIBRARIES_DIR}/libopenMVG_matching.a"
-  			"${OPENMVG_LIBRARIES_DIR}/libopenMVG_image.a"
-  			#"${OPENMVG_LIBRARIES_DIR}/libpng.a"
-  			#"${OPENMVG_LIBRARIES_DIR}/libjpeg.a"
-  			#"${OPENMVG_LIBRARIES_DIR}/libtiff.a"
-  			#"${OPENMVG_LIBRARIES_DIR}/libzlib.a"
-  			"${OPENMVG_LIBRARIES_DIR}/libopenMVG_multiview.a"
-  			"${OPENMVG_LIBRARIES_DIR}/libopenMVG_numeric.a"
-  			"${OPENMVG_LIBRARIES_DIR}/liblemon.a"
-  			"${OPENMVG_LIBRARIES_DIR}/libvlsift.a"
-  			"${OPENMVG_LIBRARIES_DIR}/libopenMVG_exif.a"
-  			"${OPENMVG_LIBRARIES_DIR}/libeasyexif.a")
-      ENDIF()   
-	ELSE()
-		MESSAGE(WARNING "Setup the library directories for OpenMVG (contians the subdirecries ./Release, ./Debug.")
-	ENDIF()
-ENDIF()
+option(UNC_ALICEVISION_SUPPORT "Include AliceVision libraries (enable input from AliceVision)" OFF)
+if (UNC_ALICEVISION_SUPPORT)
+  find_package(AliceVision)
+  if(AliceVision_FOUND)
+    add_definitions(-DUSE_ALICEVISION)
+  endif()
+endif()
 
 
 # -----------------------------------------------------------------------------
@@ -861,7 +747,7 @@ MESSAGE(STATUS "---------------------------------------------------------")
 MESSAGE(STATUS "UNC_BUILD_STATIC_LIB: ${UNC_BUILD_STATIC_LIB}")
 MESSAGE(STATUS "UNC_BUILD_SHARED_LIB: ${UNC_BUILD_SHARED_LIB}")
 
-MESSAGE(STATUS "UNC_OPENMVG_SUPPORT: ${UNC_OPENMVG_SUPPORT}")
+MESSAGE(STATUS "UNC_ALICEVISION_SUPPORT: ${UNC_ALICEVISION_SUPPORT}")
 MESSAGE(STATUS "UNC_MKL_SUPPORT: ${UNC_MKL_SUPPORT}")
 MESSAGE(STATUS "UNC_MATLAB_SUPPORT: ${UNC_MATLAB_SUPPORT}")
 MESSAGE(STATUS "UNC_BUILD_MEX: ${UNC_BUILD_MEX}")

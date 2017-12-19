@@ -13,11 +13,11 @@
 #include "FactoryIO.h"
 
 
-IO* FactoryIO::createIO(const string type){
-    string COLMAP = string("COLMAP");
-    //string YASFM = string("YASFM");
-    string OPENMVG = string("OPENMVG");
-    string JACOBIAN = string("JACOBIAN");
+IO* FactoryIO::createIO(const std::string& type){
+    std::string COLMAP = string("COLMAP");
+    //std::string YASFM = string("YASFM");
+    std::string ALICEVISION = string("ALICEVISION");
+    std::string JACOBIAN = string("JACOBIAN");
     
     IO* io = NULL;
     if (COLMAP.compare(type) == 0){
@@ -25,13 +25,13 @@ IO* FactoryIO::createIO(const string type){
     
     }else if(JACOBIAN.compare(type) == 0){
         io = new JacobianIO();
-        
 	}
-	else if (OPENMVG.compare(type) == 0) {
-		io = new OpenmvgIO();
-
-	}
-    // ...
+    else if (ALICEVISION.compare(type) == 0) {
+		io = new AliceVisionIO();
+    }
+    else {
+        throw std::runtime_error("Failed to create the IO for: " + type);
+    }
     
     return io;
 }
