@@ -16,10 +16,7 @@
 #endif
 
 #include <random>
-
-#ifndef DBL_MIN
-#define DBL_MIN -1e999
-#endif
+#include <limits>
 
 
 void replaceAll(std::string& str, const std::string& from, const std::string& to) {
@@ -48,7 +45,7 @@ void setPts2Fix(cov::Options &opt, int N, double *pts) {
 	//double *pts = bal_problem->mutable_points();
 
 	// the simplest variant of RANSAC - find triple of most distant points
-	double max_dist = DBL_MIN;
+	double max_dist = std::numeric_limits<double>::min();
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	std::uniform_real_distribution<> dis(0, N);
