@@ -84,7 +84,7 @@ if(WIN32)
       set(MKL_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/IntelMKL")
       set(MAGMA_ROOT_DIR_PRE "${PROJECT_SOURCE_DIR}/libs/third_party/magma-2.2.0")
       set(SUITESPARSE_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/third_party/suitesparse-metis-for-windows")
-    endif(NOT EXISTS "${PROJECT_SOURCE_DIR}/libs")
+    endif()
 endif(WIN32)
 
 
@@ -113,11 +113,11 @@ endif()
 # EIGEN
 # -----------------------------------------------------------------------------
 find_package(Eigen3 3.3 NO_MODULE REQUIRED)
-if(EIGEN3_FOUND)
+if(Eigen3_FOUND)
   message( "Found Eigen${EIGEN3_VERSION_STRING}" )
   message( STATUS "> EIGEN3_INCLUDE_DIRS:   ${EIGEN3_INCLUDE_DIRS}"   )
   set(EIGEN_FLAGS "-DEIGEN_DONT_ALIGN_STATICALLY=1 -DEIGEN_DONT_VECTORIZE=1")
-endif(EIGEN3_FOUND)
+endif()
 
 # -----------------------------------------------------------------------------
 # SuiteSparse 
@@ -128,7 +128,7 @@ if( SuiteSparse_FOUND)
   message( "Found SuiteSparse" )
   message( STATUS "> SUITESPARSE_INCLUDE_DIRS:   ${SUITESPARSE_INCLUDE_DIRS}" )
   message( STATUS "> SUITESPARSE_LIBRARIES:   ${SUITESPARSE_LIBRARIES}" )
-endif(SuiteSparse_FOUND)
+endif()
 
 
 # -----------------------------------------------------------------------------
@@ -200,10 +200,15 @@ endif(UNC_MATLAB_SUPPORT)
 # -----------------------------------------------------------------------------
 find_package(MAGMA REQUIRED)
 if(MAGMA_FOUND)
+  set( CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -DADD_" )
+  set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DADD_" )
   message("Found Magma")
   message(STATUS "MAGMA_INCLUDE_DIRS: ${MAGMA_INCLUDE_DIRS}")
   message(STATUS "MAGMA_LIBRARIES: ${MAGMA_LIBRARIES}")
-endif(MAGMA_FOUND)
+  include_directories(${MAGMA_INCLUDE_DIRS})
+else()
+  message(SEND_ERROR "Magma not found")
+endif()
 
 
 # -----------------------------------------------------------------------------
