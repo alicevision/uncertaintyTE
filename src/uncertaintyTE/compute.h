@@ -30,9 +30,9 @@
 #include "magma_operators.h"
 //#include "magmasparse.h"
 
-#ifdef _WIN32
-	#include "magma_internal.h"
-	#include "testings.h"
+#ifdef _WIN32_old
+	//#include "magma_internal.h"
+	//#include "testings.h"
 	#define MINIMUM min
 	#define MAXIMUM max
 #else
