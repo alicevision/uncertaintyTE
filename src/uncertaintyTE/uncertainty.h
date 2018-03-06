@@ -111,6 +111,10 @@ struct Uncertainty {
      */
 	const std::vector<double> getCamerasUncEigenValues() const;
 
+	/**
+	* @return 3 values per camera
+	*/
+	const std::vector<double> getCamerasCentersUncEigVec() const;
 
     /**
      * @return 6 values per point
@@ -131,6 +135,11 @@ struct Uncertainty {
      * @return 3 values per point
      */
 	const std::vector<double> getPointsUncEigenValues() const;
+
+	/**
+	* @return 3 values per camera
+	*/
+	const std::vector<double> getPointsUncEigVectors() const;
 };
 }
 

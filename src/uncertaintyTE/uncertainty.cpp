@@ -89,7 +89,30 @@ namespace cov {
 		return eigenValues;
 	}
 
-
+	const std::vector<double> Uncertainty::getCamerasCentersUncEigVec() const
+	{
+		
+		std::vector<double> eigenVectors;
+		for (int i = 0; i < _numCams; i++) {
+			std::vector<double> covMat = getCameraUncMatrix(i);
+			double *covArray = (double*)malloc(_camParams*_camParams * sizeof(double));
+			std::copy(covMat.begin(), covMat.end(), covArray);
+			Eigen::Map<Eigen::MatrixXd> A(covArray, _camParams, _camParams);
+			Eigen::MatrixXd B = A.block(3, 3, 3, 3);
+			Eigen::EigenSolver<Eigen::MatrixXd> es(B);
+			Eigen::MatrixXd eigVec = es.eigenvectors().real();
+			eigenVectors.push_back(eigVec(0, 0));
+			eigenVectors.push_back(eigVec(1, 0));
+			eigenVectors.push_back(eigVec(2, 0));
+			eigenVectors.push_back(eigVec(0, 1));
+			eigenVectors.push_back(eigVec(1, 1));
+			eigenVectors.push_back(eigVec(2, 1));
+			eigenVectors.push_back(eigVec(0, 2));
+			eigenVectors.push_back(eigVec(1, 2));
+			eigenVectors.push_back(eigVec(2, 2));
+		}
+	return eigenVectors;
+	}
 
 
 	const std::vector<double> Uncertainty::getPointsUncRaw() const { return _pointsUnc; }
@@ -135,6 +158,30 @@ namespace cov {
 				eigenValues.push_back(eigValPt(j));
 		}
 		return eigenValues;
+	}
+
+	const std::vector<double> Uncertainty::getPointsUncEigVectors() const
+	{
+
+		std::vector<double> eigenVectors;
+		for (int i = 0; i < _numPoints; i++) {
+			std::vector<double> ptUnc = getPointUncMatrix(i);
+			double *ptCovArray = (double*)malloc(9 * sizeof(double));
+			std::copy(ptUnc.begin(), ptUnc.end(), ptCovArray);
+			Eigen::Map<Eigen::MatrixXd> A(ptCovArray, 3, 3);
+			Eigen::EigenSolver<Eigen::MatrixXd> es(A);
+			Eigen::MatrixXd eigVec = es.eigenvectors().real();
+			eigenVectors.push_back(eigVec(0, 0));
+			eigenVectors.push_back(eigVec(1, 0));
+			eigenVectors.push_back(eigVec(2, 0));
+			eigenVectors.push_back(eigVec(0, 1));
+			eigenVectors.push_back(eigVec(1, 1));
+			eigenVectors.push_back(eigVec(2, 1));
+			eigenVectors.push_back(eigVec(0, 2));
+			eigenVectors.push_back(eigVec(1, 2));
+			eigenVectors.push_back(eigVec(2, 2));
+		}
+		return eigenVectors;
 	}
 
 }
