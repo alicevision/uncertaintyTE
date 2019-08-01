@@ -54,7 +54,7 @@ Set up the root of the source code and the directory with compiled libraries. It
 3) Generate the project (Makefiles)
  mkdir build
  cd build
- cmake ..
+ cmake .. -DMAGMA_ROOT=/path/to/magma/sources
 4) Try the framework by calling
  uncertainty -in=./Release/in/01_Cube.jacob
 
